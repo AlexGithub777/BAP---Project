@@ -1,4 +1,4 @@
-# WEEK 2 MEETING
+# WEEK 3 MEETING
 
 Attendees:
 
