@@ -1,36 +1,65 @@
 # BAP Testing
 ## Test 1: Login
+
+**Component:** Authentication
+
+**Prerequisites**: Standard login
+
 **Steps**
 * User opens app
 * User inputs required information in fields (ie Email in email field, password in password field)
 * User clicks login
 
-**Prerequisites**: Standard login
-
-**Test data**: Valid Login
-
-**Expected Results**: User can log in successfully and see map of EIT campus
-
-**Actual Results**: UNTESTED
-
-**Test Status**: UNTESTED
+**Test Results**
+<table>
+    <tr>
+        <th>Input</th>
+        <th>Expected Result</th>
+        <th>Actual Result</th>
+    </tr>
+    <tr>
+        <td>Username: "user1"<br>Password: "Password1!"</td>
+        <td>User successfully logs in and can see a map of EIT's Campus</td>
+        <td>UNTESTED</td>
+    </tr>
+    <tr>
+        <td>Username: <BLANK><br>Password: "Password1!"</td>
+        <td>Login Fails due to missing input/s</td>
+        <td>UNTESTED</td>
+    </tr>
+    <tr>
+        <td>Username: "user1"<br>Password: <BLANK></td>
+        <td>Login Fails due to missing input/s</td>
+        <td>UNTESTED</td>
+    </tr>
+    <tr>
+        <td>Username: <BLANK><br>Password: <BLANK></td>
+        <td>Login Fails due to missing input/s</td>
+        <td>UNTESTED</td>
+    </tr>
+</table>
 
 ___
 
 ## Test 2: Data update
+
+**Component:** Dashboard 
+
+**Prerequisites**: Admin account
+
 **Steps**
 * User finds an extinguisher to change information of (map)
 * User clicks update
 * User inputs relevant information pertaining to the fire extinguisher
 * User clicks update
 
-**Prerequisites**: Admin account
-
 **Test data**: Updated fire extinguisher information
 
 **Expected Results**: User can update a fire extinguishers info
 
 **Actual Results**: UNTESTED
+
+**Test Status**: UNTESTED
 
 **Test Status**: UNTESTED
 ___
