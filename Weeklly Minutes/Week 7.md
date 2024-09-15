@@ -1,4 +1,4 @@
-# WEEK # MEETING
+# WEEK 7 MEETING
 
 Attendees: - Liam Palmers
 
@@ -15,13 +15,15 @@ Meeting Time & Location: 11am | 08/09/2024 | Discord
 
 ## Task review from last week:
 
-Formal documentation finalzation
+Formal documentation preparation
 
 ## Tasks due for next week:
 
-Set up app on on local machine
+Formal documentation individual components
 
 ## Notes:
+
+Improve designs based on feedback
 
 ## Upcoming meeting info
 
