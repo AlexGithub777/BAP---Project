@@ -1,7 +1,7 @@
 # WEEK 7 MEETING
 
-Attendees: - Liam Palmers
-
+Attendees: 
+-   Liam Palmers
 -   Joe Yin
 -   James Sadler
 -   Aidan Willis
