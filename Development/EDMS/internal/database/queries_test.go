@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AlexGithub777/safety-device-app/internal/database"
-	"github.com/AlexGithub777/safety-device-app/internal/models"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/database"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 )

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/AlexGithub777/safety-device-app/internal/models"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/sethvargo/go-password/password"

@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/AlexGithub777/safety-device-app/internal/app"
-	"github.com/AlexGithub777/safety-device-app/internal/config"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/app"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 )
 
 func main() {

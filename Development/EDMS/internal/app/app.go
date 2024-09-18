@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/AlexGithub777/safety-device-app/internal/config"
-	"github.com/AlexGithub777/safety-device-app/internal/database"
-	"github.com/AlexGithub777/safety-device-app/internal/utils"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/database"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

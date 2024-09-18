@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/AlexGithub777/safety-device-app/internal/config"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
 

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/AlexGithub777/safety-device-app/internal/models"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 )
 
 func SeedData(db *sql.DB) {

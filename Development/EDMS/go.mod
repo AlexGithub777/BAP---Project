@@ -1,4 +1,4 @@
-module github.com/AlexGithub777/safety-device-app
+module github.com/AlexGithub777/BAP---Project/Development/EDMS
 
 go 1.22.5
 
