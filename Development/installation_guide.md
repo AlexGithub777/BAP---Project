@@ -17,7 +17,7 @@ Before starting, ensure the following are installed on your machine:
 
 Goose is used for managing database migrations. Install it by running:
 
-```pwsh
+```bash
 go install github.com/pressly/goose/v3/cmd/goose@latest
 ```
 
@@ -25,7 +25,7 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 
 Install Air for live reloading during development:
 
-```pwsh
+```bash
 go install github.com/air-verse/air@latest
 ```
 
