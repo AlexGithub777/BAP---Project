@@ -1,0 +1,25 @@
+<!-- Purpose: Display a list of buildings with the ability to add, edit, and delete buildings -->
+<div>
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="my-3">Buildings</h3>
+        <button
+            class="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#addBuildingModal"
+        >
+            Add Building
+        </button>
+    </div>
+    <table class="table table-striped" id="buildings-table">
+        <thead>
+            <tr>
+                <th>Building Code</th>
+                <th>Site Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Existing buildings will be populated here -->
+        </tbody>
+    </table>
+</div>

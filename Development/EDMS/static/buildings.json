@@ -1,0 +1,228 @@
+{
+    "buildings": [
+        {
+            "name": "O",
+            "coordinates": {
+                "x": 194.8,
+                "y": 101.0
+            }
+        },
+        {
+            "name": "T",
+            "coordinates": {
+                "x": 286.5,
+                "y": 155.0
+            }
+        },
+        {
+            "name": "R",
+            "coordinates": {
+                "x": 403.4,
+                "y": 199.7
+            }
+        },
+        {
+            "name": "E2",
+            "coordinates": {
+                "x": 572.0,
+                "y": 187.9
+            }
+        },
+        {
+            "name": "E",
+            "coordinates": {
+                "x": 573.2,
+                "y": 235.1
+            }
+        },
+        {
+            "name": "E1",
+            "coordinates": {
+                "x": 620.3,
+                "y": 281.7
+            }
+        },
+        {
+            "name": "D",
+            "coordinates": {
+                "x": 435.0,
+                "y": 314.9
+            }
+        },
+        {
+            "name": "P1",
+            "coordinates": {
+                "x": 299.7,
+                "y": 248.2
+            }
+        },
+        {
+            "name": "P",
+            "coordinates": {
+                "x": 252.2,
+                "y": 246.1
+            }
+        },
+        {
+            "name": "N1",
+            "coordinates": {
+                "x": 243.1,
+                "y": 286.7
+            }
+        },
+        {
+            "name": "N2",
+            "coordinates": {
+                "x": 298.7,
+                "y": 299.2
+            }
+        },
+        {
+            "name": "N",
+            "coordinates": {
+                "x": 258.9,
+                "y": 346.3
+            }
+        },
+        {
+            "name": "M",
+            "coordinates": {
+                "x": 361.4,
+                "y": 368.8
+            }
+        },
+        {
+            "name": "F1",
+            "coordinates": {
+                "x": 528.9,
+                "y": 328.5
+            }
+        },
+        {
+            "name": "F",
+            "coordinates": {
+                "x": 575.6,
+                "y": 370.1
+            }
+        },
+        {
+            "name": "C",
+            "coordinates": {
+                "x": 469.7,
+                "y": 404.7
+            }
+        },
+        {
+            "name": "B",
+            "coordinates": {
+                "x": 409.7,
+                "y": 419.9
+            }
+        },
+        {
+            "name": "L",
+            "coordinates": {
+                "x": 296.2,
+                "y": 446.4
+            }
+        },
+        {
+            "name": "L1",
+            "coordinates": {
+                "x": 237.9,
+                "y": 434.6
+            }
+        },
+        {
+            "name": "K1",
+            "coordinates": {
+                "x": 245.0,
+                "y": 477.9
+            }
+        },
+        {
+            "name": "K",
+            "coordinates": {
+                "x": 320.2,
+                "y": 524.7
+            }
+        },
+        {
+            "name": "J",
+            "coordinates": {
+                "x": 413.9,
+                "y": 565.0
+            }
+        },
+        {
+            "name": "G",
+            "coordinates": {
+                "x": 523.3,
+                "y": 534.3
+            }
+        },
+        {
+            "name": "G1",
+            "coordinates": {
+                "x": 634.2,
+                "y": 526.3
+            }
+        },
+        {
+            "name": "G2",
+            "coordinates": {
+                "x": 538.8,
+                "y": 451.3
+            }
+        },
+        {
+            "name": "I",
+            "coordinates": {
+                "x": 557.7,
+                "y": 654.6
+            }
+        },
+        {
+            "name": "I1",
+            "coordinates": {
+                "x": 497.0,
+                "y": 675.8
+            }
+        },
+        {
+            "name": "H",
+            "coordinates": {
+                "x": 618.6,
+                "y": 722.1
+            }
+        },
+        {
+            "name": "Q",
+            "coordinates": {
+                "x": 516.3,
+                "y": 927.5
+            }
+        },
+        {
+            "name": "S",
+            "coordinates": {
+                "x": 364.1,
+                "y": 881.4
+            }
+        },
+        {
+            "name": "A",
+            "coordinates": {
+                "x": 443.8,
+                "y": 471.8
+            }
+        },
+        {
+            "name": "J1",
+            "coordinates": {
+                "x": 421.1,
+                "y": 525.1
+            }
+        }
+    ]
+}

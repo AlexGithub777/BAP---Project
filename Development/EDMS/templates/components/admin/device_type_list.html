@@ -1,0 +1,24 @@
+<!-- Purpose: Display a list of device types for the admin to manage -->
+<div>
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="my-3">Manage Device Types</h2>
+        <button
+            class="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#addTypeModal"
+        >
+            Add Device Type
+        </button>
+    </div>
+    <table class="table table-striped" id="device-types-table">
+        <thead>
+            <tr>
+                <th>Device Type Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Existing device types will be populated here -->
+        </tbody>
+    </table>
+</div>

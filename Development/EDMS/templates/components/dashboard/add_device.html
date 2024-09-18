@@ -1,0 +1,164 @@
+<div id="addModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Device</h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form class="form-control">
+                    <div class="mb-3">
+                        <label for="deviceType" class="form-label"
+                            >Device Type</label
+                        >
+                        <select
+                            class="form-select"
+                            id="status"
+                            aria-label="Select status"
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="extinguisherType" class="form-label"
+                            >Extinguisher Type</label
+                        >
+                        <select
+                            class="form-select"
+                            id="extinguisherType"
+                            aria-label="Select extinguisher type"
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="site" class="form-label">Site</label>
+                        <select
+                            class="form-select"
+                            id="site"
+                            aria-label="Select site"
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="building" class="form-label"
+                            >Building</label
+                        >
+                        <select
+                            class="form-select"
+                            id="building"
+                            aria-label="Select building"
+                        >
+                            <!-- Options will be populated here -->
+                            <option disabled selected>Select a Building</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="room" class="form-label">Room</label>
+                        <select
+                            class="form-select"
+                            id="room"
+                            aria-label="Select room"
+                        >
+                            <!-- Options will be populated here -->
+                            <option disabled selected>Select a Room</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serialNumber" class="form-label"
+                            >Serial Number</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="serialNumber"
+                            placeholder="Enter serial number"
+                        />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label"
+                            >Description</label
+                        >
+                        <textarea
+                            class="form-control"
+                            id="description"
+                            rows="3"
+                            placeholder="Enter description"
+                        ></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="manufactureDate" class="form-label"
+                            >Manufacture Date</label
+                        >
+                        <input
+                            type="date"
+                            class="form-control"
+                            id="manufactureDate"
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastInspectionDate" class="form-label"
+                            >Last Inspection Date</label
+                        >
+                        <input
+                            type="date"
+                            class="form-control"
+                            id="lastInspectionDate"
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <label for="size" class="form-label">Size</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="size"
+                            placeholder="Enter size"
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select
+                            class="form-select"
+                            id="status"
+                            aria-label="Select status"
+                        >
+                            <option selected>Active</option>
+                            <option>Expired</option>
+                            <option>Inspection Due</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <button
+                            type="button mx-2"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Close
+                        </button>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-primary mx-2"
+                        data-bs-dismiss="modal"
+                    >
+                        Add Device
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

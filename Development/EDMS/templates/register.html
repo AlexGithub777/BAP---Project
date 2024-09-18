@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>EDMS Register</title>
+        <!-- jQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <!-- Bootstrap CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+        />
+        <!-- Bootstrap JS -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"
+        ></script>
+
+        <!-- Toastify JS -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"
+            integrity="sha512-MnKz2SbnWiXJ/e0lSfSzjaz9JjJXQNb2iykcZkEY2WOzgJIWVqJBFIIPidlCjak0iTH2bt2u1fHQ4pvKvBYy6Q=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <!-- Toastify CSS-->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.css"
+            integrity="sha512-VSD3lcSci0foeRFRHWdYX4FaLvec89irh5+QAGc00j5AOdow2r5MFPhoPEYBUQdyarXwbzyJEO7Iko7+PnPuBw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Get the error message from the server-side data
+                var message = "{{.message}}";
+                var error = "{{.error}}";
+
+                // If there's an error message, display it with Toastify
+                if (message) {
+                    Toastify({
+                        text: message,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #008000, #008000)",
+                    }).showToast();
+                }
+
+                if (error) {
+                    Toastify({
+                        text: error,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    }).showToast();
+                }
+            });
+        </script>
+    </head>
+    <body class="bg-dark">
+        <section class="h-100">
+            <div class="container h-100">
+                <div class="row justify-content-sm-center h-100">
+                    <div class="col-xxl-4 col-xl-5 col-lg-5 col-md-7 col-sm-9">
+                        <div class="text-center my-5">
+                            <img
+                                src="/static/eit_logo.png"
+                                alt="logo"
+                                width="100"
+                            />
+                            <h1 class="fw-bold text-light mt-3">
+                                Emergency Device Management System
+                            </h1>
+                        </div>
+                        <div class="card shadow-lg">
+                            <div class="card-body p-5">
+                                <h1 class="fs-4 card-title fw-bold mb-4">
+                                    Register
+                                </h1>
+                                <form
+                                    id="register-form"
+                                    method="POST"
+                                    class="needs-validation"
+                                    autocomplete="off"
+                                    action="/register"
+                                    novalidate
+                                >
+                                    <div class="mb-3">
+                                        <label
+                                            class="mb-2 text-muted"
+                                            for="username"
+                                            >Username</label
+                                        >
+                                        <input
+                                            id="username"
+                                            type="text"
+                                            class="form-control"
+                                            name="username"
+                                            value=""
+                                            required
+                                            minlength="6"
+                                            autofocus
+                                            pattern="^[a-zA-Z0-9_]{6,}$"
+                                        />
+                                        <div class="invalid-feedback">
+                                            Username must be at least 6
+                                            characters long and contain only
+                                            letters, numbers, and underscores.
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label
+                                            class="mb-2 text-muted"
+                                            for="email"
+                                            >E-Mail Address</label
+                                        >
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            class="form-control"
+                                            name="email"
+                                            value=""
+                                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                                            required
+                                        />
+                                        <div class="invalid-feedback">
+                                            Invalid email address.
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label
+                                            class="mb-2 text-muted"
+                                            for="password"
+                                            >Password</label
+                                        >
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            class="form-control"
+                                            name="password"
+                                            required
+                                            pattern="(?=.*\d)(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}"
+                                        />
+                                        <div class="invalid-feedback">
+                                            Password must contain at least one
+                                            number, one special character, and
+                                            one capital letter, and be at least
+                                            8 characters long.
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label
+                                            class="mb-2 text-muted"
+                                            for="confirm-password"
+                                            >Confirm Password</label
+                                        >
+                                        <input
+                                            id="confirm-password"
+                                            type="password"
+                                            class="form-control"
+                                            name="confirm-password"
+                                            pattern="(?=.*\d)(?=.*[!@#$%^&*]).{8,}"
+                                            required
+                                        />
+                                        <div class="invalid-feedback">
+                                            Passwords do not match.
+                                        </div>
+                                    </div>
+
+                                    <div class="align-items-center d-flex">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary ms-auto"
+                                        >
+                                            Register
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="card-footer py-3 border-0">
+                                <div class="text-center">
+                                    Already have an account?
+                                    <a href="/" class="text-dark">Login</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <script src="/static/register.js"></script>
+        <script>
+            // hot reaload
+            if (window.EventSource) {
+                new EventSource(
+                    "http://localhost:8090/internal/reload"
+                ).onmessage = () => {
+                    setTimeout(() => {
+                        location.reload();
+                    });
+                };
+            }
+        </script>
+    </body>
+</html>

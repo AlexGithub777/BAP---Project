@@ -1,0 +1,191 @@
+<!-- Notifications Modal -->
+<div id="notificationsModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notifications</h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <!-- Device notifications cards -->
+                <div id="deviceNotificationsCards">
+                    <!-- Each div represents a device notification -->
+                    <!-- This will be populated dynamically using JavaScript -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Fire Extinguisher
+                                <i
+                                    class="text-danger fa fa-exclamation-circle"
+                                ></i>
+                            </h5>
+                            <div class="card-text">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span>Serial Number: SN00001</span
+                                        ><br />
+                                        <span>Room: A1</span><br />
+                                        <span
+                                            >Status:
+                                            <span
+                                                class="badge bg-danger text-light"
+                                                >Inspection Due (2 days
+                                                ago)</span
+                                            >
+                                        </span>
+                                    </div>
+                                    <div class="">
+                                        <button
+                                            class="btn btn-primary"
+                                            onclick="ViewDeviceInspection(1)"
+                                        >
+                                            Inspect
+                                        </button>
+                                        <button
+                                            class="btn btn-secondary"
+                                            onclick=""
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Fire Extinguisher
+                                <i
+                                    class="text-danger fa fa-exclamation-circle"
+                                ></i>
+                            </h5>
+                            <div class="card-text">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span>Serial Number: SN00002</span
+                                        ><br />
+                                        <span>Room: A1</span><br />
+                                        <span
+                                            >Status:
+                                            <span
+                                                class="badge bg-danger text-light"
+                                                >Expired (2 days ago)
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <button
+                                            class="btn btn-secondary"
+                                            onclick=""
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Fire Extinguisher
+                                <i
+                                    class="text-warning fa-solid fa-exclamation-triangle"
+                                ></i>
+                            </h5>
+                            <div class="card-text">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span>Serial Number: SN00003</span
+                                        ><br />
+                                        <span>Room: B1</span><br />
+                                        <span
+                                            >Status:
+                                            <span
+                                                class="badge bg-warning text-black"
+                                                >Expires (In 2 days)</span
+                                            >
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <button
+                                            class="btn btn-secondary"
+                                            onclick=""
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Fire Extinguisher
+                                <i
+                                    class="text-warning fa-solid fa-exclamation-triangle"
+                                ></i>
+                            </h5>
+                            <div class="card-text">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span>Serial Number: SN00004</span
+                                        ><br />
+                                        <span>Room: B1</span><br />
+                                        <span
+                                            >Status:
+                                            <span
+                                                class="badge bg-warning text-black"
+                                                >Inspection Due (In 5
+                                                days)</span
+                                            >
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <button
+                                            class="btn btn-primary"
+                                            onclick="ViewDeviceInspection(1)"
+                                        >
+                                            Inspect
+                                        </button>
+
+                                        <button
+                                            class="btn btn-secondary"
+                                            onclick=""
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-bs-dismiss="modal"
+                >
+                    Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+<!-- Purpose: Display a list of rooms with the ability to add, edit, and delete rooms -->
+<div>
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="my-3">Rooms</h3>
+        <button
+            class="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#addRoomModal"
+        >
+            Add Room
+        </button>
+    </div>
+    <table class="table table-striped" id="rooms-table">
+        <thead>
+            <tr>
+                <th>Room Code</th>
+                <th>Building Code</th>
+                <th>Site</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Existing rooms will be populated here -->
+        </tbody>
+    </table>
+</div>

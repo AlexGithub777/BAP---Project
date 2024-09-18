@@ -1,0 +1,93 @@
+<!-- View Inspections modal -->
+<div id="viewInspectionModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div
+                class="modal-header d-flex justify-content-between align-items-center"
+            >
+                <h4 class="modal-title">Inspection List</h4>
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    onclick="AddInspection()"
+                >
+                    Add Inspection
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="">
+                    <!-- May need overflow scroll-->
+                    <table
+                        class="table table-striped table-hover overflow-scroll"
+                        id="inspection-table"
+                    >
+                        <thead class="table-primary">
+                            <tr>
+                                <th data-label="Inspection Date">
+                                    Inspection Date
+                                </th>
+                                <th data-label="Inspector Name">
+                                    Inspector Name
+                                </th>
+                                <th data-label="Inspection Status">
+                                    Inspection Status
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-label="Serial Number">
+                                    January 1, 2024
+                                </td>
+                                <td data-label="Inspector Name">
+                                    Jonathan Bixley
+                                </td>
+                                <td data-label="Inspection Status">
+                                    <span class="badge bg-success">Passed</span>
+                                </td>
+                                <td data-labeL="Actions">
+                                    <button
+                                        class="btn btn-primary"
+                                        onclick="ViewInspectionDetails()"
+                                    >
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td data-label="Inspection Date">
+                                    April 1, 2024
+                                </td>
+                                <td data-label="Inspector Name">
+                                    Jonathan Bixley
+                                </td>
+                                <td data-label="Inspection Status">
+                                    <span class="badge bg-danger">Failed</span>
+                                </td>
+                                <td data-labeL="Actions">
+                                    <button
+                                        class="btn btn-primary"
+                                        onclick="ViewInspectionDetails()"
+                                    >
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

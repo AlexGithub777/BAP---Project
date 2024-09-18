@@ -1,0 +1,24 @@
+<!-- This template is used to display the list of locations (sites, buildings, rooms) in the admin panel -->
+<div class="d-flex justify-content-between align-items-center">
+    <h3 class="my-3">Sites</h3>
+    <button
+        class="btn btn-success"
+        data-bs-toggle="modal"
+        data-bs-target="#addSiteModal"
+    >
+        Add Site
+    </button>
+</div>
+<!-- Similar structure can be used for Buildings and Rooms -->
+<table class="table table-striped" id="sites-table">
+    <thead>
+        <tr>
+            <th>Site Name</th>
+            <th>Site Address</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Existing sites will be populated here -->
+    </tbody>
+</table>
