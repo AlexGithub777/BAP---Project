@@ -7,7 +7,7 @@ This guide will help you install and set up the project on your local machine.
 Before starting, ensure the following are installed on your machine:
 
 1. **Go 1.22.5**: [Download and Install Go](https://go.dev/doc/install).
-2. **PostgreSQL Portable**: Available in the `Development` folder in the repository.
+2. **PostgreSQL Portable**: [Download PostgreSQL Portable](https://drive.google.com/file/d/14JKK4coDqtd-SqW5QGn4VizIklcd4thP/view?usp=sharing).
 3. **Goose**: A database migration tool.
 4. **Air**: A hot-reloading tool for Go.
 
@@ -39,20 +39,25 @@ git clone https://github.com/AlexGithub777/BAP---Project.git
 
 ### 4. Set Up PostgreSQL Database
 
-PostgreSQL is included in the `Development` folder inside the repository.
+1. Extract the downloaded `PostgreSQL.zip` file from the provided Google Drive link.
 
-1. Navigate to the `Development` folder inside the project.
+2. Open the extracted folder.
 
-2. Unzip the `PostgreSQL.zip` file, open once extracted
-   Run `startdb.bat` to start the PostgreSQL server. **(don't close the terminal window)**
+3. Run `startdb.bat` to start the PostgreSQL server. **(don't close the terminal window)**
 
 ### 5. Open the Project in VSCode
 
 Open the cloned repository in Visual Studio Code.
 
+Then in the terminal navigate to the project root.
+
+```pwsh
+cd .\Development\EDMS\
+```
+
 ### 6. Create the `.env` File
 
-In the root directory of the project, create a new file named `.env`.
+In the root directory of the project `BAP---Project\Development\EDMS`, create a new file named `.env`.
 
 Get the necessary environment variable values (such as `DB_USER`, `DB_PASSWORD`, and `JWT_SECRET`) from the `#dotenv` channel in the project's Discord server.
 
@@ -104,7 +109,7 @@ Once the application is running, the terminal should display a link:
 http://localhost:3000
 ```
 
-Click or open this link in your browser to access the application. You can create an account and log in.
+`Ctrl + Click` or open this link in your browser to access the application. You can create an account and log in.
 
 ### 10. Troubleshooting
 
