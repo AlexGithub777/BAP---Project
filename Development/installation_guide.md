@@ -77,7 +77,7 @@ JWT_SECRET="your_jwt_secret"
 To initialize the database tables, run the `goose_up.bat` script:
 
 ```bash
-./goose_up.bat
+./goose_up.ps1
 ```
 
 This will create the necessary tables in your PostgreSQL database.
