@@ -44,3 +44,6 @@ go.work
 
 # Environment variables file
 .env
+
+# Temp seed file
+seed_complete
