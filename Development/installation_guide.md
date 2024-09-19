@@ -17,7 +17,7 @@ Before starting, ensure the following are installed on your machine:
 
 Goose is used for managing database migrations. Install it by running:
 
-```pwsh
+```bash
 go install github.com/pressly/goose/v3/cmd/goose@latest
 ```
 
@@ -25,7 +25,7 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 
 Install Air for live reloading during development:
 
-```pwsh
+```bash
 go install github.com/air-verse/air@latest
 ```
 
@@ -33,7 +33,7 @@ go install github.com/air-verse/air@latest
 
 Create a new folder and clone the project from GitHub:
 
-```pwsh
+```bash
 git clone https://github.com/AlexGithub777/BAP---Project.git
 ```
 
@@ -51,7 +51,7 @@ Open the cloned repository in Visual Studio Code.
 
 Then in the terminal navigate to the project root.
 
-```pwsh
+```bash
 cd .\Development\EDMS\
 ```
 
@@ -63,7 +63,7 @@ Get the necessary environment variable values (such as `DB_USER`, `DB_PASSWORD`,
 
 The structure of the `.env` file should look like this:
 
-```pwsh
+```bash
 DB_USER="your_postgres_username"
 DB_PASSWORD="your_postgres_password"
 DB_NAME="your_database_name"
@@ -76,7 +76,7 @@ JWT_SECRET="your_jwt_secret"
 
 To initialize the database tables, run the `goose_up.bat` script:
 
-```pwsh
+```bash
 ./goose_up.bat
 ```
 
@@ -91,7 +91,7 @@ If you're using Air for the first time, you may need to specify the config file:
 
 Run in project root:
 
-```pwsh
+```bash
 air -c .air.toml
 ```
 
@@ -105,7 +105,7 @@ air
 
 Once the application is running, the terminal should display a link:
 
-```pwsh
+```bash
 http://localhost:3000
 ```
 
