@@ -48,6 +48,10 @@ func (a *App) initRoutes() {
 	api.GET("/room", a.HandleGetAllRooms)
 	api.GET("/building", a.HandleGetAllBuildings)
 	api.GET("/site", a.HandleGetAllSites)
-	//a.Router.POST("/api/emergency-device", a.HandleAddDevice)
+	
+
+	// Example of a protected API route
+	// api.GET("/protected", a.HandleProtectedAPI)
+
 	// Add the rest of your API routes here
 }
