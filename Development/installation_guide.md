@@ -74,7 +74,7 @@ JWT_SECRET="your_jwt_secret"
 
 ### 7. Run Database Migrations
 
-To initialize the database tables, run the `goose_up.bat` script:
+To initialize the database tables, run the `goose_up.ps1` script:
 
 ```bash
 ./goose_up.ps1
