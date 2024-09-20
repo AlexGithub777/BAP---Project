@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <!-- Navbar brand -->
 
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/dashboard">
                 <img
                     src="/static/eit_logo.png"
                     alt="Logo"
@@ -60,6 +60,7 @@
                             <li><hr class="dropdown-divider" /></li>
                         </ul>
                     </li>
+                    {{if eq .role "admin"}}
                     <li class="nav-item text-center mx-2 mx-lg-1">
                         <a class="nav-link" href="/admin">
                             <div>
@@ -68,12 +69,15 @@
                             Admin Settings
                         </a>
                     </li>
+                    {{end}}
                 </ul>
 
                 <!-- Left links -->
 
                 <!-- Right links -->
+
                 <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">
+                    {{if eq .role "admin"}}
                     <li class="nav-item text-center mx-2 mx-lg-1">
                         <a class="nav-link" onclick="ViewNotifications()">
                             <div>
@@ -87,6 +91,7 @@
                             Notifications
                         </a>
                     </li>
+                    {{end}}
                     <li class="nav-item dropdown text-center mx-2 mx-lg-1">
                         <a
                             class="nav-link dropdown-toggle"

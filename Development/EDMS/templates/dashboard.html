@@ -49,6 +49,38 @@
         />
         <!-- Custom CSS -->
         <link rel="stylesheet" href="/static/main.css" />
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Get the error message from the server-side data
+                var message = "{{.message}}";
+                var error = "{{.error}}";
+
+                // If there's an error message, display it with Toastify
+                if (message) {
+                    Toastify({
+                        text: message,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #008000, #008000)",
+                    }).showToast();
+                }
+
+                if (error) {
+                    Toastify({
+                        text: error,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    }).showToast();
+                }
+            });
+        </script>
     </head>
     <body>
         <!-- Dashboard Navbar -->
@@ -79,6 +111,9 @@
             crossorigin=""
         ></script>
         <!-- Custom JS-->
+        <script>
+            var role = "{{.role}}";
+        </script>
         <script src="/static/navbar.js"></script>
         <script src="/static/dashboard.js"></script>
     </body>

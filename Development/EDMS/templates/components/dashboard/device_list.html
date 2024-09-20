@@ -81,8 +81,10 @@
                             <th>Serial Number ▲</th>
                             <th>Manufacture Date ▲</th>
                             <th>Expire Date ▲</th>
+                            {{ if eq .role "admin" }}
                             <th>Last Inspection Date ▲</th>
                             <th>Next Inspection Date ▲</th>
+                            {{ end }}
                             <th>Size ▲</th>
                             <th>Status ▲</th>
                             <th>Actions</th>
@@ -90,6 +92,7 @@
                     </thead>
                     <tbody id="emergency-device-body">
                         <!-- Rows will be dynamically loaded here -->
+                        <!-- from dashboard.js - GetAllDevices() -->
                     </tbody>
                 </table>
                 <div class="d-flex justify-content-between align-items-center">

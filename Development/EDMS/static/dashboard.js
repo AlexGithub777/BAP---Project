@@ -177,109 +177,112 @@ document.getElementById("siteFilter").addEventListener("change", FilterBySite);
 // Call the function to populate the filter options
 GetFilterOptions();
 
-// Function to fetch devices and populate the table
+console.log(role);
 
 async function GetAllDevices(buildingCode = "", siteId = "") {
     try {
         let url = "/api/emergency-device";
-        if (buildingCode) {
-            url += `?building_code=${buildingCode}`;
-        }
-        if (siteId) {
-            url += `?site_id=${siteId}`;
-        }
+        const params = new URLSearchParams();
+        if (buildingCode) params.append("building_code", buildingCode);
+        if (siteId) params.append("site_id", siteId);
+        if (params.toString()) url += `?${params.toString()}`;
+
         const response = await fetch(url);
         const devices = await response.json();
 
         const tbody = document.getElementById("emergency-device-body");
-        tbody.innerHTML = devices
-            .map((device) => {
-                // Helper function to format dates as "Month YYYY" or "N/A" for manufacture and expiry dates
-                const formatDateMonthYear = (dateString) => {
-                    if (!dateString || dateString === "0001-01-01T00:00:00Z") {
-                        return "N/A";
-                    }
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                    });
-                };
-
-                // Helper function to format dates as "Month Day, YYYY" or "N/A" for inspection dates
-                const formatDateFull = (dateString) => {
-                    if (!dateString || dateString === "0001-01-01T00:00:00Z") {
-                        return "N/A";
-                    }
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                    });
-                };
-
-                // Get the badge class based on the status
-                const badgeClass =
-                    device.status.String === "Active"
-                        ? "text-bg-success"
-                        : device.status.String === "Expired"
-                        ? "text-bg-danger"
-                        : "text-bg-warning";
-
-                // Return the row with formatted dates
-                // Return the row with formatted dates and data-* attributes
-                return `
-                    <tr>
-                        <td data-label="Device Type">${
-                            device.emergency_device_type_name
-                        }</td>
-                        <td data-label="Extinguisher Type">${
-                            device.extinguisher_type_name.String
-                        }</td>
-                        <td data-label="Room">${device.room_code}</td>
-                        <td data-label="Serial Number">${
-                            device.serial_number.String
-                        }</td>
-                        <td data-label="Manufacture Date">${formatDateMonthYear(
-                            device.manufacture_date.Time
-                        )}</td>
-                        <td data-label="Expire Date">${formatDateMonthYear(
-                            device.expire_date.Time
-                        )}</td>
-                        <td data-label="Last Inspection Date">${formatDateFull(
-                            device.last_inspection_date.Time
-                        )}</td>
-                        <td data-label="Next Inspection Date">${formatDateFull(
-                            device.next_inspection_date.Time
-                        )}</td>
-                        <td data-label="Size">${device.size.String}</td>
-                        <td data-label="Status"><span class="badge ${badgeClass}">${
-                    device.status.String
-                }</span></td>
-            <td>
-                <div class="action-buttons">
-                                <button class="btn btn-secondary" onclick="ViewDeviceInspection(${
-                                    device.emergency_device_id
-                                })">Inspect</button>
-                                <button class="btn btn-primary" onclick="DeviceNotes('${
-                                    device.description.String
-                                }')">Notes</button>
-                                <button class="btn btn-warning" onclick="EditDevice(${
-                                    device.emergency_device_id
-                                })">Edit</button>
-                                <button class="btn btn-danger" onclick="DeleteDevice(${
-                                    device.emergency_device_id
-                                })">Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            })
-            .join("");
+        tbody.innerHTML = devices.map(formatDeviceRow).join("");
     } catch (err) {
         console.error("Failed to fetch devices:", err);
     }
+}
+
+function formatDeviceRow(device) {
+    const formatDateMonthYear = (dateString) =>
+        formatDate(dateString, { year: "numeric", month: "long" });
+    const formatDateFull = (dateString) =>
+        formatDate(dateString, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+
+    const badgeClass = getBadgeClass(device.status.String);
+    const buttons = getActionButtons(device);
+
+    const isAdmin = role === "admin";
+
+    return `
+        <tr>
+            <td data-label="Device Type">${
+                device.emergency_device_type_name
+            }</td>
+            <td data-label="Extinguisher Type">${
+                device.extinguisher_type_name.String
+            }</td>
+            <td data-label="Room">${device.room_code}</td>
+            <td data-label="Serial Number">${device.serial_number.String}</td>
+            <td data-label="Manufacture Date">${formatDateMonthYear(
+                device.manufacture_date.Time
+            )}</td>
+            <td data-label="Expire Date">${formatDateMonthYear(
+                device.expire_date.Time
+            )}</td>
+            ${
+                isAdmin
+                    ? `<td data-label="Last Inspection Date">${formatDateFull(
+                          device.last_inspection_date.Time
+                      )}</td>`
+                    : ""
+            }
+            ${
+                isAdmin
+                    ? `<td data-label="Next Inspection Date">${formatDateFull(
+                          device.next_inspection_date.Time
+                      )}</td>`
+                    : ""
+            }
+            <td data-label="Size">${device.size.String}</td>
+            <td data-label="Status">
+                <span class="badge ${badgeClass}">${device.status.String}</span>
+            </td>
+            <td>
+                <div class="action-buttons">
+                    ${buttons}
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+function formatDate(dateString, options) {
+    if (!dateString || dateString === "0001-01-01T00:00:00Z") {
+        return "N/A";
+    }
+    return new Date(dateString).toLocaleDateString("en-NZ", options);
+}
+
+function getBadgeClass(status) {
+    switch (status) {
+        case "Active":
+            return "text-bg-success";
+        case "Expired":
+            return "text-bg-danger";
+        default:
+            return "text-bg-warning";
+    }
+}
+
+function getActionButtons(device) {
+    let buttons = `<button class="btn btn-primary" onclick="DeviceNotes('${device.description.String}')">Notes</button>`;
+    if (role === "admin") {
+        buttons += `
+            <button class="btn btn-secondary" onclick="ViewDeviceInspection(${device.emergency_device_id})">Inspect</button>
+            <button class="btn btn-warning" onclick="EditDevice(${device.emergency_device_id})">Edit</button>
+            <button class="btn btn-danger" onclick="DeleteDevice(${device.emergency_device_id})">Delete</button>
+        `;
+    }
+    return buttons;
 }
 
 // Initial fetch without filtering

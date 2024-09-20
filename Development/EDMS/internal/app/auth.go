@@ -163,6 +163,31 @@ func (a *App) HandlePostRegister(c echo.Context) error {
 	})
 }
 
+// HandleGetLogin serves the home page
+func (a *App) HandleGetLogin(c echo.Context) error {
+	// Check if the user is already logged in
+	cookie, err := c.Cookie("token")
+	if err == nil && cookie.Value != "" {
+		// Parse the JWT token
+		token, err := parseToken(cookie.Value)
+		if err == nil && token.Valid {
+			if claims, ok := token.Claims.(*CustomClaims); ok {
+				// Put the claims data in the context
+				c.Set("user", claims.UserID)
+				c.Set("username", claims.Username)
+				c.Set("role", claims.Role)
+				c.Set("email", claims.Email)
+
+				// User is already logged in, redirect to the dashboard
+				return c.Redirect(http.StatusSeeOther, "/dashboard")
+			}
+		}
+	}
+
+	// If no valid token, render login page
+	return c.Render(http.StatusOK, "index.html", nil)
+}
+
 // HandlePostLogin handles user login
 func (a *App) HandlePostLogin(c echo.Context) error {
 	username := c.FormValue("username")
@@ -178,7 +203,7 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 	}
 
 	// Determine expiration time based on "remember" checkbox
-	expiresAt := time.Now().Add(72 * time.Hour)
+	expiresAt := time.Now().Add(72 * time.Hour) // Default expiration time is 3 days
 	if remember == "on" {
 		expiresAt = time.Now().Add(30 * 24 * time.Hour)
 	}
@@ -198,7 +223,7 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 		Expires:  expiresAt,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true, // Set to true if using HTTPS
+		Secure:   true, 
 		SameSite: http.SameSiteStrictMode,
 	}
 	c.SetCookie(cookie)
@@ -225,31 +250,6 @@ func (a *App) HandleGetLogout(c echo.Context) error {
 
 	// Redirect the user to the login page
 	return c.Redirect(http.StatusSeeOther, "/")
-}
-
-// HandleGetLogin serves the home page
-func (a *App) HandleGetLogin(c echo.Context) error {
-	// Check if the user is already logged in
-	cookie, err := c.Cookie("token")
-	if err == nil && cookie.Value != "" {
-		// Parse the JWT token
-		token, err := parseToken(cookie.Value)
-		if err == nil && token.Valid {
-			if claims, ok := token.Claims.(*CustomClaims); ok {
-				// Put the claims data in the context
-				c.Set("user", claims.UserID)
-				c.Set("username", claims.Username)
-				c.Set("role", claims.Role)
-				c.Set("email", claims.Email)
-
-				// User is already logged in, redirect to the dashboard
-				return c.Redirect(http.StatusSeeOther, "/dashboard")
-			}
-		}
-	}
-
-	// If no valid token, render login page
-	return c.Render(http.StatusOK, "index.html", nil)
 }
 
 // GenerateToken generates a JWT token

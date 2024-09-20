@@ -12,11 +12,13 @@ import (
 func (a *App) HandleGetDashboard(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	fmt.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"], "User Role: ", claims["role"])
+	fmt.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"], "User Role: ", claims["role"], "User Email: ", claims["email"])
 
 	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
 		"username": claims["username"],
 		"role":     claims["role"],
+		"email":    claims["email"],
+		"user_id":  claims["user_id"],
 	})
 }
 
