@@ -7,11 +7,13 @@
                 Toggle Map
             </button>
             <!-- Add Device button -->
+            {{ if eq .role "admin" }}
             <div>
                 <button class="btn btn-success" onclick="AddDevice()">
                     Add Device
                 </button>
             </div>
+            {{ end }}
         </div>
         <!-- Map Section -->
         <div id="map" class="col-12 col-xxl-2"></div>
