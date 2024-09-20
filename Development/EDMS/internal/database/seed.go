@@ -7,18 +7,54 @@ import (
 	"time"
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func SeedData(db *sql.DB) {
+	// Get admin password from .env
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		log.Fatal("ADMIN_PASSWORD not set in .env file")
+	}
+
+	userPassword := "Password1!"
+
 	var siteID, hastingsSiteID, buildingIDA, buildingIDB, hastingsBuildingID int
 	var roomA1ID, roomB1ID, hastingsMainRoomID int
 	var co2TypeID, waterTypeID, dryTypeID int
 	var emergencyDeviceTypeID int
 
+	// Generate hash for password
+	adminHash, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userHash, err := bcrypt.GenerateFromPassword([]byte(userPassword), bcrypt.DefaultCost)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Insert Users
+	_, err = db.Exec(`
+		INSERT INTO UserT (username, password, role, email)
+		VALUES ('admin1', $1, 'admin', 'admin@email.com')`, adminHash)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		INSERT INTO UserT (username, password, role, email)
+		VALUES ('user12', $1, 'user', 'user@email.com')`, userHash)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Insert Sites
-	err := db.QueryRow(`
-			INSERT INTO SiteT (SiteName, SiteAddress)
-			VALUES ('EIT', '501 Gloucester Street, Taradale, Napier 4112') RETURNING SiteID`).Scan(&siteID)
+	err = db.QueryRow(`
+		INSERT INTO SiteT (SiteName, SiteAddress)
+		VALUES ('EIT', '501 Gloucester Street, Taradale, Napier 4112') RETURNING SiteID`).Scan(&siteID)
 	if err != nil {
 		log.Fatal(err)
 	}

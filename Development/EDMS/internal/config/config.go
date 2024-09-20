@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -25,8 +24,6 @@ func LoadConfig() Config {
 
 	// Get the DB_PORT environment variable
 	dbPortStr := os.Getenv("DB_PORT")
-
-	fmt.Println(dbPortStr)
 
 	// Convert the string to an integer and handle any potential errors
 	dbPort, err := strconv.Atoi(dbPortStr)
