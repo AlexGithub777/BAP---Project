@@ -102,7 +102,6 @@ func (a *App) HamdleGetSiteByID(c echo.Context) error {
 }
 
 func (a *App) HandlePostSite(c echo.Context) error {
-
 	// Parse the form, limiting upload size to 10MB
 	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
@@ -115,41 +114,43 @@ func (a *App) HandlePostSite(c echo.Context) error {
 	siteName := c.FormValue("siteName")
 	siteAddress := c.FormValue("siteAddress")
 
+	// Initialize filePath as an empty sql.NullString
+	filePath := sql.NullString{String: "", Valid: false}
+
 	// Retrieve the file from the form
 	file, header, err := c.Request().FormFile("siteMap")
-	if err != nil {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Error retrieving file",
-		})
-	}
-	defer file.Close()
+	if err == nil {
+		defer file.Close()
 
-	// Define static directory for site maps
-	staticDir := "./static/site_maps"
-	if _, err := os.Stat(staticDir); os.IsNotExist(err) {
-		os.MkdirAll(staticDir, os.ModePerm) // Create directory if it doesn't exist
-	}
+		// Define static directory for site maps
+		staticDir := "./static/site_maps"
+		if _, err := os.Stat(staticDir); os.IsNotExist(err) {
+			os.MkdirAll(staticDir, os.ModePerm) // Create directory if it doesn't exist
+		}
 
-	// Create unique file name
-	fileName := filepath.Join(staticDir, header.Filename)
-	out, err := os.Create(fileName)
-	if err != nil {
-		return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-			"error": "Error creating file",
-		})
-	}
-	defer out.Close()
+		// Create unique file name
+		fileName := filepath.Join(staticDir, header.Filename)
+		out, err := os.Create(fileName)
+		if err != nil {
+			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
+				"error": "Error creating file",
+			})
+		}
+		defer out.Close()
 
-	// Copy the uploaded file data to the new file
-	_, err = io.Copy(out, file)
-	if err != nil {
-		return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-			"error": "Error copying file",
-		})
+		// Copy the uploaded file data to the new file
+		_, err = io.Copy(out, file)
+		if err != nil {
+			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
+				"error": "Error copying file",
+			})
+		}
+
+		// Save the relative path as a sql.NullString
+		filePath = sql.NullString{String: "/static/site_maps/" + header.Filename, Valid: true}
 	}
 
 	// Save site information and file path in the database
-	filePath := sql.NullString{String: "/static/site_maps/" + header.Filename, Valid: true} // Save the relative path as a sql.NullString
 	site := &models.Site{
 		SiteName:         siteName,
 		SiteAddress:      siteAddress,

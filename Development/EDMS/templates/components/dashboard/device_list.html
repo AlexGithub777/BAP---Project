@@ -6,14 +6,14 @@
             <button
                 class="btn btn-primary me-2 d-none"
                 id="toggleMap"
-                onclick="ToggleMap()"
+                onclick="toggleMap()"
             >
                 Toggle Map
             </button>
             <!-- Add Device button -->
             {{ if eq .role "admin" }}
             <div>
-                <button class="btn btn-success" onclick="AddDevice()">
+                <button class="btn btn-success" onclick="addDevice()">
                     Add Device
                 </button>
             </div>

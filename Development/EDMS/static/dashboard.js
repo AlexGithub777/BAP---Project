@@ -45,13 +45,13 @@ function renderBuildings(data, svgDimensions, minCoordinates) {
         ]).addTo(map);
 
         rectangle.on("click", () => {
-            GetAllDevices(building.name);
+            getAllDevices(building.name);
             console.log("Building clicked:", building.name);
         });
     });
 }
 
-function GetFilterOptions() {
+function getFilterOptions() {
     fetchAndPopulateSelect(
         "/api/site",
         "siteFilter",
@@ -144,26 +144,19 @@ function clearRoomFilter() {
     addDefaultOption(roomSelect, "All Rooms");
 }
 
-function FilterBySite() {
+function filterBySite() {
     const siteName =
         document.getElementById("siteFilter").selectedOptions[0].text;
     const siteId = document.getElementById("siteFilter").value;
     console.log("Site Name:", siteName, "Site ID:", siteId);
-
-    const mapElement = document.getElementById("map");
-    const toggleMapButton = document.getElementById("toggleMap");
 
     // Clear the table body
     clearTableBody();
 
     if (siteName === "All Sites") {
         console.log("Filter by site: All Sites");
-        mapElement.classList.add("d-none");
-        toggleMapButton.classList.add("d-none");
-        // Change the device list width to col-xxl-12
-        document.querySelector(".device-list").classList.remove("col-xxl-9");
-        document.querySelector(".device-list").classList.add("col-xxl-12");
-        GetAllDevices();
+        hideMap();
+        getAllDevices();
         return;
     }
 
@@ -179,17 +172,13 @@ function FilterBySite() {
                 map.removeLayer(layer);
             }
         });
-        mapElement.classList.remove("d-none");
-        toggleMapButton.classList.remove("d-none");
-        // Change the device list width to col-xxl-9
-        document.querySelector(".device-list").classList.remove("col-xxl-12");
-        document.querySelector(".device-list").classList.add("col-xxl-9");
+        showMap();
         createEitTaradaleMap();
-        GetAllDevices("", siteId);
+        getAllDevices("", siteId);
         return;
     }
 
-    GetAllDevices("", siteId);
+    getAllDevices("", siteId);
     clearRoomFilter();
     updateMapForSite(siteId);
 }
@@ -208,13 +197,13 @@ function updateMapForSite(siteId) {
         .then((response) => response.json())
         .then((data) => {
             console.log("Site Data:", data);
-            document.getElementById("map").classList.remove("d-none");
-            document.getElementById("toggleMap").classList.remove("d-none");
-            // Change the device list width to col-xxl-9
-            document
-                .querySelector(".device-list")
-                .classList.remove("col-xxl-12");
-            document.querySelector(".device-list").classList.add("col-xxl-9");
+            // Check if site has a map image
+            if (!data.site_map_image_path.String) {
+                console.log("Site has no map image");
+                hideMap();
+                return;
+            }
+            showMap();
 
             const imageUrl = data.site_map_image_path.String;
             console.log("Image URL:", imageUrl);
@@ -247,19 +236,35 @@ function updateMapForSite(siteId) {
         .catch((error) => console.error("Error updating map:", error));
 }
 
+function hideMap() {
+    document.getElementById("map").classList.add("d-none");
+    document.getElementById("toggleMap").classList.add("d-none");
+    // Change the device list width to col-xxl-12
+    document.querySelector(".device-list").classList.remove("col-xxl-9");
+    document.querySelector(".device-list").classList.add("col-xxl-12");
+}
+
+function showMap() {
+    document.getElementById("map").classList.remove("d-none");
+    document.getElementById("toggleMap").classList.remove("d-none");
+    // Change the device list width to col-xxl-9
+    document.querySelector(".device-list").classList.remove("col-xxl-12");
+    document.querySelector(".device-list").classList.add("col-xxl-9");
+}
+
 // Update the event listener to include table clearing
 document.getElementById("siteFilter").addEventListener("change", () => {
-    FilterBySite();
+    filterBySite();
     clearTableBody();
 });
 
 // Initialize the map and populate filter options
 initializeMap("map");
-GetFilterOptions();
+getFilterOptions();
 
 console.log(role);
 
-async function GetAllDevices(buildingCode = "", siteId = "") {
+async function getAllDevices(buildingCode = "", siteId = "") {
     try {
         let url = "/api/emergency-device";
         const params = new URLSearchParams();
@@ -375,21 +380,21 @@ function getBadgeClass(status) {
 }
 
 function getActionButtons(device) {
-    let buttons = `<button class="btn btn-primary" onclick="DeviceNotes('${device.description.String}')">Notes</button>`;
+    let buttons = `<button class="btn btn-primary" onclick="deviceNotes('${device.description.String}')">Notes</button>`;
     if (role === "admin") {
         buttons += `
-            <button class="btn btn-secondary" onclick="ViewDeviceInspection(${device.emergency_device_id})">Inspect</button>
-            <button class="btn btn-warning" onclick="EditDevice(${device.emergency_device_id})">Edit</button>
-            <button class="btn btn-danger" onclick="DeleteDevice(${device.emergency_device_id})">Delete</button>
+            <button class="btn btn-secondary" onclick="viewDeviceInspection(${device.emergency_device_id})">Inspect</button>
+            <button class="btn btn-warning" onclick="editDevice(${device.emergency_device_id})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteDevice(${device.emergency_device_id})">Delete</button>
         `;
     }
     return buttons;
 }
 
 // Initial fetch without filtering
-GetAllDevices();
+getAllDevices();
 
-function AddDevice() {
+function addDevice() {
     // Fetch the sites and populate the select options
     fetch("/api/site")
         .then((response) => response.json())
@@ -530,30 +535,30 @@ function AddDevice() {
     $("#addModal").modal("show");
 }
 
-function EditDevice(deviceId) {
+function editDevice(deviceId) {
     console.log(`Edit device with ID: ${deviceId}`);
     // Add your edit logic here
 }
 
-function DeleteDevice(deviceId) {
+function deleteDevice(deviceId) {
     console.log(`Delete device with ID: ${deviceId}`);
     // Add your delete logic here
 }
 
 // Change to add inspection
-function ViewDeviceInspection(deviceId) {
+function viewDeviceInspection(deviceId) {
     console.log(`Inspect device with ID: ${deviceId}`);
 
     // Show the modal
     $("#viewInspectionModal").modal("show");
 }
 
-function ViewInspectionDetails(inspectionId) {
+function viewInspectionDetails(inspectionId) {
     console.log(`View inspection details for inspection ID: ${inspectionId}`);
     // Add your view inspection details logic here
 }
 
-function AddInspection() {
+function addInspection() {
     // Close the view inspection modal
     $("#viewInspectionModal").modal("hide");
 
@@ -561,7 +566,7 @@ function AddInspection() {
     $("#addInspectionModal").modal("show");
 }
 
-function DeviceNotes(description) {
+function deviceNotes(description) {
     // Populate the modal with the description
     document.getElementById("notesModalBody").innerText = description;
 
@@ -570,7 +575,7 @@ function DeviceNotes(description) {
 }
 
 // Function to toggle the map visibility
-function ToggleMap() {
+function toggleMap() {
     var map = document.getElementById("map");
     var deviceList = document.querySelector(".device-list");
 

@@ -53,3 +53,5 @@ seed_complete
 
 # Log files
 tmp
+
+tmp/*
