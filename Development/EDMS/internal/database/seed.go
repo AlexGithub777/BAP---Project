@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -27,12 +28,14 @@ func SeedData(db *sql.DB) {
 	// Generate hash for password
 	adminHash, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
 	if err != nil {
+		fmt.Println("Error generating hash for admin password")
 		log.Fatal(err)
 	}
 
 	userHash, err := bcrypt.GenerateFromPassword([]byte(userPassword), bcrypt.DefaultCost)
 
 	if err != nil {
+		fmt.Println("Error generating hash for user password")
 		log.Fatal(err)
 	}
 
