@@ -151,8 +151,16 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 	LEFT JOIN Extinguisher_TypeT et ON ed.extinguishertypeid = et.extinguishertypeid
 	`
 
-	// Add filtering by site name if provided
-	if siteId != "" {
+	// Add filtering by site name and building code if provided
+	if siteId != "" && buildingCode != "" {
+		query += `
+		JOIN buildingT b ON r.buildingid = b.buildingid
+		JOIN siteT s ON b.siteid = s.siteid
+		WHERE s.siteid = $1 AND b.buildingcode = $2
+		`
+		args = append(args, siteId, buildingCode)
+	} else if siteId != "" {
+		// Add filtering by site name if provided
 		query += `
 		JOIN buildingT b ON r.buildingid = b.buildingid
 		JOIN siteT s ON b.siteid = s.siteid

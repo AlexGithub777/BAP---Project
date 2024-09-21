@@ -45,7 +45,7 @@ function renderBuildings(data, svgDimensions, minCoordinates) {
         ]).addTo(map);
 
         rectangle.on("click", () => {
-            getAllDevices(building.name);
+            getAllDevices(building.name, "1");
             console.log("Building clicked:", building.name);
         });
     });
@@ -289,7 +289,7 @@ async function getAllDevices(buildingCode = "", siteId = "") {
         }
 
         if (!Array.isArray(devices) || devices.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found for this site.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
         } else {
             tbody.innerHTML = devices.map(formatDeviceRow).join("");
         }
