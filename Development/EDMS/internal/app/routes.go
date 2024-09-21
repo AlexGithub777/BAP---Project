@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
@@ -40,11 +39,6 @@ func (a *App) initRoutes() {
 	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
 		SigningKey:  []byte(os.Getenv("JWT_SECRET")),
 		TokenLookup: "cookie:token",
-		SuccessHandler: func(c echo.Context) {
-			user := c.Get("user").(*jwt.Token)
-			claims := user.Claims.(jwt.MapClaims)
-			fmt.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"], "User Role: ", claims["role"])
-		},
 		ErrorHandler: func(c echo.Context, err error) error {
 			return c.Redirect(http.StatusSeeOther, "/")
 		},
@@ -67,7 +61,7 @@ func (a *App) initRoutes() {
 	//admin.PUT("/api/user/:id", a.HandlePutUser)
 	//admin.DELETE("/api/user/:id", a.HandleDeleteUser)
 	// Site management routes - Alex
-	//admin.POST("/api/site", a.HandlePostSite)
+	admin.POST("/api/site", a.HandlePostSite)
 	//admin.PUT("/api/site/:id", a.HandlePutSite)
 	//admin.DELETE("/api/site/:id", a.HandleDeleteSite)
 	// Building management routes - Joe
@@ -95,6 +89,7 @@ func (a *App) initRoutes() {
 	api.GET("/room", a.HandleGetAllRooms)
 	api.GET("/building", a.HandleGetAllBuildings)
 	api.GET("/site", a.HandleGetAllSites)
+	api.GET("/site/:id", a.HamdleGetSiteByID)
 
 	// Add any other routes as needed
 }

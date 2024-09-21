@@ -12,7 +12,12 @@
                 ></button>
             </div>
             <div class="modal-body">
-                <form class="form-control">
+                <form
+                    class="form-control"
+                    enctype="multipart/form-data"
+                    method="POST"
+                    action="/api/site"
+                >
                     <div class="mb-3">
                         <label for="siteName" class="form-label"
                             >Site Name</label
@@ -21,7 +26,9 @@
                             type="text"
                             class="form-control"
                             id="siteName"
+                            name="siteName"
                             placeholder="Enter Site Name"
+                            required
                         />
                     </div>
                     <div class="mb-3">
@@ -32,7 +39,9 @@
                             type="text"
                             class="form-control"
                             id="siteAddress"
+                            name="siteAddress"
                             placeholder="Enter Site Address"
+                            required
                         />
                     </div>
                     <div class="mb-3">
@@ -41,7 +50,9 @@
                             type="file"
                             class="form-control"
                             id="siteMap"
+                            name="siteMap"
                             accept="image/*"
+                            required
                         />
                     </div>
                     <div id="imagePreviewContainer" style="display: none">
@@ -56,27 +67,19 @@
                             alt="Site Map Preview"
                         />
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <div class="d-flex justify-content-between">
-                    <div>
+                    <div class="modal-footer">
                         <button
-                            type="button mx-2"
+                            type="button"
                             class="btn btn-secondary"
                             data-bs-dismiss="modal"
                         >
                             Close
                         </button>
+                        <button type="submit" class="btn btn-primary">
+                            Add Site
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        class="btn btn-primary mx-2"
-                        data-bs-dismiss="modal"
-                    >
-                        Add Site
-                    </button>
-                </div>
+                </form>
             </div>
         </div>
     </div>

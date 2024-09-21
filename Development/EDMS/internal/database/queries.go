@@ -447,3 +447,42 @@ func (db *DB) GetAllSites() ([]models.Site, error) {
 	return sites, nil
 
 }
+
+func (db *DB) GetSiteByID(siteID string) (*models.Site, error) {
+	query := `
+	SELECT siteid, sitename, siteaddress, sitemapimagepath
+	FROM siteT
+	WHERE siteid = $1
+	`
+	var site models.Site
+	err := db.QueryRow(query, siteID).Scan(
+		&site.SiteID,
+		&site.SiteName,
+		&site.SiteAddress,
+		&site.SiteMapImagePath,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &site, nil
+}
+
+func (db *DB) AddSite(site *models.Site) error {
+	query := "INSERT INTO SiteT (siteName, siteAddress, siteMapImagePath) VALUES ($1, $2, $3)"
+	insertStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer insertStmt.Close()
+
+	_, err = insertStmt.Exec(site.SiteName, site.SiteAddress, site.SiteMapImagePath)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

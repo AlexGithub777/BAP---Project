@@ -10,6 +10,8 @@ import (
 
 // HandleGetDashboard serves the dashboard page
 func (a *App) HandleGetDashboard(c echo.Context) error {
+	// get the site ID from the URL
+	
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	fmt.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"], "User Role: ", claims["role"], "User Email: ", claims["email"])

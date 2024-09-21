@@ -4,85 +4,120 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Admin Settings</title>
+        <!-- Toastify JS -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"
+            integrity="sha512-MnKz2SbnWiXJ/e0lSfSzjaz9JjJXQNb2iykcZkEY2WOzgJIWVqJBFIIPidlCjak0iTH2bt2u1fHQ4pvKvBYy6Q=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <!-- Toastify CSS-->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.css"
+            integrity="sha512-VSD3lcSci0foeRFRHWdYX4FaLvec89irh5+QAGc00j5AOdow2r5MFPhoPEYBUQdyarXwbzyJEO7Iko7+PnPuBw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <!-- jQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <!-- Bootstrap CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+        />
+        <!-- Bootstrap JS -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"
+        ></script>
+        <!-- Font Awesome -->
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+            rel="stylesheet"
+        />
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/main.css" />
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Get the error message from the server-side data
+                var message = "{{.message}}";
+                var error = "{{.error}}";
+
+                // If there's an error message, display it with Toastify
+                if (message) {
+                    Toastify({
+                        text: message,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #008000, #008000)",
+                    }).showToast();
+                }
+
+                if (error) {
+                    Toastify({
+                        text: error,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    }).showToast();
+                }
+            });
+        </script>
     </head>
     <body>
-        <!DOCTYPE html>
-        <html lang="en">
-            <head>
-                <meta charset="UTF-8" />
-                <meta
-                    name="viewport"
-                    content="width=device-width, initial-scale=1.0"
-                />
-                <!-- jQuery -->
-                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <!-- Admin navbar-->
+        {{ template "admin_navbar.html" . }}
 
-                <!-- Bootstrap CSS -->
-                <link
-                    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-                    rel="stylesheet"
-                    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-                    crossorigin="anonymous"
-                />
-                <!-- Bootstrap JS -->
-                <script
-                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-                    crossorigin="anonymous"
-                ></script>
-                <!-- Font Awesome -->
-                <link
-                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-                    rel="stylesheet"
-                />
-                <!-- Custom CSS -->
-                <link rel="stylesheet" href="/static/main.css" />
-            </head>
-            <body>
-                <!-- Admin navbar-->
-                {{ template "admin_navbar.html" . }}
+        <div class="container">
+            <!-- Manage Users -->
+            {{ template "user_list.html" . }}
 
-                <div class="container">
-                    <!-- Manage Users -->
-                    {{ template "user_list.html" . }}
+            <!-- Manage Locations -->
+            <div>
+                <h2>Manage Locations</h2>
 
-                    <!-- Manage Locations -->
-                    <div>
-                        <h2>Manage Locations</h2>
+                <!-- Manage Sites -->
+                {{ template "site_list.html" . }}
 
-                        <!-- Manage Sites -->
-                        {{ template "site_list.html" . }}
+                <!-- Manage Buildings-->
+                {{ template "building_list.html" . }}
 
-                        <!-- Manage Buildings-->
-                        {{ template "building_list.html" . }}
+                <!-- Manage Rooms -->
+                {{ template "room_list.html" . }}
+            </div>
 
-                        <!-- Manage Rooms -->
-                        {{ template "room_list.html" . }}
-                    </div>
+            <!-- Manage Device Types -->
+            {{ template "device_type_list.html" . }}
 
-                    <!-- Manage Device Types -->
-                    {{ template "device_type_list.html" . }}
-
-                    <!-- Modals -->
-                    {{ template "add_site.html" . }}
-                </div>
-                <!-- Custom JS-->
-                <script>
-                    // Image Preview
-                    $("#siteMap").change(function () {
-                        var file = this.files[0];
-                        console.log(file);
-                        var reader = new FileReader();
-                        reader.onload = function (e) {
-                            $("#imagePreview").attr("src", e.target.result);
-                            $("#imagePreviewContainer").show();
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                </script>
-                <script src="/static/navbar.js"></script>
-                <script src="/static/admin.js"></script>
-            </body>
-        </html>
+            <!-- Modals -->
+            {{ template "add_site.html" . }}
+        </div>
+        <!-- Custom JS-->
+        <script>
+            // Image Preview
+            $("#siteMap").change(function () {
+                var file = this.files[0];
+                console.log(file);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#imagePreview").attr("src", e.target.result);
+                    $("#imagePreviewContainer").show();
+                };
+                reader.readAsDataURL(file);
+            });
+        </script>
+        <script src="/static/navbar.js"></script>
+        <script src="/static/admin.js"></script>
     </body>
 </html>

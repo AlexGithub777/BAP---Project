@@ -1,8 +1,13 @@
 package app
 
 import (
+	"database/sql"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -83,6 +88,83 @@ func (a *App) HandleGetAllSites(c echo.Context) error {
 
 	// Return the results as JSON
 	return c.JSON(http.StatusOK, sites)
+}
+
+func (a *App) HamdleGetSiteByID(c echo.Context) error {
+	id := c.Param("id")
+	site, err := a.DB.GetSiteByID(id)
+	if err != nil {
+		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
+	}
+
+	// Return the results as JSON
+	return c.JSON(http.StatusOK, site)
+}
+
+func (a *App) HandlePostSite(c echo.Context) error {
+
+	// Parse the form, limiting upload size to 10MB
+	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
+			"error": "Error parsing form",
+		})
+	}
+
+	// Get the form values
+	siteName := c.FormValue("siteName")
+	siteAddress := c.FormValue("siteAddress")
+
+	// Retrieve the file from the form
+	file, header, err := c.Request().FormFile("siteMap")
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
+			"error": "Error retrieving file",
+		})
+	}
+	defer file.Close()
+
+	// Define static directory for site maps
+	staticDir := "./static/site_maps"
+	if _, err := os.Stat(staticDir); os.IsNotExist(err) {
+		os.MkdirAll(staticDir, os.ModePerm) // Create directory if it doesn't exist
+	}
+
+	// Create unique file name
+	fileName := filepath.Join(staticDir, header.Filename)
+	out, err := os.Create(fileName)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
+			"error": "Error creating file",
+		})
+	}
+	defer out.Close()
+
+	// Copy the uploaded file data to the new file
+	_, err = io.Copy(out, file)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
+			"error": "Error copying file",
+		})
+	}
+
+	// Save site information and file path in the database
+	filePath := sql.NullString{String: "/static/site_maps/" + header.Filename, Valid: true} // Save the relative path as a sql.NullString
+	site := &models.Site{
+		SiteName:         siteName,
+		SiteAddress:      siteAddress,
+		SiteMapImagePath: filePath,
+	}
+
+	err = a.DB.AddSite(site)
+	if err != nil {
+		return a.handleError(c, http.StatusInternalServerError, "Error saving site", err)
+	}
+
+	// Respond to the client
+	return c.Render(http.StatusOK, "admin.html", map[string]interface{}{
+		"message": "Site added successfully",
+	})
 }
 
 /*

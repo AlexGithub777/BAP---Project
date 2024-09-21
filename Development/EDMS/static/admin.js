@@ -191,6 +191,8 @@ function AddSiteOptions() {
 
 AddSiteOptions();
 
+
+
 // Function to add a new site to the database
 function addSite() {
     // Show the modal

@@ -1,180 +1,259 @@
 // Leaflet map setup
-// SVG's intrinsic width/height or viewBox values
-const svgWidth = 561.568;
-const svgHeight = 962.941;
-const minX = 128.009;
-const minY = 82.331;
+let map;
 
-var map = L.map("map", {
-    crs: L.CRS.Simple,
-    minZoom: -1,
-});
+function initializeMap(containerId, options = {}) {
+    const defaultOptions = {
+        crs: L.CRS.Simple,
+        minZoom: -1,
+    };
+    map = L.map(containerId, { ...defaultOptions, ...options });
+}
 
-var imageUrl = "/static/map.svg";
+function createEitTaradaleMap() {
+    const svgDimensions = { width: 561.568, height: 962.941 };
+    const minCoordinates = { x: 128.009, y: 82.331 };
+    const imageUrl = "/static/map.svg";
+    const bounds = [
+        [0, 0],
+        [svgDimensions.height, svgDimensions.width],
+    ];
 
-// Apply these values to the bounds
-const bounds = [
-    [0, 0],
-    [svgHeight, svgWidth],
-];
+    L.imageOverlay(imageUrl, bounds).addTo(map);
 
-L.imageOverlay(imageUrl, bounds).addTo(map);
+    fetchBuildingsData()
+        .then((data) => renderBuildings(data, svgDimensions, minCoordinates))
+        .catch((error) =>
+            console.error("Error fetching building data:", error)
+        );
 
-// Fetch the buildings data draw overlay nat each co ordinate
-fetch("static/buildings.json")
-    .then((response) => response.json())
-    .then((data) => {
-        console.log(data);
+    map.fitBounds(bounds);
+}
 
-        // Loop over the buildings and add a rectangle for each one
-        data.buildings.forEach((building) => {
-            var x = building.coordinates.x - minX; // Subtract the min-x value
-            var y = svgHeight - (building.coordinates.y - minY); // Subtract the min-y value and flip the y-coordinate
+function fetchBuildingsData() {
+    return fetch("static/buildings.json").then((response) => response.json());
+}
 
-            // Create the rectangle
-            var rectangle = L.rectangle([
-                [y - 19, x], // Subtract the height of the rectangle from the y-coordinate
-                [y, x + 19],
-            ]).addTo(map);
+function renderBuildings(data, svgDimensions, minCoordinates) {
+    data.buildings.forEach((building) => {
+        const x = building.coordinates.x - minCoordinates.x;
+        const y =
+            svgDimensions.height - (building.coordinates.y - minCoordinates.y);
 
-            // Add a click event listener to the rectangle
-            rectangle.on("click", () => {
-                // Fetch devices for the clicked building
-                GetAllDevices(building.name); // Pass the building code to fetchDevices
-                console.log("Building clicked:", building.name);
-            });
+        const rectangle = L.rectangle([
+            [y - 19, x],
+            [y, x + 19],
+        ]).addTo(map);
+
+        rectangle.on("click", () => {
+            GetAllDevices(building.name);
+            console.log("Building clicked:", building.name);
         });
     });
+}
 
-map.fitBounds(bounds);
-
-// function to get filter options
 function GetFilterOptions() {
-    // Fetch the sites and populate the select options
-    fetch("/api/site")
+    fetchAndPopulateSelect(
+        "/api/site",
+        "siteFilter",
+        "site_name",
+        "site_id",
+        "All Sites"
+    );
+    setupBuildingFilter();
+    setupRoomFilter();
+    fetchAndPopulateSelect(
+        "/api/emergency-device-type",
+        "deviceTypeFilter",
+        "emergency_device_type_name",
+        null,
+        "All Device Types"
+    );
+}
+
+function fetchAndPopulateSelect(
+    url,
+    selectId,
+    textKey,
+    valueKey,
+    defaultOptionText
+) {
+    fetch(url)
         .then((response) => response.json())
         .then((data) => {
-            const select = document.getElementById("siteFilter");
-            // Clear previous options
+            const select = document.getElementById(selectId);
             select.innerHTML = "";
-            // Add a default option and select it
-            const defaultOption = document.createElement("option");
-            defaultOption.text = "All Sites";
-            defaultOption.selected = true;
-            select.add(defaultOption);
-            data.forEach((item) => {
-                const option = document.createElement("option");
-                option.text = item.site_name; // Set the text of the option
-                option.value = item.site_id; // Set the value of the option
-                select.add(option);
-            });
-        })
-        .catch((error) => console.error("Error:", error));
 
-    // Fetch the buildings and populate the select options based on the selected site
-    document.getElementById("siteFilter").addEventListener("change", () => {
-        const selectedSite = document.getElementById("siteFilter").value;
-        fetch(`/api/building?siteId=${selectedSite}`)
-            .then((response) => response.json())
-            .then((data) => {
-                const select = document.getElementById("buildingFilter");
-                // Clear previous options
-                select.innerHTML = "";
-                // Add a default option and select it
-                const defaultOption = document.createElement("option");
-                defaultOption.text = "All Buildings";
-                defaultOption.selected = true;
-                select.add(defaultOption);
+            // Add the default option
+            addDefaultOption(select, defaultOptionText);
+
+            // Check if data is valid and is an array
+            if (data && Array.isArray(data) && data.length > 0) {
                 data.forEach((item) => {
                     const option = document.createElement("option");
-                    option.text = item.building_code; // Set the text of the option
-                    option.value = item.building_id; // Set the value of the option
+                    option.text = item[textKey];
+                    if (valueKey) option.value = item[valueKey];
                     select.add(option);
                 });
+            } else {
+                console.log(`No data available for ${selectId}`);
+            }
+        })
+        .catch((error) => {
+            console.error(`Error fetching ${selectId} data:`, error);
+        });
+}
 
-                // Clear roomFilter options
-                const roomSelect = document.getElementById("roomFilter");
-                roomSelect.innerHTML = "";
-                const defaultRoomOption = document.createElement("option");
-                defaultRoomOption.text = "All Rooms";
-                defaultRoomOption.selected = true;
-                roomSelect.add(defaultRoomOption);
-            })
-            .catch((error) => console.error("Error:", error));
+function addDefaultOption(select, text) {
+    const defaultOption = document.createElement("option");
+    defaultOption.text = text;
+    defaultOption.selected = true;
+    select.add(defaultOption);
+}
+
+function setupBuildingFilter() {
+    document.getElementById("siteFilter").addEventListener("change", () => {
+        const selectedSite = document.getElementById("siteFilter").value;
+        fetchAndPopulateSelect(
+            `/api/building?siteId=${selectedSite}`,
+            "buildingFilter",
+            "building_code",
+            "building_id",
+            "All Buildings"
+        );
+        clearRoomFilter();
     });
+}
 
-    // Fetch the rooms and populate the select options based on the selected building
+function setupRoomFilter() {
     document.getElementById("buildingFilter").addEventListener("change", () => {
         const selectedBuilding =
             document.getElementById("buildingFilter").value;
-        fetch(`/api/room?buildingId=${selectedBuilding}`)
-            .then((response) => response.json())
-            .then((data) => {
-                const select = document.getElementById("roomFilter");
-                // Clear previous options
-                select.innerHTML = "";
-                // Add a default option and select it
-                const defaultOption = document.createElement("option");
-                defaultOption.text = "All Rooms";
-                defaultOption.selected = true;
-                select.add(defaultOption);
-                data.forEach((item) => {
-                    const option = document.createElement("option");
-                    option.text = item.room_code; // Set the text of the option
-                    select.add(option);
-                });
-            })
-            .catch((error) => console.error("Error:", error));
+        fetchAndPopulateSelect(
+            `/api/room?buildingId=${selectedBuilding}`,
+            "roomFilter",
+            "room_code",
+            null,
+            "All Rooms"
+        );
     });
-
-    // Fetch the device types and populate the select options
-    fetch("/api/emergency-device-type")
-        .then((response) => response.json())
-        .then((data) => {
-            const select = document.getElementById("deviceTypeFilter");
-            // Clear previous options
-            select.innerHTML = "";
-            // Add a default option and select it
-            const defaultOption = document.createElement("option");
-            defaultOption.text = "All Device Types";
-            defaultOption.selected = true;
-            select.add(defaultOption);
-            data.forEach((item) => {
-                const option = document.createElement("option");
-                option.text = item.emergency_device_type_name; // Set the text of the option
-                select.add(option);
-            });
-        })
-        .catch((error) => console.error("Error:", error));
 }
 
-// Function to filter devices by site
+function clearRoomFilter() {
+    const roomSelect = document.getElementById("roomFilter");
+    roomSelect.innerHTML = "";
+    addDefaultOption(roomSelect, "All Rooms");
+}
+
 function FilterBySite() {
     const siteName =
         document.getElementById("siteFilter").selectedOptions[0].text;
     const siteId = document.getElementById("siteFilter").value;
-    console.log("Site Name:", siteName);
-    console.log("Site ID:", siteId);
-    const buildingCode = ""; // Set the building code to empty to fetch all devices
+    console.log("Site Name:", siteName, "Site ID:", siteId);
+
+    const mapElement = document.getElementById("map");
+    const toggleMapButton = document.getElementById("toggleMap");
+
+    // Clear the table body
+    clearTableBody();
+
     if (siteName === "All Sites") {
         console.log("Filter by site: All Sites");
+        mapElement.classList.add("d-none");
+        toggleMapButton.classList.add("d-none");
+        // Change the device list width to col-xxl-12
+        document.querySelector(".device-list").classList.remove("col-xxl-9");
+        document.querySelector(".device-list").classList.add("col-xxl-12");
         GetAllDevices();
         return;
     }
-    GetAllDevices(buildingCode, siteId);
 
-    // Clear roomFilter options
-    const roomSelect = document.getElementById("roomFilter");
-    roomSelect.innerHTML = "";
-    const defaultRoomOption = document.createElement("option");
-    defaultRoomOption.text = "All Rooms";
-    defaultRoomOption.selected = true;
-    roomSelect.add(defaultRoomOption);
+    if (siteName === "EIT Taradale") {
+        console.log("Filter by site: EIT Taradale");
+        // Clear the map layers
+        map.eachLayer((layer) => {
+            if (
+                layer instanceof L.ImageOverlay ||
+                layer instanceof L.Rectangle
+            ) {
+                map.removeLayer(layer);
+            }
+        });
+        mapElement.classList.remove("d-none");
+        toggleMapButton.classList.remove("d-none");
+        // Change the device list width to col-xxl-9
+        document.querySelector(".device-list").classList.remove("col-xxl-12");
+        document.querySelector(".device-list").classList.add("col-xxl-9");
+        createEitTaradaleMap();
+        GetAllDevices("", siteId);
+        return;
+    }
+
+    GetAllDevices("", siteId);
+    clearRoomFilter();
+    updateMapForSite(siteId);
 }
 
-document.getElementById("siteFilter").addEventListener("change", FilterBySite);
+function clearTableBody() {
+    const tableBody = document.getElementById("emergency-device-body");
+    if (tableBody) {
+        tableBody.innerHTML = "";
+    } else {
+        console.error("Table body element not found");
+    }
+}
 
-// Call the function to populate the filter options
+function updateMapForSite(siteId) {
+    fetch(`/api/site/${siteId}`)
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Site Data:", data);
+            document.getElementById("map").classList.remove("d-none");
+            document.getElementById("toggleMap").classList.remove("d-none");
+            // Change the device list width to col-xxl-9
+            document
+                .querySelector(".device-list")
+                .classList.remove("col-xxl-12");
+            document.querySelector(".device-list").classList.add("col-xxl-9");
+
+            const imageUrl = data.site_map_image_path.String;
+            console.log("Image URL:", imageUrl);
+
+            const image = new Image();
+            image.src = imageUrl;
+            image.onload = function () {
+                const imgWidth = this.width;
+                const imgHeight = this.height;
+                console.log("Image dimensions:", imgWidth, "x", imgHeight);
+
+                const newBounds = [
+                    [0, 0],
+                    [imgHeight, imgWidth],
+                ];
+
+                map.eachLayer((layer) => {
+                    if (
+                        layer instanceof L.ImageOverlay ||
+                        layer instanceof L.Rectangle
+                    ) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                L.imageOverlay(imageUrl, newBounds).addTo(map);
+                map.fitBounds(newBounds);
+            };
+        })
+        .catch((error) => console.error("Error updating map:", error));
+}
+
+// Update the event listener to include table clearing
+document.getElementById("siteFilter").addEventListener("change", () => {
+    FilterBySite();
+    clearTableBody();
+});
+
+// Initialize the map and populate filter options
+initializeMap("map");
 GetFilterOptions();
 
 console.log(role);
@@ -188,16 +267,37 @@ async function GetAllDevices(buildingCode = "", siteId = "") {
         if (params.toString()) url += `?${params.toString()}`;
 
         const response = await fetch(url);
+        console.log("Response:", response);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const devices = await response.json();
+        console.log("Devices:", devices);
 
         const tbody = document.getElementById("emergency-device-body");
-        tbody.innerHTML = devices.map(formatDeviceRow).join("");
+        if (!tbody) {
+            console.error("Table body element not found");
+            return;
+        }
+
+        if (!Array.isArray(devices) || devices.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found for this site.</td></tr>`;
+        } else {
+            tbody.innerHTML = devices.map(formatDeviceRow).join("");
+        }
     } catch (err) {
         console.error("Failed to fetch devices:", err);
+        const tbody = document.getElementById("emergency-device-body");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="11" class="text-center">Error fetching devices. Please try again.</td></tr>`;
+        }
     }
 }
 
 function formatDeviceRow(device) {
+    if (!device) return "";
     const formatDateMonthYear = (dateString) =>
         formatDate(dateString, { year: "numeric", month: "long" });
     const formatDateFull = (dateString) =>
@@ -477,35 +577,13 @@ function ToggleMap() {
     if (map.classList.contains("d-none")) {
         // Map is hidden, show the map and set device list back to col-xxl-9 width
         map.classList.remove("d-none");
-        map.classList.add("col-xxl-2");
+        map.classList.add("col-xxl-3");
         deviceList.classList.remove("col-xxl-12");
-        deviceList.classList.add("col-xxl-10");
+        deviceList.classList.add("col-xxl-9");
     } else {
         // Map is visible, hide the map and make device list 100% width
         map.classList.add("d-none");
-        deviceList.classList.remove("col-xxl-10");
+        deviceList.classList.remove("col-xxl-9");
         deviceList.classList.add("col-xxl-12");
     }
 }
-
-// function to add site dropdown items to navbar
-function AddSiteOptions() {
-    fetch("/api/site")
-        .then((response) => response.json())
-        .then((data) => {
-            const dropdownMenu = document.getElementById("siteDropdown");
-            data.forEach((item) => {
-                const listItem = document.createElement("li");
-                const anchor = document.createElement("a");
-                anchor.classList.add("dropdown-item");
-                anchor.href = "#"; // replace with the actual link
-                anchor.textContent = item.site_name;
-                anchor.dataset.siteId = item.site_id; // store site_id in data attribute
-                listItem.appendChild(anchor);
-                dropdownMenu.appendChild(listItem);
-            });
-        })
-        .catch((error) => console.error("Error:", error));
-}
-
-AddSiteOptions();
