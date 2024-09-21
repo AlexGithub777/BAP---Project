@@ -113,8 +113,8 @@ func (a *App) HandlePostSite(c echo.Context) error {
 	}
 
 	// Get the form values
-	siteName := c.FormValue("siteName")
-	siteAddress := c.FormValue("siteAddress")
+	siteName := strings.TrimSpace(c.FormValue("siteName"))       // Trim whitespace
+	siteAddress := strings.TrimSpace(c.FormValue("siteAddress")) // Trim whitespace
 
 	// Validate input
 	if siteName == "" || siteAddress == "" {
@@ -123,11 +123,29 @@ func (a *App) HandlePostSite(c echo.Context) error {
 		})
 	}
 
+	// Validate site name & address length (site name should be less than 100 characters) (address should be less than 255 characters)
+	if len(siteName) > 100 || len(siteAddress) > 255 {
+		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
+			"error": "Site name should be less than 100 characters and address should be less than 255 characters",
+		})
+	}
+
+	// Additional validation for siteName (allow only alphanumeric, spaces, hyphens, and underscores)
+	if !regexp.MustCompile(`^[a-zA-Z0-9\s_-]+$`).MatchString(siteName) {
+		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
+			"error": "Site name can only contain letters, numbers, spaces, hyphens, and underscores",
+		})
+	}
+
 	// Check if site name is unique
 	_, err = a.DB.GetSiteByName(siteName)
 	if err == nil {
 		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
 			"error": "Site name already exists",
+		})
+	} else if err != sql.ErrNoRows { // If the error is not sql.ErrNoRows, it's a database error
+		return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
+			"error": "Database error",
 		})
 	}
 
@@ -138,15 +156,21 @@ func (a *App) HandlePostSite(c echo.Context) error {
 	file, header, err := c.Request().FormFile("siteMap")
 	if err == nil {
 		defer file.Close()
-
+		// Validate file extension
+		// Create unique file name based on the site name
+		fileExt := filepath.Ext(header.Filename)
+		allowedExtensions := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true}
+		if !allowedExtensions[fileExt] {
+			return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
+				"error": "Invalid file type. Allowed types: jpg, jpeg, png, gif",
+			})
+		}
 		// Define static directory for site maps
 		staticDir := "./static/site_maps"
 		if _, err := os.Stat(staticDir); os.IsNotExist(err) {
 			os.MkdirAll(staticDir, os.ModePerm) // Create directory if it doesn't exist
 		}
 
-		// Create unique file name based on the site name
-		fileExt := filepath.Ext(header.Filename)
 		sanitizedSiteName := strings.ReplaceAll(siteName, " ", "_")
 		sanitizedSiteName = regexp.MustCompile(`[^a-zA-Z0-9_-]`).ReplaceAllString(sanitizedSiteName, "")
 		fileName := filepath.Join(staticDir, sanitizedSiteName+fileExt)
