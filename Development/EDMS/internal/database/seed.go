@@ -54,14 +54,14 @@ func SeedData(db *sql.DB) {
 	// Insert Sites
 	err = db.QueryRow(`
 		INSERT INTO SiteT (SiteName, SiteAddress)
-		VALUES ('EIT', '501 Gloucester Street, Taradale, Napier 4112') RETURNING SiteID`).Scan(&siteID)
+		VALUES ('EIT Taradale', '501 Gloucester Street, Taradale, Napier 4112') RETURNING SiteID`).Scan(&siteID)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	err = db.QueryRow(`
-			INSERT INTO SiteT (SiteName, SiteAddress)
-			VALUES ('Hastings - EIT', '416 Heretaunga Street West, Hastings 4122') RETURNING SiteID`).Scan(&hastingsSiteID)
+			INSERT INTO SiteT (SiteName, SiteAddress, SiteMapImagePath)
+			VALUES ('EIT Hastings', '416 Heretaunga Street West, Hastings 4122', '/static/site_maps/eit_hastings_map.png') RETURNING SiteID`).Scan(&hastingsSiteID)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -167,7 +167,8 @@ function FilterBySite() {
         return;
     }
 
-    if (siteName === "EIT Taradale") {
+    if (siteId === "1") {
+        // EIT Taradale should always also be id = 1, as its the first site inserted into the database (see seed.go)
         console.log("Filter by site: EIT Taradale");
         // Clear the map layers
         map.eachLayer((layer) => {
