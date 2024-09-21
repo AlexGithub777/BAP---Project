@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/labstack/echo/v4"
@@ -114,6 +116,21 @@ func (a *App) HandlePostSite(c echo.Context) error {
 	siteName := c.FormValue("siteName")
 	siteAddress := c.FormValue("siteAddress")
 
+	// Validate input
+	if siteName == "" || siteAddress == "" {
+		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
+			"error": "All fields are required",
+		})
+	}
+
+	// Check if site name is unique
+	_, err = a.DB.GetSiteByName(siteName)
+	if err == nil {
+		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
+			"error": "Site name already exists",
+		})
+	}
+
 	// Initialize filePath as an empty sql.NullString
 	filePath := sql.NullString{String: "", Valid: false}
 
@@ -128,8 +145,12 @@ func (a *App) HandlePostSite(c echo.Context) error {
 			os.MkdirAll(staticDir, os.ModePerm) // Create directory if it doesn't exist
 		}
 
-		// Create unique file name
-		fileName := filepath.Join(staticDir, header.Filename)
+		// Create unique file name based on the site name
+		fileExt := filepath.Ext(header.Filename)
+		sanitizedSiteName := strings.ReplaceAll(siteName, " ", "_")
+		sanitizedSiteName = regexp.MustCompile(`[^a-zA-Z0-9_-]`).ReplaceAllString(sanitizedSiteName, "")
+		fileName := filepath.Join(staticDir, sanitizedSiteName+fileExt)
+
 		out, err := os.Create(fileName)
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
@@ -147,7 +168,7 @@ func (a *App) HandlePostSite(c echo.Context) error {
 		}
 
 		// Save the relative path as a sql.NullString
-		filePath = sql.NullString{String: "/static/site_maps/" + header.Filename, Valid: true}
+		filePath = sql.NullString{String: "/static/site_maps/" + sanitizedSiteName + fileExt, Valid: true}
 	}
 
 	// Save site information and file path in the database

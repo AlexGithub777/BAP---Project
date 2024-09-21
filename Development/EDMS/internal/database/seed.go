@@ -68,7 +68,7 @@ func SeedData(db *sql.DB) {
 
 	err = db.QueryRow(`
 			INSERT INTO SiteT (SiteName, SiteAddress, SiteMapImagePath)
-			VALUES ('EIT Hastings', '416 Heretaunga Street West, Hastings 4122', '/static/site_maps/eit_hastings_map.png') RETURNING SiteID`).Scan(&hastingsSiteID)
+			VALUES ('EIT Hastings', '416 Heretaunga Street West, Hastings 4122', '/static/site_maps/EIT_Hastings.png') RETURNING SiteID`).Scan(&hastingsSiteID)
 	if err != nil {
 		log.Fatal(err)
 	}

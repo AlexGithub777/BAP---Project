@@ -12,7 +12,7 @@ CREATE TABLE UserT (
 -- Site table to store information about different locations
 CREATE TABLE SiteT (
     SiteID SERIAL PRIMARY KEY,
-    SiteName VARCHAR(100) NOT NULL,
+    SiteName VARCHAR(100) NOT NULL UNIQUE,
     SiteAddress VARCHAR(255),
     SiteMapImagePath VARCHAR(150)
 );
