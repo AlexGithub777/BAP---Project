@@ -62,8 +62,24 @@
 
                     <!-- Manage Device Types -->
                     {{ template "device_type_list.html" . }}
+
+                    <!-- Modals -->
+                    {{ template "add_site.html" . }}
                 </div>
                 <!-- Custom JS-->
+                <script>
+                    // Image Preview
+                    $("#siteMap").change(function () {
+                        var file = this.files[0];
+                        console.log(file);
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#imagePreview").attr("src", e.target.result);
+                            $("#imagePreviewContainer").show();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                </script>
                 <script src="/static/navbar.js"></script>
                 <script src="/static/admin.js"></script>
             </body>
