@@ -13,10 +13,13 @@
             </div>
             <div class="modal-body">
                 <form
-                    class="form-control"
+                    class="form-control needs-validation"
                     enctype="multipart/form-data"
                     method="POST"
+                    id="addSiteForm"
                     action="/api/site"
+                    autocomplete="off"
+                    novalidate
                 >
                     <div class="mb-3">
                         <label for="siteName" class="form-label"
@@ -28,8 +31,12 @@
                             id="siteName"
                             name="siteName"
                             placeholder="Enter Site Name"
+                            pattern=".{1,}"
                             required
                         />
+                        <div class="invalid-feedback">
+                            Please enter a site name.
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="siteAddress" class="form-label"
@@ -41,16 +48,22 @@
                             id="siteAddress"
                             name="siteAddress"
                             placeholder="Enter Site Address"
+                            pattern=".{1,}"
                             required
                         />
+                        <div class="invalid-feedback">
+                            Please enter a site address.
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label for="siteMap" class="form-label">Site Map</label>
+                        <label for="siteMapImgInput" class="form-label"
+                            >Site Map</label
+                        >
                         <input
                             type="file"
                             class="form-control"
-                            id="siteMap"
-                            name="siteMap"
+                            id="siteMapImgInput"
+                            name="siteMapImgInput"
                             accept="image/*"
                         />
                     </div>
@@ -66,19 +79,19 @@
                             alt="Site Map Preview"
                         />
                     </div>
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
-                            Close
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            Add Site
-                        </button>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button type="button" id="addSiteBtn" class="btn btn-primary">
+                    Add Site
+                </button>
             </div>
         </div>
     </div>

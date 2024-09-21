@@ -153,16 +153,16 @@ func (a *App) HandlePostSite(c echo.Context) error {
 	filePath := sql.NullString{String: "", Valid: false}
 
 	// Retrieve the file from the form
-	file, header, err := c.Request().FormFile("siteMap")
+	file, header, err := c.Request().FormFile("siteMapImgInput")
 	if err == nil {
 		defer file.Close()
 		// Validate file extension
 		// Create unique file name based on the site name
 		fileExt := filepath.Ext(header.Filename)
-		allowedExtensions := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true}
+		allowedExtensions := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".svg": true}
 		if !allowedExtensions[fileExt] {
 			return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-				"error": "Invalid file type. Allowed types: jpg, jpeg, png, gif",
+				"error": "Invalid file type. Allowed types: jpg, jpeg, png, gif, svg",
 			})
 		}
 		// Define static directory for site maps

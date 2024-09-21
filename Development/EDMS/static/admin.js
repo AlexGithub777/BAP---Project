@@ -169,34 +169,36 @@ fetch("/api/emergency-device-type")
         });
     });
 
-// function to add site dropdown items to navbar
-function AddSiteOptions() {
-    fetch("/api/site")
-        .then((response) => response.json())
-        .then((data) => {
-            const dropdownMenu = document.getElementById("siteDropdown");
-            data.forEach((item) => {
-                const listItem = document.createElement("li");
-                const anchor = document.createElement("a");
-                anchor.classList.add("dropdown-item");
-                anchor.href = "#"; // replace with the actual link
-                anchor.textContent = item.site_name;
-                anchor.dataset.siteId = item.site_id; // store site_id in data attribute
-                listItem.appendChild(anchor);
-                dropdownMenu.appendChild(listItem);
-            });
-        })
-        .catch((error) => console.error("Error:", error));
-}
-
-AddSiteOptions();
-
-
-
 // Function to add a new site to the database
 function addSite() {
     // Show the modal
     $("#addSiteModal").modal("show");
 }
+
+(function () {
+    "use strict";
+
+    // Fetch the form and the submit button
+    var form = document.querySelector("#addSiteForm");
+    var submitButton = document.querySelector("#addSiteBtn");
+
+    // Add event listener to the submit button
+    submitButton.addEventListener(
+        "click",
+        function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // If the form is valid, submit it
+                form.submit();
+            }
+
+            form.classList.add("was-validated");
+        },
+        false
+    );
+})();
+
 
 
