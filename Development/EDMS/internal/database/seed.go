@@ -7,13 +7,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func SeedData(db *sql.DB) {
 	// Get admin password from .env
-	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	adminPassword := config.LoadConfig().AdminPassword
+
 	if adminPassword == "" {
 		log.Fatal("ADMIN_PASSWORD not set in .env file")
 	}
@@ -38,6 +40,8 @@ func SeedData(db *sql.DB) {
 		fmt.Println("Error generating hash for user password")
 		log.Fatal(err)
 	}
+
+	log.Println("Seeding data...")
 
 	// Insert Users
 	_, err = db.Exec(`

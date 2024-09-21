@@ -9,11 +9,13 @@ import (
 )
 
 type Config struct {
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBHost     string
-	DBPort     int
+	DBUser        string
+	DBPassword    string
+	DBName        string
+	DBHost        string
+	DBPort        int
+	AdminPassword string
+	JWTSecret     string
 }
 
 func LoadConfig() Config {
@@ -32,10 +34,12 @@ func LoadConfig() Config {
 	}
 
 	return Config{
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     dbPort,
+		DBUser:        os.Getenv("DB_USER"),
+		DBPassword:    os.Getenv("DB_PASSWORD"),
+		DBName:        os.Getenv("DB_NAME"),
+		DBHost:        os.Getenv("DB_HOST"),
+		DBPort:        dbPort,
+		AdminPassword: os.Getenv("ADMIN_PASSWORD"),
+		JWTSecret:     os.Getenv("JWT_SECRET"),
 	}
 }

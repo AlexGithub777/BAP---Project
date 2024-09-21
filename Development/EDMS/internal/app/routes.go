@@ -2,8 +2,8 @@ package app
 
 import (
 	"net/http"
-	"os"
 
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -26,6 +26,7 @@ func (a *App) AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func (a *App) initRoutes() {
+	secret := config.LoadConfig().JWTSecret
 	// Public routes
 	a.Router.GET("/", a.HandleGetLogin)
 	a.Router.GET("/register", a.HandleGetRegister)
@@ -37,7 +38,7 @@ func (a *App) initRoutes() {
 
 	// JWT middleware
 	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
-		SigningKey:  []byte(os.Getenv("JWT_SECRET")),
+		SigningKey:  []byte(secret),
 		TokenLookup: "cookie:token",
 		ErrorHandler: func(c echo.Context, err error) error {
 			return c.Redirect(http.StatusSeeOther, "/")

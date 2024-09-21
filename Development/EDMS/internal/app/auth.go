@@ -3,11 +3,11 @@ package app
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"time"
 
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -223,7 +223,7 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 		Expires:  expiresAt,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true, 
+		Secure:   true,
 		SameSite: http.SameSiteStrictMode,
 	}
 	c.SetCookie(cookie)
@@ -265,13 +265,13 @@ func GenerateToken(user *models.User, expiresAt time.Time) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secret := os.Getenv("JWT_SECRET")
+	secret := config.LoadConfig().JWTSecret
 	return token.SignedString([]byte(secret))
 }
 
 // parseToken parses and validates the JWT token
 func parseToken(tokenString string) (*jwt.Token, error) {
-	secret := os.Getenv("JWT_SECRET")
+	secret := config.LoadConfig().JWTSecret
 	return jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
