@@ -78,7 +78,7 @@ func (a *App) initRoutes() {
 	//admin.PUT("/api/emergency-device-type/:id", a.HandlePutDeviceType)
 	//admin.DELETE("/api/emergency-device-type/:id", a.HandleDeleteDeviceType)
 	// Device management routes - Liam
-	//admin.POST("/api/emergency-device", a.HandlePostDevice)
+	admin.POST("/api/emergency-device", a.HandlePostDevice)
 	//admin.PUT("/api/emergency-device/:id", a.HandlePutDevice)
 	//admin.DELETE("/api/emergency-device/:id", a.HandleDeleteDevice)
 

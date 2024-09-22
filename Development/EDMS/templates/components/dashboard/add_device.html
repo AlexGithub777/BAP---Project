@@ -12,7 +12,12 @@
                 ></button>
             </div>
             <div class="modal-body">
-                <form class="form-control">
+                <form
+                    class="form-control"
+                    method="POST"
+                    action="/api/emergency-device"
+                    id="addDeviceForm"
+                >
                     <div class="mb-3">
                         <label for="deviceType" class="form-label"
                             >Device Type</label
@@ -21,6 +26,7 @@
                             class="form-select"
                             id="status"
                             aria-label="Select status"
+                            name="emergency_device_type_id"
                         >
                             <!-- Options will be populated here -->
                         </select>
@@ -33,6 +39,7 @@
                             class="form-select"
                             id="extinguisherType"
                             aria-label="Select extinguisher type"
+                            name="extinguisher_type_id"
                         >
                             <!-- Options will be populated here -->
                         </select>
@@ -65,6 +72,7 @@
                         <select
                             class="form-select"
                             id="room"
+                            name="room"
                             aria-label="Select room"
                         >
                             <!-- Options will be populated here -->
@@ -80,6 +88,7 @@
                             class="form-control"
                             id="serialNumber"
                             placeholder="Enter serial number"
+                            name="serial_number"
                         />
                     </div>
 
@@ -90,6 +99,7 @@
                         <textarea
                             class="form-control"
                             id="description"
+                            name="description"
                             rows="3"
                             placeholder="Enter description"
                         ></textarea>
@@ -103,6 +113,7 @@
                             type="date"
                             class="form-control"
                             id="manufactureDate"
+                            name="manufacture_date"
                         />
                     </div>
                     <div class="mb-3">
@@ -113,6 +124,7 @@
                             type="date"
                             class="form-control"
                             id="lastInspectionDate"
+                            name="last_inspection_date"
                         />
                     </div>
                     <div class="mb-3">
@@ -121,6 +133,7 @@
                             type="text"
                             class="form-control"
                             id="size"
+                            name="size"
                             placeholder="Enter size"
                         />
                     </div>
@@ -129,6 +142,7 @@
                         <select
                             class="form-select"
                             id="status"
+                            name="status"
                             aria-label="Select status"
                         >
                             <option selected>Active</option>
@@ -154,6 +168,7 @@
                         type="button"
                         class="btn btn-primary mx-2"
                         data-bs-dismiss="modal"
+                        onclick="document.getElementById('addDeviceForm').submit();"
                     >
                         Add Device
                     </button>
