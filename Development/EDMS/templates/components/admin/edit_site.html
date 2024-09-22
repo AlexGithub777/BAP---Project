@@ -1,0 +1,98 @@
+<div id="editSiteModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Site</h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    class="form-control needs-validation"
+                    enctype="multipart/form-data"
+                    method="POST"
+                    id="editSiteForm"
+                    action="/api/site/update"
+                    autocomplete="off"
+                    novalidate
+                >
+                    <div class="mb-3">
+                        <label for="siteName" class="form-label"
+                            >Site Name</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editSiteName"
+                            name="editSiteName"
+                            placeholder="Enter Site Name"
+                            pattern=".{1,}"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Please enter a site name.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="siteAddress" class="form-label"
+                            >Site Address</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editSiteAddress"
+                            name="editSiteAddress"
+                            placeholder="Enter Site Address"
+                            pattern=".{1,}"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Please enter a site address.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="siteMapImgInput" class="form-label"
+                            >Site Map</label
+                        >
+                        <input
+                            type="file"
+                            class="form-control"
+                            id="siteMapImgInput"
+                            name="siteMapImgInput"
+                            accept="image/*"
+                        />
+                    </div>
+                    <div id="imagePreviewContainer" style="display: none">
+                        <h3>Image Preview:</h3>
+                        <img
+                            id="imagePreview"
+                            style="
+                                max-width: 100%;
+                                max-height: 100%;
+                                object-fit: contain;
+                            "
+                            alt="Site Map Preview"
+                        />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button type="button" id="editSiteBtn" class="btn btn-primary">
+                    Edit Site
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
