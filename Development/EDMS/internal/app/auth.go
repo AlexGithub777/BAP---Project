@@ -27,6 +27,13 @@ type CustomClaims struct {
 
 // HandlePostForgotPassword handles the forgot password form submission
 func (a *App) HandlePostForgotPassword(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "forgot_password.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	email := c.FormValue("email")
 
 	// Check if the email exists in the database
@@ -73,6 +80,13 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 
 // HandlePostRegister handles the register form submission
 func (a *App) HandlePostRegister(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "register.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	username := c.FormValue("username")
 	email := c.FormValue("email")
 	password := c.FormValue("password")
@@ -190,6 +204,13 @@ func (a *App) HandleGetLogin(c echo.Context) error {
 
 // HandlePostLogin handles user login
 func (a *App) HandlePostLogin(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "index.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	remember := c.FormValue("remember")

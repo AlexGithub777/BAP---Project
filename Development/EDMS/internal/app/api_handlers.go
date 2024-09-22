@@ -104,6 +104,13 @@ func (a *App) HamdleGetSiteByID(c echo.Context) error {
 }
 
 func (a *App) HandlePostSite(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "admin.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	// Parse the form, limiting upload size to 10MB
 	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
@@ -113,8 +120,8 @@ func (a *App) HandlePostSite(c echo.Context) error {
 	}
 
 	// Get the form values
-	siteName := strings.TrimSpace(c.FormValue("siteName"))       // Trim whitespace
-	siteAddress := strings.TrimSpace(c.FormValue("siteAddress")) // Trim whitespace
+	siteName := strings.TrimSpace(c.FormValue("addSiteName"))       // Trim whitespace
+	siteAddress := strings.TrimSpace(c.FormValue("addSiteAddress")) // Trim whitespace
 
 	// Validate input
 	if siteName == "" || siteAddress == "" {
