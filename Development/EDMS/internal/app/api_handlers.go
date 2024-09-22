@@ -15,6 +15,13 @@ import (
 
 // HandleGetAllUsers fetches all users from the database and returns the results as JSON
 func (a *App) HandleGetAllUsers(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "admin.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	users, err := a.DB.GetAllUsers()
 	if err != nil {
 		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
@@ -27,6 +34,12 @@ func (a *App) HandleGetAllUsers(c echo.Context) error {
 // GetAllDevices fetches all emergency devices from the database with optional filtering by building code
 // and returns the results as JSON
 func (a *App) HandleGetAllDevices(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
 	siteId := c.QueryParam("site_id")
 	buildingCode := c.QueryParam("building_code")
 
@@ -40,6 +53,13 @@ func (a *App) HandleGetAllDevices(c echo.Context) error {
 }
 
 func (a *App) HandleGetAllDeviceTypes(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	emergencyDeviceTypes, err := a.DB.GetAllDeviceTypes()
 	if err != nil {
 		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
@@ -50,6 +70,13 @@ func (a *App) HandleGetAllDeviceTypes(c echo.Context) error {
 }
 
 func (a *App) HandleGetAllExtinguisherTypes(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	extinguisherTypes, err := a.DB.GetAllExtinguisherTypes()
 	if err != nil {
 		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
@@ -60,6 +87,13 @@ func (a *App) HandleGetAllExtinguisherTypes(c echo.Context) error {
 }
 
 func (a *App) HandleGetAllRooms(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	buildingId := c.QueryParam("buildingId")
 
 	rooms, err := a.DB.GetAllRooms(buildingId)
@@ -72,6 +106,13 @@ func (a *App) HandleGetAllRooms(c echo.Context) error {
 }
 
 func (a *App) HandleGetAllBuildings(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	siteId := c.QueryParam("siteId")
 	buildings, err := a.DB.GetAllBuildings(siteId)
 	if err != nil {
@@ -83,6 +124,13 @@ func (a *App) HandleGetAllBuildings(c echo.Context) error {
 }
 
 func (a *App) HandleGetAllSites(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	sites, err := a.DB.GetAllSites()
 	if err != nil {
 		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
@@ -93,6 +141,13 @@ func (a *App) HandleGetAllSites(c echo.Context) error {
 }
 
 func (a *App) HamdleGetSiteByID(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	id := c.Param("id")
 	site, err := a.DB.GetSiteByID(id)
 	if err != nil {
@@ -104,6 +159,13 @@ func (a *App) HamdleGetSiteByID(c echo.Context) error {
 }
 
 func (a *App) HandlePostSite(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "admin.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	// Parse the form, limiting upload size to 10MB
 	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
@@ -113,8 +175,8 @@ func (a *App) HandlePostSite(c echo.Context) error {
 	}
 
 	// Get the form values
-	siteName := strings.TrimSpace(c.FormValue("siteName"))       // Trim whitespace
-	siteAddress := strings.TrimSpace(c.FormValue("siteAddress")) // Trim whitespace
+	siteName := strings.TrimSpace(c.FormValue("addSiteName"))       // Trim whitespace
+	siteAddress := strings.TrimSpace(c.FormValue("addSiteAddress")) // Trim whitespace
 
 	// Validate input
 	if siteName == "" || siteAddress == "" {

@@ -505,6 +505,7 @@ function addDevice() {
             data.forEach((item) => {
                 const option = document.createElement("option");
                 option.text = item.emergency_device_type_name; // Set the text of the option
+                option.value = item.emergency_device_type_id; // Set the value of the option
                 select.add(option);
             });
         })
