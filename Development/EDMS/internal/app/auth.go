@@ -179,6 +179,13 @@ func (a *App) HandlePostRegister(c echo.Context) error {
 
 // HandleGetLogin serves the home page
 func (a *App) HandleGetLogin(c echo.Context) error {
+	// Check if request is a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "index.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	// Check if the user is already logged in
 	cookie, err := c.Cookie("token")
 	if err == nil && cookie.Value != "" {
@@ -257,6 +264,13 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 
 // HandleGetLogout logs the user out
 func (a *App) HandleGetLogout(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "index.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	// Clear JWT or session cookie
 	cookie := &http.Cookie{
 		Name:     "token",
