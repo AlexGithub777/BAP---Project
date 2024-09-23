@@ -517,3 +517,21 @@ func (db *DB) AddSite(site *models.Site) error {
 
 	return nil
 }
+
+func (db *DB) UpdateSite(site *models.Site) error {
+	query := "UPDATE SiteT SET siteName = $1, siteAddress = $2, siteMapImagePath = $3 WHERE siteID = $4"
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(site.SiteName, site.SiteAddress, site.SiteMapImagePath, site.SiteID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

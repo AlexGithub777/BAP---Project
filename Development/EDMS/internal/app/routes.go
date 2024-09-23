@@ -63,7 +63,7 @@ func (a *App) initRoutes() {
 	//admin.DELETE("/api/user/:id", a.HandleDeleteUser)
 	// Site management routes - Alex
 	admin.POST("/api/site", a.HandlePostSite)
-	//admin.PUT("/api/site/:id", a.HandlePutSite)
+	admin.POST("/api/site/:id", a.HandleEditSite)
 	//admin.DELETE("/api/site/:id", a.HandleDeleteSite)
 	// Building management routes - Joe
 	//admin.POST("/api/building", a.HandlePostBuilding)

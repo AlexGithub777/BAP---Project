@@ -17,11 +17,16 @@
                     enctype="multipart/form-data"
                     method="POST"
                     id="editSiteForm"
-                    action="/api/site/update"
+                    action=""
                     autocomplete="off"
                     novalidate
                 >
                     <div class="mb-3">
+                        <input
+                            type="hidden"
+                            id="editSiteID"
+                            name="editSiteID"
+                        />
                         <label for="siteName" class="form-label"
                             >Site Name</label
                         >
@@ -56,21 +61,42 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="siteMapImgInput" class="form-label"
+                        <label for="currentSiteMap" class="form-label"
                             >Site Map</label
+                        >
+                        <div id="currentSiteMapContainer" style="display: none">
+                            <img
+                                id="currentSiteMap"
+                                name="currentSiteMap"
+                                style="
+                                    max-width: 100%;
+                                    max-height: 100%;
+                                    object-fit: contain;
+                                "
+                                alt="Site Map"
+                            />
+                        </div>
+                    </div>
+                    <div id="editSiteImgInput" class="mb-3">
+                        <label for="siteMapImgInput" class="form-label"
+                            >New Site Map</label
                         >
                         <input
                             type="file"
                             class="form-control"
-                            id="siteMapImgInput"
+                            id="editSiteMapImgInput"
                             name="siteMapImgInput"
                             accept="image/*"
                         />
                     </div>
-                    <div id="imagePreviewContainer" style="display: none">
-                        <h3>Image Preview:</h3>
+                    <div
+                        id="editSiteImagePreviewContainer"
+                        style="display: none"
+                    >
+                        <h4>Image Preview:</h4>
                         <img
                             id="imagePreview"
+                            name="editSiteImage"
                             style="
                                 max-width: 100%;
                                 max-height: 100%;

@@ -101,39 +101,12 @@
             {{ template "device_type_list.html" . }}
 
             <!-- Modals -->
-            {{ template "add_site.html" . }}
+            {{ template "add_site.html" . }} {{ template "edit_site.html" . }}
 
             <!-- Notifications modal -->
             {{ template "notifications.html" . }}
         </div>
         <!-- Custom JS-->
-        <script>
-            // Image Preview
-            $("#siteMapImgInput").change(function () {
-                var file = this.files[0];
-                // Check if the file is an image
-                if (!file.type.startsWith("image/")) {
-                    $("#siteMapImgInput").val("");
-                    Toastify({
-                        text: "Please upload an image file.",
-                        duration: 6000,
-                        close: true,
-                        gravity: "top", // `top` or `bottom`
-                        position: "center", // `left`, `center` or `right`
-                        backgroundColor:
-                            "linear-gradient(to right, #ff5f6d, #ffc371)",
-                    }).showToast();
-                    return;
-                }
-
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $("#imagePreview").attr("src", e.target.result);
-                    $("#imagePreviewContainer").show();
-                };
-                reader.readAsDataURL(file);
-            });
-        </script>
         <script src="/static/navbar.js"></script>
         <script src="/static/admin.js"></script>
     </body>
