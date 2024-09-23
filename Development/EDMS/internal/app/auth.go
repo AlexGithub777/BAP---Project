@@ -71,11 +71,10 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 			"email": "Could not send email, but password reset successful. Your new password is: " + newPassword,
 		})
 	}
+	message := fmt.Sprintf("Password reset successful. Check your %s for the new password.", email)
 
-	// Render the forgot password page with a success message
-	return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-		"message": fmt.Sprintf("Password reset successful. Check your %s for the new password.", email),
-	})
+	// Render the login page with a success message
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // HandlePostRegister handles the register form submission
@@ -172,9 +171,7 @@ func (a *App) HandlePostRegister(c echo.Context) error {
 	// Generate a success message
 	// Maybe send a welcome email here
 	message := fmt.Sprintf("Registration successful. Please login with your username: %s", username)
-	return c.Render(http.StatusOK, "register.html", map[string]interface{}{
-		"message": message,
-	})
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // HandleGetLogin serves the home page
@@ -259,14 +256,14 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 	c.Set("user", token)
 
 	// Return the token in the response as well
-	return c.Redirect(http.StatusSeeOther, "/dashboard")
+	return c.Redirect(http.StatusFound, "/dashboard")
 }
 
 // HandleGetLogout logs the user out
 func (a *App) HandleGetLogout(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "index.html", map[string]interface{}{
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
 			"error": "Method not allowed",
 		})
 	}

@@ -17,9 +17,7 @@ import (
 func (a *App) HandleGetAllUsers(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "admin.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 
 	users, err := a.DB.GetAllUsers()
@@ -36,9 +34,7 @@ func (a *App) HandleGetAllUsers(c echo.Context) error {
 func (a *App) HandleGetAllDevices(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 	siteId := c.QueryParam("site_id")
 	buildingCode := c.QueryParam("building_code")
@@ -55,9 +51,7 @@ func (a *App) HandleGetAllDevices(c echo.Context) error {
 func (a *App) HandleGetAllDeviceTypes(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 
 	emergencyDeviceTypes, err := a.DB.GetAllDeviceTypes()
@@ -72,9 +66,7 @@ func (a *App) HandleGetAllDeviceTypes(c echo.Context) error {
 func (a *App) HandleGetAllExtinguisherTypes(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 
 	extinguisherTypes, err := a.DB.GetAllExtinguisherTypes()
@@ -89,9 +81,7 @@ func (a *App) HandleGetAllExtinguisherTypes(c echo.Context) error {
 func (a *App) HandleGetAllRooms(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 
 	buildingId := c.QueryParam("buildingId")
@@ -108,9 +98,7 @@ func (a *App) HandleGetAllRooms(c echo.Context) error {
 func (a *App) HandleGetAllBuildings(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 
 	siteId := c.QueryParam("siteId")
@@ -126,9 +114,7 @@ func (a *App) HandleGetAllBuildings(c echo.Context) error {
 func (a *App) HandleGetAllSites(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 
 	sites, err := a.DB.GetAllSites()
@@ -143,9 +129,7 @@ func (a *App) HandleGetAllSites(c echo.Context) error {
 func (a *App) HamdleGetSiteByID(c echo.Context) error {
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
 	}
 
 	id := c.Param("id")
@@ -161,17 +145,13 @@ func (a *App) HamdleGetSiteByID(c echo.Context) error {
 func (a *App) HandlePostSite(c echo.Context) error {
 	// Check if request if a GET request
 	if c.Request().Method != http.MethodPost {
-		return c.Render(http.StatusMethodNotAllowed, "admin.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
 	}
 
 	// Parse the form, limiting upload size to 10MB
 	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Error parsing form",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Error parsing form")
 	}
 
 	// Get the form values
@@ -180,35 +160,25 @@ func (a *App) HandlePostSite(c echo.Context) error {
 
 	// Validate input
 	if siteName == "" || siteAddress == "" {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "All fields are required",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=All fields are required")
 	}
 
 	// Validate site name & address length (site name should be less than 100 characters) (address should be less than 255 characters)
 	if len(siteName) > 100 || len(siteAddress) > 255 {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Site name should be less than 100 characters and address should be less than 255 characters",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name should be less than 100 characters and address should be less than 255 characters")
 	}
 
 	// Additional validation for siteName (allow only alphanumeric, spaces, hyphens, and underscores)
 	if !regexp.MustCompile(`^[a-zA-Z0-9\s_-]+$`).MatchString(siteName) {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Site name can only contain letters, numbers, spaces, hyphens, and underscores",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name can only contain letters, numbers, spaces, hyphens, and underscores")
 	}
 
 	// Check if site name is unique
 	_, err = a.DB.GetSiteByName(siteName)
 	if err == nil {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Site name already exists",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name already exists")
 	} else if err != sql.ErrNoRows { // If the error is not sql.ErrNoRows, it's a database error
-		return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-			"error": "Database error",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Database error")
 	}
 
 	// Initialize filePath as an empty sql.NullString
@@ -223,9 +193,7 @@ func (a *App) HandlePostSite(c echo.Context) error {
 		fileExt := filepath.Ext(header.Filename)
 		allowedExtensions := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".svg": true}
 		if !allowedExtensions[fileExt] {
-			return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-				"error": "Invalid file type. Allowed types: jpg, jpeg, png, gif, svg",
-			})
+			return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid file type. Allowed types: jpg, jpeg, png, gif, svg")
 		}
 		// Define static directory for site maps
 		staticDir := "./static/site_maps"
@@ -239,18 +207,14 @@ func (a *App) HandlePostSite(c echo.Context) error {
 
 		out, err := os.Create(fileName)
 		if err != nil {
-			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-				"error": "Error creating file",
-			})
+			return c.Redirect(http.StatusInternalServerError, "/admin?error=Error creating file")
 		}
 		defer out.Close()
 
 		// Copy the uploaded file data to the new file
 		_, err = io.Copy(out, file)
 		if err != nil {
-			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-				"error": "Error copying file",
-			})
+			return c.Redirect(http.StatusInternalServerError, "/admin?error=Error copying file")
 		}
 
 		// Save the relative path as a sql.NullString
@@ -269,26 +233,20 @@ func (a *App) HandlePostSite(c echo.Context) error {
 		return a.handleError(c, http.StatusInternalServerError, "Error saving site", err)
 	}
 
-	// Respond to the client
-	return c.Render(http.StatusOK, "admin.html", map[string]interface{}{
-		"message": "Site added successfully",
-	})
+	// Redirect to the admin page with a success message
+	return c.Redirect(http.StatusFound, "/admin?message=Site added successfully")
 }
 
 func (a *App) HandleEditSite(c echo.Context) error {
 	// Check if request if a GET request
 	if c.Request().Method != http.MethodPost {
-		return c.Render(http.StatusMethodNotAllowed, "admin.html", map[string]interface{}{
-			"error": "Method not allowed",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
 	}
 
 	// Parse the form, limiting upload size to 10MB
 	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Error parsing form",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Error parsing form")
 	}
 
 	// Get the form values
@@ -298,23 +256,17 @@ func (a *App) HandleEditSite(c echo.Context) error {
 
 	// Validate input
 	if siteName == "" || siteAddress == "" {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "All fields are required",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=All fields are required")
 	}
 
 	// Validate site name & address length (site name should be less than 100 characters) (address should be less than 255 characters)
 	if len(siteName) > 100 || len(siteAddress) > 255 {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Site name should be less than 100 characters and address should be less than 255 characters",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name should be less than 100 characters and address should be less than 255 characters")
 	}
 
 	// Additional validation for siteName (allow only alphanumeric, spaces, hyphens, and underscores)
 	if !regexp.MustCompile(`^[a-zA-Z0-9\s_-]+$`).MatchString(siteName) {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Site name can only contain letters, numbers, spaces, hyphens, and underscores",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name can only contain letters, numbers, spaces, hyphens, and underscores")
 	}
 
 	// Get the existing site by ID
@@ -330,9 +282,7 @@ func (a *App) HandleEditSite(c echo.Context) error {
 			return a.handleError(c, http.StatusInternalServerError, "Database error", err)
 		}
 	} else if siteWithSameName.SiteID != existingSite.SiteID {
-		return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-			"error": "Site name already exists",
-		})
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name already exists")
 	}
 
 	// Initialize filePath as an empty sql.NullString
@@ -357,9 +307,7 @@ func (a *App) HandleEditSite(c echo.Context) error {
 		if existingSite != nil && existingSite.SiteMapImagePath.Valid {
 			oldImagePath := "." + existingSite.SiteMapImagePath.String
 			if err := os.Remove(oldImagePath); err != nil {
-				return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-					"error": "Error deleting old image",
-				})
+				return c.Redirect(http.StatusInternalServerError, "/admin?error=Error deleting old image")
 			}
 		}
 
@@ -368,9 +316,7 @@ func (a *App) HandleEditSite(c echo.Context) error {
 		fileExt = filepath.Ext(header.Filename)
 		allowedExtensions := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".svg": true}
 		if !allowedExtensions[fileExt] {
-			return c.Render(http.StatusBadRequest, "admin.html", map[string]interface{}{
-				"error": "Invalid file type. Allowed types: jpg, jpeg, png, gif, svg",
-			})
+			return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid file type. Allowed types: jpg, jpeg, png, gif, svg")
 		}
 
 		// Define static directory for site maps
@@ -384,18 +330,14 @@ func (a *App) HandleEditSite(c echo.Context) error {
 
 		out, err := os.Create(fileName)
 		if err != nil {
-			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-				"error": "Error creating file",
-			})
+			return c.Redirect(http.StatusInternalServerError, "/admin?error=Error creating file")
 		}
 		defer out.Close()
 
 		// Copy the uploaded file data to the new file
 		_, err = io.Copy(out, file)
 		if err != nil {
-			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-				"error": "Error copying file",
-			})
+			return c.Redirect(http.StatusInternalServerError, "/admin?error=Error copying file")
 		}
 
 		// Save the relative path as a sql.NullString
@@ -411,9 +353,7 @@ func (a *App) HandleEditSite(c echo.Context) error {
 			oldImagePath := "." + existingSite.SiteMapImagePath.String
 			newImagePath := filepath.Join(staticDir, sanitizedSiteName+fileExt)
 			if err := os.Rename(oldImagePath, newImagePath); err != nil {
-				return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-					"error": "Error renaming image",
-				})
+				return c.Redirect(http.StatusInternalServerError, "/admin?error=Error renaming image")
 			}
 
 			// Update the file path
@@ -442,9 +382,7 @@ func (a *App) HandleEditSite(c echo.Context) error {
 	}
 
 	// Respond to the client
-	return c.Render(http.StatusOK, "admin.html", map[string]interface{}{
-		"message": "Site updated successfully",
-	})
+	return c.Redirect(http.StatusFound, "/admin?message=Site updated successfully")
 }
 
 /*

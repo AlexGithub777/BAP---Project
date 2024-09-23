@@ -29,6 +29,7 @@ func (a *App) initRoutes() {
 	secret := config.LoadConfig().JWTSecret
 	// Public routes
 	a.Router.GET("/", a.HandleGetLogin)
+	a.Router.GET("/login", a.HandleGetLogin)
 	a.Router.GET("/register", a.HandleGetRegister)
 	a.Router.POST("/register", a.HandlePostRegister)
 	a.Router.GET("/forgot-password", a.HandleGetForgotPassword)
