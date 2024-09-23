@@ -2,30 +2,73 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func SeedData(db *sql.DB) {
+	// Get admin password from .env
+	adminPassword := config.LoadConfig().AdminPassword
+
+	if adminPassword == "" {
+		log.Fatal("ADMIN_PASSWORD not set in .env file")
+	}
+
+	userPassword := "Password1!"
+
 	var siteID, hastingsSiteID, buildingIDA, buildingIDB, hastingsBuildingID int
 	var roomA1ID, roomB1ID, hastingsMainRoomID int
 	var co2TypeID, waterTypeID, dryTypeID int
 	var emergencyDeviceTypeID int
 
+	// Generate hash for password
+	adminHash, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println("Error generating hash for admin password")
+		log.Fatal(err)
+	}
+
+	userHash, err := bcrypt.GenerateFromPassword([]byte(userPassword), bcrypt.DefaultCost)
+
+	if err != nil {
+		fmt.Println("Error generating hash for user password")
+		log.Fatal(err)
+	}
+
+	log.Println("Seeding data...")
+
+	// Insert Users
+	_, err = db.Exec(`
+		INSERT INTO UserT (username, password, role, email)
+		VALUES ('admin1', $1, 'admin', 'admin@email.com')`, adminHash)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		INSERT INTO UserT (username, password, role, email)
+		VALUES ('user12', $1, 'user', 'user@email.com')`, userHash)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Insert Sites
-	err := db.QueryRow(`
-			INSERT INTO SiteT (SiteName, SiteAddress)
-			VALUES ('EIT', '501 Gloucester Street, Taradale, Napier 4112') RETURNING SiteID`).Scan(&siteID)
+	err = db.QueryRow(`
+		INSERT INTO SiteT (SiteName, SiteAddress)
+		VALUES ('EIT Taradale', '501 Gloucester Street, Taradale, Napier 4112') RETURNING SiteID`).Scan(&siteID)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	err = db.QueryRow(`
-			INSERT INTO SiteT (SiteName, SiteAddress)
-			VALUES ('Hastings - EIT', '416 Heretaunga Street West, Hastings 4122') RETURNING SiteID`).Scan(&hastingsSiteID)
+			INSERT INTO SiteT (SiteName, SiteAddress, SiteMapImagePath)
+			VALUES ('EIT Hastings', '416 Heretaunga Street West, Hastings 4122', '/static/site_maps/EIT_Hastings.png') RETURNING SiteID`).Scan(&hastingsSiteID)
 	if err != nil {
 		log.Fatal(err)
 	}

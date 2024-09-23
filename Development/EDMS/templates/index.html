@@ -35,28 +35,49 @@
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
         />
-
         <script type="text/javascript">
             $(document).ready(function () {
-                // Get the error message from the server-side data
-                var error = "{{.error}}";
-                var success = "{{.success}}";
+                // Function to get query parameters by name
+                function getQueryParameter(param) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(param);
+                }
 
-                // If there's an error message, display it with Toastify
+                // Get the message and error parameters from the query string
+                var message = getQueryParameter("message") || "{{.message}}";
+                var error = getQueryParameter("error") || "{{.error}}";
+
+                // If there's a message, display it using Toastify
+                if (message) {
+                    Toastify({
+                        text: message,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #008000, #008000)",
+                    }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState({}, document.title, "/");
+                }
+
+                // If there's an error, display it using Toastify
                 if (error) {
                     Toastify({
                         text: error,
-                        duration: 3000,
+                        duration: 6000,
                         close: true,
                         gravity: "top", // `top` or `bottom`
                         position: "center", // `left`, `center` or `right`
                         backgroundColor:
                             "linear-gradient(to right, #ff5f6d, #ffc371)",
                     }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState({}, document.title, "/");
                 }
             });
         </script>
-
         <!-- Custom CSS-->
         <link rel="stylesheet" href="/static/login.css" />
     </head>
@@ -130,13 +151,8 @@
                                             class="form-control"
                                             name="password"
                                             required
-                                            pattern="(?=.*\d)(?=.*[!@#$%^&*]).{8,}"
                                         />
-                                        <div class="invalid-feedback">
-                                            Invalid password.
-                                        </div>
                                     </div>
-
                                     <div class="d-flex align-items-center">
                                         <div class="form-check">
                                             <input

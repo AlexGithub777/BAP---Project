@@ -47,3 +47,11 @@ go.work
 
 # Temp seed file
 seed_complete
+
+# Map files
+/static/site_maps/*
+
+# Log files
+tmp
+
+tmp/*

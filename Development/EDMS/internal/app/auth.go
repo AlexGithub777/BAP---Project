@@ -3,11 +3,11 @@ package app
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"time"
 
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -27,6 +27,13 @@ type CustomClaims struct {
 
 // HandlePostForgotPassword handles the forgot password form submission
 func (a *App) HandlePostForgotPassword(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "forgot_password.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	email := c.FormValue("email")
 
 	// Check if the email exists in the database
@@ -64,15 +71,21 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 			"email": "Could not send email, but password reset successful. Your new password is: " + newPassword,
 		})
 	}
+	message := fmt.Sprintf("Password reset successful. Check your %s for the new password.", email)
 
-	// Render the forgot password page with a success message
-	return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-		"message": fmt.Sprintf("Password reset successful. Check your %s for the new password.", email),
-	})
+	// Render the login page with a success message
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // HandlePostRegister handles the register form submission
 func (a *App) HandlePostRegister(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "register.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	username := c.FormValue("username")
 	email := c.FormValue("email")
 	password := c.FormValue("password")
@@ -158,77 +171,18 @@ func (a *App) HandlePostRegister(c echo.Context) error {
 	// Generate a success message
 	// Maybe send a welcome email here
 	message := fmt.Sprintf("Registration successful. Please login with your username: %s", username)
-	return c.Render(http.StatusOK, "register.html", map[string]interface{}{
-		"message": message,
-	})
-}
-
-// HandlePostLogin handles user login
-func (a *App) HandlePostLogin(c echo.Context) error {
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-	remember := c.FormValue("remember")
-
-	// Validate the user's credentials
-	user, err := a.DB.GetUserByUsername(username)
-	if err != nil || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
-		return c.Render(http.StatusOK, "index.html", map[string]interface{}{
-			"error": "Invalid username or password",
-		})
-	}
-
-	// Determine expiration time based on "remember" checkbox
-	expiresAt := time.Now().Add(72 * time.Hour)
-	if remember == "on" {
-		expiresAt = time.Now().Add(30 * 24 * time.Hour)
-	}
-
-	// Generate token
-	token, err := GenerateToken(user, expiresAt)
-	if err != nil {
-		return c.Render(http.StatusOK, "index.html", map[string]interface{}{
-			"error": "Could not generate token",
-		})
-	}
-
-	// Set the token as a cookie
-	cookie := &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Expires:  expiresAt,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true, // Set to true if using HTTPS
-		SameSite: http.SameSiteStrictMode,
-	}
-	c.SetCookie(cookie)
-
-	c.Set("user", token)
-
-	// Return the token in the response as well
-	return c.Redirect(http.StatusSeeOther, "/dashboard")
-}
-
-// HandleGetLogout logs the user out
-func (a *App) HandleGetLogout(c echo.Context) error {
-	// Clear JWT or session cookie
-	cookie := &http.Cookie{
-		Name:     "token",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour),
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true, // Set to true if using HTTPS
-		SameSite: http.SameSiteStrictMode,
-	}
-	c.SetCookie(cookie)
-
-	// Redirect the user to the login page
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // HandleGetLogin serves the home page
 func (a *App) HandleGetLogin(c echo.Context) error {
+	// Check if request is a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "index.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
 	// Check if the user is already logged in
 	cookie, err := c.Cookie("token")
 	if err == nil && cookie.Value != "" {
@@ -252,6 +206,84 @@ func (a *App) HandleGetLogin(c echo.Context) error {
 	return c.Render(http.StatusOK, "index.html", nil)
 }
 
+// HandlePostLogin handles user login
+func (a *App) HandlePostLogin(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "index.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+	remember := c.FormValue("remember")
+
+	// Validate the user's credentials
+	user, err := a.DB.GetUserByUsername(username)
+	if err != nil || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+		return c.Render(http.StatusOK, "index.html", map[string]interface{}{
+			"error": "Invalid username or password",
+		})
+	}
+
+	// Determine expiration time based on "remember" checkbox
+	expiresAt := time.Now().Add(72 * time.Hour) // Default expiration time is 3 days
+	if remember == "on" {
+		expiresAt = time.Now().Add(30 * 24 * time.Hour)
+	}
+
+	// Generate token
+	token, err := GenerateToken(user, expiresAt)
+	if err != nil {
+		return c.Render(http.StatusOK, "index.html", map[string]interface{}{
+			"error": "Could not generate token",
+		})
+	}
+
+	// Set the token as a cookie
+	cookie := &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Expires:  expiresAt,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	c.SetCookie(cookie)
+
+	c.Set("user", token)
+
+	// Return the token in the response as well
+	return c.Redirect(http.StatusFound, "/dashboard")
+}
+
+// HandleGetLogout logs the user out
+func (a *App) HandleGetLogout(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
+	// Clear JWT or session cookie
+	cookie := &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true, // Set to true if using HTTPS
+		SameSite: http.SameSiteStrictMode,
+	}
+	c.SetCookie(cookie)
+
+	// Redirect the user to the login page
+	return c.Redirect(http.StatusSeeOther, "/")
+}
+
 // GenerateToken generates a JWT token
 func GenerateToken(user *models.User, expiresAt time.Time) (string, error) {
 	claims := &CustomClaims{
@@ -265,13 +297,13 @@ func GenerateToken(user *models.User, expiresAt time.Time) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secret := os.Getenv("JWT_SECRET")
+	secret := config.LoadConfig().JWTSecret
 	return token.SignedString([]byte(secret))
 }
 
 // parseToken parses and validates the JWT token
 func parseToken(tokenString string) (*jwt.Token, error) {
-	secret := os.Getenv("JWT_SECRET")
+	secret := config.LoadConfig().JWTSecret
 	return jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

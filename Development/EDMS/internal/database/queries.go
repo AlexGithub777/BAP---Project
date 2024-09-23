@@ -151,8 +151,16 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 	LEFT JOIN Extinguisher_TypeT et ON ed.extinguishertypeid = et.extinguishertypeid
 	`
 
-	// Add filtering by site name if provided
-	if siteId != "" {
+	// Add filtering by site name and building code if provided
+	if siteId != "" && buildingCode != "" {
+		query += `
+		JOIN buildingT b ON r.buildingid = b.buildingid
+		JOIN siteT s ON b.siteid = s.siteid
+		WHERE s.siteid = $1 AND b.buildingcode = $2
+		`
+		args = append(args, siteId, buildingCode)
+	} else if siteId != "" {
+		// Add filtering by site name if provided
 		query += `
 		JOIN buildingT b ON r.buildingid = b.buildingid
 		JOIN siteT s ON b.siteid = s.siteid
@@ -446,4 +454,84 @@ func (db *DB) GetAllSites() ([]models.Site, error) {
 
 	return sites, nil
 
+}
+
+func (db *DB) GetSiteByID(siteID string) (*models.Site, error) {
+	query := `
+	SELECT siteid, sitename, siteaddress, sitemapimagepath
+	FROM siteT
+	WHERE siteid = $1
+	`
+	var site models.Site
+	err := db.QueryRow(query, siteID).Scan(
+		&site.SiteID,
+		&site.SiteName,
+		&site.SiteAddress,
+		&site.SiteMapImagePath,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &site, nil
+}
+
+// Get site by name function
+func (db *DB) GetSiteByName(siteName string) (*models.Site, error) {
+	query := `
+	SELECT siteid, sitename, siteaddress, sitemapimagepath
+	FROM siteT
+	WHERE sitename = $1
+	`
+
+	var site models.Site
+	err := db.QueryRow(query, siteName).Scan(
+		&site.SiteID,
+		&site.SiteName,
+		&site.SiteAddress,
+		&site.SiteMapImagePath,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &site, nil
+}
+
+func (db *DB) AddSite(site *models.Site) error {
+	query := "INSERT INTO SiteT (siteName, siteAddress, siteMapImagePath) VALUES ($1, $2, $3)"
+	insertStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer insertStmt.Close()
+
+	_, err = insertStmt.Exec(site.SiteName, site.SiteAddress, site.SiteMapImagePath)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) UpdateSite(site *models.Site) error {
+	query := "UPDATE SiteT SET siteName = $1, siteAddress = $2, siteMapImagePath = $3 WHERE siteID = $4"
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(site.SiteName, site.SiteAddress, site.SiteMapImagePath, site.SiteID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

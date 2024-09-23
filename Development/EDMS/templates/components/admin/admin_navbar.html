@@ -6,7 +6,7 @@
         <div class="container-fluid">
             <!-- Navbar brand -->
 
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/dashboard">
                 <img
                     src="/static/eit_logo.png"
                     alt="Logo"
@@ -36,33 +36,13 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left links -->
                 <ul class="navbar-nav me-auto d-flex flex-row mt-3 mt-lg-0">
-                    <li class="nav-item dropdown text-center mx-2 mx-lg-1">
-                        <a
-                            class="nav-link dropdown-toggle"
-                            role="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
+                    <li class="nav-item text-center mx-2 mx-lg-1">
+                        <a class="nav-link" href="/dashboard">
                             <div>
-                                <i class="fa-solid fa-building fa-lg mb-1"></i>
+                                <i class="fas fa-dashboard fa-lg mb-1"></i>
                             </div>
-                            Sites
+                            Dashboard
                         </a>
-                        <ul
-                            class="dropdown-menu dropdown-menu-start"
-                            aria-labelledby="navbarDropdown"
-                            id="siteDropdown"
-                        >
-                            <li>
-                                <a
-                                    class="dropdown-header"
-                                    href="/dashboard"
-                                    aria-disabled="true"
-                                    >Sites</a
-                                >
-                            </li>
-                            <li><hr class="dropdown-divider" /></li>
-                        </ul>
                     </li>
                     <li class="nav-item text-center mx-2 mx-lg-1">
                         <a class="nav-link active" href="/admin">
@@ -79,7 +59,7 @@
                 <!-- Right links -->
                 <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">
                     <li class="nav-item text-center mx-2 mx-lg-1">
-                        <a class="nav-link" onclick="ViewNotifications()">
+                        <a class="nav-link" onclick="viewNotifications()">
                             <div>
                                 <i class="fas fa-bell fa-lg mb-1"></i>
                                 <span
@@ -125,7 +105,7 @@
                                 <a
                                     class="dropdown-item"
                                     href="#"
-                                    onclick="Logout()"
+                                    onclick="logout()"
                                     >Logout</a
                                 >
                             </li>

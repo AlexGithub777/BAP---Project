@@ -1,8 +1,8 @@
-function Logout() {
+function logout() {
     window.location.href = "/logout";
 }
 
-function ViewNotifications() {
+function viewNotifications() {
     console.log("View notifications");
     $("#notificationsModal").modal("show");
     // Add your view notifications logic here
@@ -16,5 +16,3 @@ if (window.EventSource) {
         });
     };
 }
-
-

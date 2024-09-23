@@ -49,6 +49,57 @@
         />
         <!-- Custom CSS -->
         <link rel="stylesheet" href="/static/main.css" />
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Function to get query parameters by name
+                function getQueryParameter(param) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(param);
+                }
+
+                // Get the message and error parameters from the query string
+                var message = getQueryParameter("message") || "{{.message}}";
+                var error = getQueryParameter("error") || "{{.error}}";
+
+                // If there's a message, display it using Toastify
+                if (message) {
+                    Toastify({
+                        text: message,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #008000, #008000)",
+                    }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        "/dashboard"
+                    );
+                }
+
+                // If there's an error, display it using Toastify
+                if (error) {
+                    Toastify({
+                        text: error,
+                        duration: 6000,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "center", // `left`, `center` or `right`
+                        backgroundColor:
+                            "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        "/dashboard"
+                    );
+                }
+            });
+        </script>
     </head>
     <body>
         <!-- Dashboard Navbar -->
@@ -79,6 +130,9 @@
             crossorigin=""
         ></script>
         <!-- Custom JS-->
+        <script>
+            var role = "{{.role}}";
+        </script>
         <script src="/static/navbar.js"></script>
         <script src="/static/dashboard.js"></script>
     </body>

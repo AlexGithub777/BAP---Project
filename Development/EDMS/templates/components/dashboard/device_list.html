@@ -3,21 +3,27 @@
     <!-- Toggle Map button -->
     <div class="row mx-lg-2">
         <div class="my-4 d-flex justify-content-between">
-            <button class="btn btn-primary me-2" onclick="ToggleMap()">
+            <button
+                class="btn btn-primary me-2 d-none"
+                id="toggleMap"
+                onclick="toggleMap()"
+            >
                 Toggle Map
             </button>
             <!-- Add Device button -->
+            {{ if eq .role "admin" }}
             <div>
-                <button class="btn btn-success" onclick="AddDevice()">
+                <button class="btn btn-success" onclick="addDevice()">
                     Add Device
                 </button>
             </div>
+            {{ end }}
         </div>
         <!-- Map Section -->
-        <div id="map" class="col-12 col-xxl-2"></div>
+        <div id="map" class="col-12 col-xxl-3 d-none"></div>
 
         <!-- Device List Section -->
-        <div class="device-list col-xxl-10">
+        <div class="device-list col-xxl-12">
             <div class="d-flex justify-content-end"></div>
             <div>
                 <!-- Search and filter section -->
@@ -81,8 +87,10 @@
                             <th>Serial Number ▲</th>
                             <th>Manufacture Date ▲</th>
                             <th>Expire Date ▲</th>
+                            {{ if eq .role "admin" }}
                             <th>Last Inspection Date ▲</th>
                             <th>Next Inspection Date ▲</th>
+                            {{ end }}
                             <th>Size ▲</th>
                             <th>Status ▲</th>
                             <th>Actions</th>
@@ -90,6 +98,7 @@
                     </thead>
                     <tbody id="emergency-device-body">
                         <!-- Rows will be dynamically loaded here -->
+                        <!-- from dashboard.js - GetAllDevices() -->
                     </tbody>
                 </table>
                 <div class="d-flex justify-content-between align-items-center">
