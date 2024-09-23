@@ -406,17 +406,19 @@ func (a *App) HandleEditSite(c echo.Context) error {
 
 	// check if the site name has changed and a map exists
 	if siteName != existingSite.SiteName && existingSite.SiteMapImagePath.Valid {
-		// rename the file
-		oldImagePath := "." + existingSite.SiteMapImagePath.String
-		newImagePath := filepath.Join(staticDir, sanitizedSiteName+fileExt)
-		if err := os.Rename(oldImagePath, newImagePath); err != nil {
-			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
-				"error": "Error renaming image",
-			})
-		}
+		// Only rename the file if no new file is uploaded
+		if err != nil {
+			oldImagePath := "." + existingSite.SiteMapImagePath.String
+			newImagePath := filepath.Join(staticDir, sanitizedSiteName+fileExt)
+			if err := os.Rename(oldImagePath, newImagePath); err != nil {
+				return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
+					"error": "Error renaming image",
+				})
+			}
 
-		// Update the file path
-		filePath = sql.NullString{String: "/static/site_maps/" + sanitizedSiteName + fileExt, Valid: true}
+			// Update the file path
+			filePath = sql.NullString{String: "/static/site_maps/" + sanitizedSiteName + fileExt, Valid: true}
+		}
 	}
 
 	// Save site information and file path in the database
