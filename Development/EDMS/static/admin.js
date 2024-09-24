@@ -190,14 +190,6 @@ fetch("/api/user")
                     return user.default_admin.toString();
                 });
 
-            console.log("User data:", {
-                id,
-                username,
-                email,
-                role,
-                default_admin,
-            });
-
             // Fill in the form with the user data
             $("#editUserForm")[0].reset();
             $("#editUserForm input[name=currentUserID]").val(current_user_id);
