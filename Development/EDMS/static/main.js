@@ -17,7 +17,14 @@ if (window.EventSource) {
     };
 }
 
-function showDeleteModal(id, entityType) {
+function formatEntityType(entityType) {
+    return entityType
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
+
+function showDeleteModal(id, entityType, entityName) {
     const deleteModal = document.getElementById("deleteModal");
     const deleteForm = document.getElementById("deleteForm");
     const deleteIdInput = document.getElementById("deleteId");
@@ -31,13 +38,14 @@ function showDeleteModal(id, entityType) {
         modalBody &&
         deleteButton
     ) {
-        // Capitalize the first letter of entityType
-        const capitalizedEntityType =
-            entityType.charAt(0).toUpperCase() + entityType.slice(1);
+        // Format and capitalize the entityType
+        const formattedEntityType = formatEntityType(entityType);
 
         // Update modal text
-        modalBody.textContent = `Are you sure you want to delete this ${entityType}?`;
-        deleteButton.textContent = `Delete ${capitalizedEntityType}`;
+        modalBody.innerHTML = `Are you sure you want to delete ${formattedEntityType}: ${entityName}?`;
+        deleteButton.textContent = `Delete ${formattedEntityType}`;
+
+        // Add any additional logic here
 
         // Set form action and ID
         deleteForm.action = `/api/${entityType}/${id}`;

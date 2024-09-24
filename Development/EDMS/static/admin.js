@@ -107,7 +107,7 @@ fetch("/api/user")
 <td>
     <div class="btn-group">
         <button class="btn btn-primary edit-button" data-id="${user.user_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${user.user_id}">Delete</button>
+        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>
     </div>
 </td>
 </tr>
@@ -141,7 +141,7 @@ fetch("/api/site")
             <td data-label="Actions">
                 <div class="btn-group">
                     <button class="btn btn-primary edit-button" onclick="editSite(${site.site_id})" data-id="${site.site_id}">Edit</button>
-                    <button class="btn btn-danger delete-button" onclick="showDeleteModal(${site.site_id}, 'site')">Delete</button>
+                    <button class="btn btn-danger delete-button" onclick="showDeleteModal(${site.site_id}, 'site', '${site.site_name}')">Delete</button>
                 </div>
             </td>
         </tr>
@@ -165,7 +165,7 @@ fetch("/api/building")
 <td>
     <div class="btn-group">
         <button class="btn btn-primary edit-button" data-id="${building.building_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${building.building_id}">Delete</button>
+        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${building.building_id}, 'building', '${building.building_code}')" data-id="${building.building_id}">Delete</button>
     </div> 
 </td>
 </tr>
@@ -200,7 +200,7 @@ fetch("/api/room")
 <td>
     <div class="btn-group">
         <button class="btn btn-primary edit-button" data-id="${room.room_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${room.room_id}">Delete</button>
+        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${room.room_id}, 'room', '${room.room_code}')" data-id="${room.room_id}">Delete</button>
     </div>
 </td>
 </tr>
@@ -233,7 +233,7 @@ fetch("/api/emergency-device-type")
 <td>
     <div class="btn-group">
         <button class="btn btn-primary edit-button" data-id="${deviceType.emergency_device_type_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${deviceType.emergency_device_type_id}">Delete</button>
+        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${deviceType.emergency_device_type_id}, 'emergency-device-type', '<br>${deviceType.emergency_device_type_name}')" data-id="${deviceType.emergency_device_type_id}">Delete</button>
     </div>
 </td>
 </tr>
@@ -362,7 +362,3 @@ function editSite(siteId) {
         false
     );
 })();
-
-
-
-
