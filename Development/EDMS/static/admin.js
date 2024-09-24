@@ -101,9 +101,37 @@ console.log(is_current_user_default_admin);
 fetch("/api/user")
     .then((response) => response.json())
     .then((users) => {
+        console.log("Original users:", users);
+        console.log(
+            "Current user ID:",
+            current_user_id,
+            "Type:",
+            typeof current_user_id
+        );
+
+        // Convert current_user_id to a number
+        const currentUserIdNumber = parseInt(current_user_id, 10);
+
+        // Log the converted current user ID
+        console.log(
+            "Converted current user ID:",
+            currentUserIdNumber,
+            "Type:",
+            typeof currentUserIdNumber
+        );
+
+        // Sort the users array to put the current user first
+        users.sort((a, b) => {
+            if (a.user_id === currentUserIdNumber) return -1;
+            if (b.user_id === currentUserIdNumber) return 1;
+            return a.username.localeCompare(b.username); // Sort others alphabetically
+        });
+
+        console.log("Sorted users:", users);
+
         // Create a table row for each user
         const userRows = users.map((user) => {
-            console.log("User:", user.default_admin);
+            console.log("Processing user:", user);
             // Convert user.default_admin to a boolean
             var isAdmin = JSON.parse(user.default_admin);
             // Convert is_current_user_default_admin to a boolean
@@ -118,7 +146,7 @@ fetch("/api/user")
 
             // Generate the row HTML
             return `
-<tr>
+<tr${user.user_id === currentUserIdNumber ? ' class="table-primary"' : ""}>
     <td data-label="Username">${user.username}</td>
     <td data-label="Email">${user.email}</td>
     <td data-label="Role">${user.role}</td>
