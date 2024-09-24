@@ -16,7 +16,7 @@ func (a *App) AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 		claims := user.Claims.(jwt.MapClaims)
 		role := claims["role"]
 
-		if role != "admin" {
+		if role != "Admin" {
 			return c.Render(http.StatusForbidden, "dashboard.html", map[string]interface{}{
 				"error": "You do not have permission to access this page/action",
 			})

@@ -1,0 +1,68 @@
+<div id="editUserModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserID" name="editUserID" />
+                    <div class="mb-3">
+                        <label for="username" class="form-label"
+                            >Username:</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editUserUsername"
+                            name="editUserUsername"
+                            required
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input
+                            type="email"
+                            class="form-control"
+                            id="editUserEmail"
+                            name="editUserEmail"
+                            required
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editUserRole" class="form-label"
+                            >Role:</label
+                        >
+                        <select
+                            class="form-select"
+                            id="editUserRole"
+                            name="editUserRole"
+                            required
+                        >
+                            <option value="Admin">Admin</option>
+                            <option value="User">User</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button type="button" id="editUserBtn" class="btn btn-primary">
+                    Edit User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

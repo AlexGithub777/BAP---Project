@@ -11,7 +11,7 @@
                 Toggle Map
             </button>
             <!-- Add Device button -->
-            {{ if eq .role "admin" }}
+            {{ if eq .role "Admin" }}
             <div>
                 <button class="btn btn-success" onclick="addDevice()">
                     Add Device
@@ -87,7 +87,7 @@
                             <th>Serial Number ▲</th>
                             <th>Manufacture Date ▲</th>
                             <th>Expire Date ▲</th>
-                            {{ if eq .role "admin" }}
+                            {{ if eq .role "Admin" }}
                             <th>Last Inspection Date ▲</th>
                             <th>Next Inspection Date ▲</th>
                             {{ end }}

@@ -106,7 +106,7 @@ fetch("/api/user")
 <td data-label="Role">${user.role}</td>
 <td>
     <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${user.user_id}">Edit</button>
+        <button class="btn btn-primary edit-user-button" data-id="${user.user_id}">Edit</button>
         <button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>
     </div>
 </td>
@@ -118,13 +118,28 @@ fetch("/api/user")
         $("#users-table tbody").html(userRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-user-button").click((event) => {
             const id = $(event.target).data("id");
+            console.log("Edit button clicked for user with ID:", id);
             // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
+            // Fetch the user data from the nearest row
+            const row = $(event.target).closest("tr");
+            const username = row.find("td[data-label=Username]").text();
+            const email = row.find("td[data-label=Email]").text();
+            const role = row.find("td[data-label=Role]").text();
+
+            console.log("User data:", { id, username, email, role });
+
+            // Fill in the form with the user data
+            $("#editUserForm input[name=editUserID]").val(id);
+            $("#editUserForm input[name=editUserUsername]").val(username);
+            $("#editUserForm input[name=editUserEmail]").val(email);
+            $("#editUserForm select[name=editUserRole]").val(role);
+
+            // Show the modal
+            $("#editUserModal").modal("show");
+
+            // Add event listener to the submit button
         });
     });
 
@@ -164,7 +179,7 @@ fetch("/api/building")
 <td data-label="Site Name">${building.site_name}</td>
 <td>
     <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${building.building_id}">Edit</button>
+        <button class="btn btn-primary edit-building-button" data-id="${building.building_id}">Edit</button>
         <button class="btn btn-danger delete-button" onclick="showDeleteModal(${building.building_id}, 'building', '${building.building_code}')" data-id="${building.building_id}">Delete</button>
     </div> 
 </td>
@@ -176,13 +191,10 @@ fetch("/api/building")
         $("#buildings-table tbody").html(buildingRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-building-button").click((event) => {
             const id = $(event.target).data("id");
+            console.log("Edit button clicked for building with ID:", id);
             // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
         });
     });
 
@@ -199,7 +211,7 @@ fetch("/api/room")
 <td data-label="Site Name">${room.site_name}</td>
 <td>
     <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${room.room_id}">Edit</button>
+        <button class="btn btn-primary edit-room-button" data-id="${room.room_id}">Edit</button>
         <button class="btn btn-danger delete-button" onclick="showDeleteModal(${room.room_id}, 'room', '${room.room_code}')" data-id="${room.room_id}">Delete</button>
     </div>
 </td>
@@ -211,13 +223,9 @@ fetch("/api/room")
         $("#rooms-table tbody").html(roomRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-room-button").click((event) => {
             const id = $(event.target).data("id");
-            // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
+            console.log("Edit button clicked for room with ID:", id);
         });
     });
 
@@ -232,7 +240,7 @@ fetch("/api/emergency-device-type")
 <td data-label="Device Type">${deviceType.emergency_device_type_name}</td>
 <td>
     <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${deviceType.emergency_device_type_id}">Edit</button>
+        <button class="btn btn-primary edit-device-type-button" data-id="${deviceType.emergency_device_type_id}">Edit</button>
         <button class="btn btn-danger delete-button" onclick="showDeleteModal(${deviceType.emergency_device_type_id}, 'emergency-device-type', '<br>${deviceType.emergency_device_type_name}')" data-id="${deviceType.emergency_device_type_id}">Delete</button>
     </div>
 </td>
@@ -244,13 +252,10 @@ fetch("/api/emergency-device-type")
         $("#device-types-table tbody").html(deviceTypeRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-device-type-button").click((event) => {
             const id = $(event.target).data("id");
+            console.log("Edit button clicked for device type with ID:", id);
             // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
         });
     });
 

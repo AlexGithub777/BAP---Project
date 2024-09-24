@@ -314,7 +314,13 @@ function formatDeviceRow(device) {
     const badgeClass = getBadgeClass(device.status.String);
     const buttons = getActionButtons(device);
 
-    const isAdmin = role === "admin";
+    // Declare isAdmin within the function
+    let isAdmin = false;
+
+    // Ensure role is defined and check for "Admin"
+    if (role === "Admin") {
+        isAdmin = true;
+    }
 
     return `
         <tr>
@@ -379,7 +385,7 @@ function getBadgeClass(status) {
 
 function getActionButtons(device) {
     let buttons = `<button class="btn btn-primary" onclick="deviceNotes('${device.description.String}')">Notes</button>`;
-    if (role === "admin") {
+    if (role === "Admin") {
         buttons += `
             <button class="btn btn-secondary" onclick="viewDeviceInspection(${device.emergency_device_id})">Inspect</button>
             <button class="btn btn-warning" onclick="editDevice(${device.emergency_device_id})">Edit</button>
