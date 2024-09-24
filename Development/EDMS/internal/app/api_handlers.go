@@ -95,6 +95,32 @@ func (a *App) HandleEditUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid role")
 	}
 
+	// Convert the user ID to an integer
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+	}
+
+	// check if updated username is unique
+	existingUser, err := a.DB.GetUserByUsername(username)
+	if err == nil {
+		if existingUser.UserID != userIDInt {
+			return c.Redirect(http.StatusSeeOther, "/admin?error=Username already exists")
+		}
+	} else if err != sql.ErrNoRows {
+		return a.handleError(c, http.StatusInternalServerError, "Error fetching user", err)
+	}
+
+	// check if updated email is unique
+	existingUser, err = a.DB.GetUserByEmail(email)
+	if err == nil {
+		if existingUser.UserID != userIDInt {
+			return c.Redirect(http.StatusSeeOther, "/admin?error=Email already exists")
+		}
+	} else if err != sql.ErrNoRows {
+		return a.handleError(c, http.StatusInternalServerError, "Error fetching user", err)
+	}
+
 	// Check if the user is trying to edit their own account
 	if currentUserID == userID {
 		// Check if the user is trying to change their role
@@ -122,6 +148,8 @@ func (a *App) HandleEditUser(c echo.Context) error {
 
 			// Update the user in the database
 			err = a.DB.UpdateUser(user)
+			// Check for errors
+			// iF there is an error, return an error message
 			if err != nil {
 				return a.handleError(c, http.StatusInternalServerError, "Error updating user", err)
 			}
