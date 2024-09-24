@@ -383,7 +383,8 @@ function getActionButtons(device) {
         buttons += `
             <button class="btn btn-secondary" onclick="viewDeviceInspection(${device.emergency_device_id})">Inspect</button>
             <button class="btn btn-warning" onclick="editDevice(${device.emergency_device_id})">Edit</button>
-            <button class="btn btn-danger" onclick="deleteDevice(${device.emergency_device_id})">Delete</button>
+            <button class="btn btn-danger" onclick="showDeleteModal(${device.emergency_device_id},'emergency-device')">Delete</button>
+            
         `;
     }
     return buttons;
