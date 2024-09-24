@@ -262,8 +262,6 @@ document.getElementById("siteFilter").addEventListener("change", () => {
 initializeMap("map");
 getFilterOptions();
 
-console.log(role);
-
 async function getAllDevices(buildingCode = "", siteId = "") {
     try {
         let url = "/api/emergency-device";

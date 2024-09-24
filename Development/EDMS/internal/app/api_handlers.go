@@ -385,6 +385,102 @@ func (a *App) HandleEditSite(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/admin?message=Site updated successfully")
 }
 
+func (a *App) HandleDeleteSite(c echo.Context) error {
+	// Check if request is not a delete request
+	if c.Request().Method != http.MethodDelete {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
+	}
+
+	// Get the site ID from the URL
+	siteID := c.Param("id")
+
+	// Get the site by ID
+	site, err := a.DB.GetSiteByID(siteID)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Error fetching site")
+	}
+
+	// Check if the site has any emergency devices
+	emergencyDevices, err := a.DB.GetAllDevices(siteID, "")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching emergency devices",
+			"redirectURL": "/admin?error=Error fetching emergency devices",
+		})
+	}
+
+	// Check if the site has any emergency devices
+	if len(emergencyDevices) > 0 {
+		return c.JSON(http.StatusOK, map[string]string{
+			"error":       "Cannot delete site with associated emergency devices",
+			"redirectURL": "/admin?error=Cannot delete site with associated emergency devices",
+		})
+	}
+
+	// Check if the site has any rooms
+	rooms, err := a.DB.GetRoomsBySiteID(siteID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching rooms",
+			"redirectURL": "/admin?error=Error fetching rooms",
+		})
+	}
+
+	// Check if the site has any rooms
+	if len(rooms) > 0 {
+		return c.JSON(http.StatusOK, map[string]string{
+			"error":       "Cannot delete site with associated rooms",
+			"redirectURL": "/admin?error=Cannot delete site with associated rooms",
+		})
+	}
+
+	// Handle foreign key constraints
+	// Check if the site has any buildings
+	buildings, err := a.DB.GetAllBuildings(siteID)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching buildings",
+			"redirectURL": "/admin?error=Error fetching buildings",
+		})
+	}
+
+	if len(buildings) > 0 {
+		return c.JSON(http.StatusOK, map[string]string{
+			"error":       "Cannot delete site with associated buildings",
+			"redirectURL": "/admin?error=Cannot delete site with associated buildings",
+		})
+	}
+
+	// Delete the site from the database
+	err = a.DB.DeleteSite(siteID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error deleting site",
+			"redirectURL": "/admin?error=Error deleting site",
+		})
+	}
+
+	// Check if the site has a map image
+	if site.SiteMapImagePath.Valid {
+		// Delete the map image file
+		imagePath := "." + site.SiteMapImagePath.String
+		if err := os.Remove(imagePath); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error":       "Error deleting site map image",
+				"redirectURL": "/admin?error=Error deleting site map image",
+			})
+
+		}
+	}
+
+	// Respond to the client
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":     "Site deleted successfully",
+		"redirectURL": "/admin?message=Site deleted successfully",
+	})
+}
+
 /*
 func (a *App) HandleAddDevice(c echo.Context) error {
     // Parse form data

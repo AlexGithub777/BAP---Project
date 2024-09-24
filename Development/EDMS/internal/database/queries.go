@@ -535,3 +535,59 @@ func (db *DB) UpdateSite(site *models.Site) error {
 
 	return nil
 }
+
+func (db *DB) DeleteSite(siteID string) error {
+	query := "DELETE FROM SiteT WHERE siteID = $1"
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(siteID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) GetRoomsBySiteID(siteID string) ([]models.Room, error) {
+	query := `
+	SELECT r.roomid, r.roomcode, b.buildingcode, s.sitename
+	FROM roomT r
+	JOIN buildingT b ON r.buildingid = b.buildingid
+	JOIN siteT s ON b.siteid = s.siteid
+	WHERE s.siteid = $1
+	ORDER BY r.roomcode
+	`
+
+	rows, err := db.Query(query, siteID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var rooms []models.Room
+
+	// Scan the results
+	for rows.Next() {
+		var room models.Room
+		err := rows.Scan(
+			&room.RoomID,
+			&room.RoomCode,
+			&room.BuildingCode,
+			&room.SiteName,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		rooms = append(rooms, room)
+	}
+
+	return rooms, nil
+}

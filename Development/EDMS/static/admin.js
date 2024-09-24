@@ -135,17 +135,17 @@ fetch("/api/site")
         // Create a table row for each site
         const siteRows = sites.map(
             (site) => `
-<tr>
-<td data-label="Site Name">${site.site_name}</td>
-<td data-label="Site Address">${site.site_address}</td>
-<td data-label="Actions">
-    <div class="btn-group">
-        <button class="btn btn-primary edit-button" onclick="editSite(${site.site_id})" data-id="${site.site_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${site.site_id}">Delete</button>
-    </div>
-</td>
-</tr>
-`
+        <tr>
+            <td data-label="Site Name">${site.site_name}</td>
+            <td data-label="Site Address">${site.site_address}</td>
+            <td data-label="Actions">
+                <div class="btn-group">
+                    <button class="btn btn-primary edit-button" onclick="editSite(${site.site_id})" data-id="${site.site_id}">Edit</button>
+                    <button class="btn btn-danger delete-button" onclick="showDeleteModal(${site.site_id}, 'site')">Delete</button>
+                </div>
+            </td>
+        </tr>
+        `
         );
 
         // Add the rows to the sites table
@@ -362,3 +362,7 @@ function editSite(siteId) {
         false
     );
 })();
+
+
+
+
