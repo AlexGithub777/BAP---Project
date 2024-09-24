@@ -58,6 +58,58 @@ func (db *DB) CreateUser(user *models.User) error {
 	return nil
 }
 
+// Update user function
+func (db *DB) UpdateUserWithPassword(user *models.User) error {
+	query := `
+        UPDATE userT
+        SET username = $1, email = $2, role = $3, password = $4
+        WHERE userid = $5
+        `
+	args := []interface{}{user.Username, user.Email, user.Role, user.Password, user.UserID}
+
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Update user function
+func (db *DB) UpdateUser(user *models.User) error {
+	query := `
+		UPDATE userT
+		SET username = $1, email = $2, role = $3
+		WHERE userid = $4
+		`
+
+	args := []interface{}{user.Username, user.Email, user.Role, user.UserID}
+
+	updateStmt, err := db.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(args...)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 // Get user by username function
 func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 	query := `

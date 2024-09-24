@@ -131,15 +131,47 @@ fetch("/api/user")
             console.log("User data:", { id, username, email, role });
 
             // Fill in the form with the user data
+            $("#editUserForm")[0].reset();
+            $("#editUserForm input[name=currentUserID]").val(current_user_id);
             $("#editUserForm input[name=editUserID]").val(id);
             $("#editUserForm input[name=editUserUsername]").val(username);
             $("#editUserForm input[name=editUserEmail]").val(email);
             $("#editUserForm select[name=editUserRole]").val(role);
 
+            // Set the form action to the update endpoint for this user
+            $("#editUserForm").attr("action", `/api/user/${id}`);
+
+            // Get the user ID of the user being updated
+            const updatedUserId = $(
+                "#editUserForm input[name=editUserID]"
+            ).val();
+
+            // If the current user ID is equal to the user being updated, display the password field
+            if (current_user_id === updatedUserId) {
+                $("#passwordField").show();
+            } else {
+                $("#passwordField").hide();
+            }
+
             // Show the modal
             $("#editUserModal").modal("show");
+            // Clear validation classes
+            $("#editUserForm").removeClass("was-validated");
 
             // Add event listener to the submit button
+            $("#editUserBtn").click(function (event) {
+                // Check if the form is valid
+                if (!$("#editUserForm")[0].checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    // If the form is valid, submit it
+                    $("#editUserForm").submit();
+                }
+
+                // Add the was-validated class to the form
+                $("#editUserForm").addClass("was-validated");
+            });
         });
     });
 
@@ -367,3 +399,30 @@ function editSite(siteId) {
         false
     );
 })();
+
+/*
+(function () {
+    "use strict";
+
+    // Fetch the form and the submit button
+    var form = document.querySelector("#editUserForm");
+    var submitButton = document.querySelector("#editUserBtn");
+
+    // Add event listener to the submit button
+    submitButton.addEventListener(
+        "click",
+        function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // If the form is valid, submit it
+                form.submit();
+            }
+
+            form.classList.add("was-validated");
+        },
+        false
+    );
+})();
+*/

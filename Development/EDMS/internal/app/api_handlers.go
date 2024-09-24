@@ -3,14 +3,17 @@ package app
 import (
 	"database/sql"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // HandleGetAllUsers fetches all users from the database and returns the results as JSON
@@ -27,6 +30,147 @@ func (a *App) HandleGetAllUsers(c echo.Context) error {
 
 	// Return the results as JSON
 	return c.JSON(http.StatusOK, users)
+}
+
+// func to HandleEditUser
+func (a *App) HandleEditUser(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodPost {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
+	}
+
+	// Parse the form
+	err := c.Request().ParseForm()
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Error parsing form")
+	}
+
+	// Get the form values
+	currentUserID := c.FormValue("currentUserID")
+	userID := c.FormValue("editUserID")
+	username := strings.TrimSpace(c.FormValue("editUserUsername"))
+	email := strings.TrimSpace(c.FormValue("editUserEmail"))
+	role := strings.TrimSpace(c.FormValue("editUserRole"))
+
+	log.Printf("currentUserID: %s, userID: %s, username: %s, email: %s, role: %s", currentUserID, userID, username, email, role)
+
+	// Validate input
+	if username == "" || email == "" || role == "" {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=All fields are required")
+	}
+
+	// Validate username
+	usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9_]{6,}$`)
+	if !usernameRegex.MatchString(username) {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Username must be at least 6 characters long and contain only letters, numbers, and underscores")
+	}
+
+	// Validate email
+	if !regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`).MatchString(email) {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid email address")
+	}
+
+	// Validate role
+	if role != "Admin" && role != "User" {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid role")
+	}
+
+	// Check if the user is trying to edit their own account
+	if currentUserID == userID {
+		// parse tthe password
+		password := c.FormValue("editUserPassword")
+		confirmedPassword := c.FormValue("editUserConfirmPassword")
+
+		if password == "" {
+			// update the user without changing the password
+			userIDInt, err := strconv.Atoi(userID)
+			if err != nil {
+				return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+			}
+
+			user := &models.User{
+				UserID:   userIDInt,
+				Username: username,
+				Email:    email,
+				Role:     role,
+			}
+
+			// Update the user in the database
+			err = a.DB.UpdateUser(user)
+			if err != nil {
+				return a.handleError(c, http.StatusInternalServerError, "Error updating user", err)
+			}
+
+			// Log the user out
+			return c.Redirect(http.StatusSeeOther, "/logout?message=User details updated successfully. Please log in again")
+		} else {
+			// Validate password
+			if password != confirmedPassword {
+				return c.Redirect(http.StatusSeeOther, "/admin?error=Passwords do not match")
+			}
+
+			passwordLengthRegex := regexp.MustCompile(`.{8,}`)
+			passwordDigitRegex := regexp.MustCompile(`[0-9]`)
+			passwordSpecialCharRegex := regexp.MustCompile(`[!@#$%^&*]`)
+			passwordCapitalLetterRegex := regexp.MustCompile(`[A-Z]`)
+
+			if !passwordLengthRegex.MatchString(password) || !passwordDigitRegex.MatchString(password) || !passwordSpecialCharRegex.MatchString(password) || !passwordCapitalLetterRegex.MatchString(password) {
+				return c.Redirect(http.StatusSeeOther, "/admin?error=Password must be at least 8 characters long and contain at least one digit, one special character, and one capital letter")
+			}
+
+			// Hash the password
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+			if err != nil {
+				return a.handleError(c, http.StatusInternalServerError, "Error hashing password", err)
+			}
+
+			// make a user model
+			userIDInt, err := strconv.Atoi(userID)
+			if err != nil {
+				return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+			}
+
+			user := &models.User{
+				UserID:   userIDInt,
+				Username: username,
+				Email:    email,
+				Password: string(hashedPassword),
+				Role:     role,
+			}
+
+			// Update the user in the database
+			err = a.DB.UpdateUserWithPassword(user)
+			if err != nil {
+				return a.handleError(c, http.StatusInternalServerError, "Error updating user", err)
+
+			}
+			// Log the user out
+			return c.Redirect(http.StatusSeeOther, "/logout?message=User details updated successfully. Please log in again")
+		}
+
+	} else {
+		userIDInt, err := strconv.Atoi(userID)
+		if err != nil {
+			return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+		}
+
+		user := &models.User{
+			UserID:   userIDInt,
+			Username: username,
+			Email:    email,
+			Role:     role,
+		}
+
+		// Update the user in the database
+		err = a.DB.UpdateUser(user)
+		if err != nil {
+			return a.handleError(c, http.StatusInternalServerError, "Error updating user", err)
+		}
+	}
+
+	// Redirect to the admin page with a success message
+	return c.Redirect(http.StatusFound, "/admin?message=User updated successfully")
 }
 
 // GetAllDevices fetches all emergency devices from the database with optional filtering by building code

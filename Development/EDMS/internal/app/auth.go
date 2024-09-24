@@ -261,6 +261,8 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 
 // HandleGetLogout logs the user out
 func (a *App) HandleGetLogout(c echo.Context) error {
+	// Get message from query string
+	message := c.QueryParam("message")
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
 		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
@@ -281,7 +283,7 @@ func (a *App) HandleGetLogout(c echo.Context) error {
 	c.SetCookie(cookie)
 
 	// Redirect the user to the login page
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // GenerateToken generates a JWT token

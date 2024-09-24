@@ -119,6 +119,10 @@
             {{ template "notifications.html" . }}
         </div>
         <!-- Custom JS-->
+        <script>
+            var role = "{{.role}}";
+            var current_user_id = "{{.user_id}}";
+        </script>
         <script src="/static/main.js"></script>
         <script src="/static/admin.js"></script>
     </body>

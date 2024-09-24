@@ -56,10 +56,10 @@ func (a *App) initRoutes() {
 	admin := protected.Group("")
 	admin.Use(a.AdminOnly)
 	admin.GET("/admin", a.HandleGetAdmin)
-	admin.GET("/api/user", a.HandleGetAllUsers)
 	// Add any other admin-only routes as needed
 	// User management routes - Alex
-	//admin.POST("/api/user", a.HandlePostUser)
+	admin.GET("/api/user", a.HandleGetAllUsers)
+	admin.POST("/api/user/:id", a.HandleEditUser)
 	//admin.PUT("/api/user/:id", a.HandlePutUser)
 	//admin.DELETE("/api/user/:id", a.HandleDeleteUser)
 	// Site management routes - Alex

@@ -22,10 +22,11 @@ func (a *App) HandleGetDashboard(c echo.Context) error {
 	fmt.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"], "User Role: ", claims["role"], "User Email: ", claims["email"])
 
 	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
-		"username": claims["username"],
-		"role":     claims["role"],
-		"email":    claims["email"],
-		"user_id":  claims["user_id"],
+		"username":      claims["username"],
+		"role":          claims["role"],
+		"email":         claims["email"],
+		"user_id":       claims["user_id"],
+		"default_admin": claims["default_admin"],
 	})
 }
 
@@ -35,8 +36,11 @@ func (a *App) HandleGetAdmin(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	fmt.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"], "User Role: ", claims["role"])
 	return c.Render(http.StatusOK, "admin.html", map[string]interface{}{
-		"username": claims["username"],
-		"role":     claims["role"],
+		"username":      claims["username"],
+		"role":          claims["role"],
+		"email":         claims["email"],
+		"user_id":       claims["user_id"],
+		"default_admin": claims["default_admin"],
 	})
 }
 
