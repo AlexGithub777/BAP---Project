@@ -388,7 +388,10 @@ func (a *App) HandleEditSite(c echo.Context) error {
 func (a *App) HandleDeleteSite(c echo.Context) error {
 	// Check if request is not a delete request
 	if c.Request().Method != http.MethodDelete {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{
+			"error":       "Method not allowed",
+			"redirectURL": "/admin?error=Method not allowed",
+		})
 	}
 
 	// Get the site ID from the URL
@@ -397,7 +400,10 @@ func (a *App) HandleDeleteSite(c echo.Context) error {
 	// Get the site by ID
 	site, err := a.DB.GetSiteByID(siteID)
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Error fetching site")
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching site",
+			"redirectURL": "/admin?error=Error fetching site",
+		})
 	}
 
 	// Check if the site has any emergency devices
