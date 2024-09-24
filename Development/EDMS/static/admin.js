@@ -124,7 +124,7 @@ fetch("/api/user")
         <div class="btn-group">
             ${
                 hideActions
-                    ? "" // Hide buttons if conditions are met
+                    ? ""
                     : `<button class="btn btn-primary edit-user-button" data-id="${user.user_id}">Edit</button>
                        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>`
             }
@@ -138,7 +138,7 @@ fetch("/api/user")
         $("#users-table tbody").html(userRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-user-button").click((event) => {
+        $(".edit-user-button").click(async (event) => {
             const id = $(event.target).data("id");
             console.log("Edit button clicked for user with ID:", id);
             // Handle edit
@@ -148,7 +148,19 @@ fetch("/api/user")
             const email = row.find("td[data-label=Email]").text();
             const role = row.find("td[data-label=Role]").text();
 
-            console.log("User data:", { id, username, email, role });
+            const default_admin = await fetch(`/api/user/${username}`)
+                .then((response) => response.json())
+                .then((user) => {
+                    return user.default_admin.toString();
+                });
+
+            console.log("User data:", {
+                id,
+                username,
+                email,
+                role,
+                default_admin,
+            });
 
             // Fill in the form with the user data
             $("#editUserForm")[0].reset();
@@ -157,6 +169,7 @@ fetch("/api/user")
             $("#editUserForm input[name=editUserUsername]").val(username);
             $("#editUserForm input[name=editUserEmail]").val(email);
             $("#editUserForm select[name=editUserRole]").val(role);
+            $("#editUserForm input[name=defaultAdmin]").val(default_admin);
 
             // Set the form action to the update endpoint for this user
             $("#editUserForm").attr("action", `/api/user/${id}`);

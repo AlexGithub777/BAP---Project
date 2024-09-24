@@ -59,6 +59,7 @@ func (a *App) initRoutes() {
 	// Add any other admin-only routes as needed
 	// User management routes - Alex
 	admin.GET("/api/user", a.HandleGetAllUsers)
+	admin.GET("/api/user/:username", a.HandleGetUserByUsername)
 	admin.POST("/api/user/:id", a.HandleEditUser)
 	//admin.PUT("/api/user/:id", a.HandlePutUser)
 	//admin.DELETE("/api/user/:id", a.HandleDeleteUser)

@@ -32,6 +32,25 @@ func (a *App) HandleGetAllUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// HandleGetUserByUsername
+func (a *App) HandleGetUserByUsername(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
+
+	}
+
+	username := c.Param("username")
+	log.Printf("Username: %s", username)
+	user, err := a.DB.GetUserByUsername(username)
+	if err != nil {
+		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
+	}
+
+	// Return the results as JSON
+	return c.JSON(http.StatusOK, user)
+}
+
 // func to HandleEditUser
 func (a *App) HandleEditUser(c echo.Context) error {
 	// Check if request if a POST request
@@ -51,6 +70,7 @@ func (a *App) HandleEditUser(c echo.Context) error {
 	username := strings.TrimSpace(c.FormValue("editUserUsername"))
 	email := strings.TrimSpace(c.FormValue("editUserEmail"))
 	role := strings.TrimSpace(c.FormValue("editUserRole"))
+	defaultAdmin := c.FormValue("defaultAdmin")
 
 	log.Printf("currentUserID: %s, userID: %s, username: %s, email: %s, role: %s", currentUserID, userID, username, email, role)
 
@@ -153,6 +173,11 @@ func (a *App) HandleEditUser(c echo.Context) error {
 		userIDInt, err := strconv.Atoi(userID)
 		if err != nil {
 			return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+		}
+
+		// Check if tyring to update the default admin
+		if defaultAdmin == "true" {
+			return c.Redirect(http.StatusSeeOther, "/admin?error=Cannot update the default admin")
 		}
 
 		user := &models.User{
