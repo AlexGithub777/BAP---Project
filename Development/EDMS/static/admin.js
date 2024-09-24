@@ -111,6 +111,8 @@ fetch("/api/user")
                 is_current_user_default_admin
             );
 
+            const hideDelete = current_default_admin && isAdmin;
+
             // Determine whether to hide action buttons based on conditions
             const hideActions = !current_default_admin && isAdmin;
 
@@ -125,8 +127,14 @@ fetch("/api/user")
             ${
                 hideActions
                     ? ""
-                    : `<button class="btn btn-primary edit-user-button" data-id="${user.user_id}">Edit</button>
-                       <button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>`
+                    : `<button class="btn btn-primary edit-user-button" data-id="${
+                          user.user_id
+                      }">Edit</button>
+                       ${
+                           hideDelete
+                               ? ""
+                               : `<button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>`
+                       }`
             }
         </div>
     </td>
