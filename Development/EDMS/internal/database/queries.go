@@ -9,7 +9,7 @@ import (
 
 // GetAllUsers function
 func (db *DB) GetAllUsers() ([]models.User, error) {
-	query := `SELECT userid, username, email, role FROM userT`
+	query := `SELECT userid, username, email, role, defaultadmin FROM userT`
 	rows, err := db.Query(query)
 	if err != nil {
 		return nil, err
@@ -25,6 +25,7 @@ func (db *DB) GetAllUsers() ([]models.User, error) {
 			&user.Username,
 			&user.Email,
 			&user.Role,
+			&user.DefaultAdmin,
 		)
 		if err != nil {
 			return nil, err
@@ -113,7 +114,7 @@ func (db *DB) UpdateUser(user *models.User) error {
 // Get user by username function
 func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 	query := `
-		SELECT userid, username, password, email, role
+		SELECT userid, username, password, email, role, defaultadmin
 		FROM userT
 		WHERE username = $1
 		`
@@ -124,6 +125,7 @@ func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 		&user.Password,
 		&user.Email,
 		&user.Role,
+		&user.DefaultAdmin,
 	)
 
 	if err != nil {

@@ -93,26 +93,46 @@ $(document).ready(function () {
     });
 });
 
+console.log(is_current_user_default_admin);
+
+// whenever is_current_user_default_admin is false, hide the actions buttons from any row with user.default_admin = true
+
 // Fetch users from the server
 fetch("/api/user")
     .then((response) => response.json())
     .then((users) => {
         // Create a table row for each user
-        const userRows = users.map(
-            (user) => `
+        const userRows = users.map((user) => {
+            console.log("User:", user.default_admin);
+            // Convert user.default_admin to a boolean
+            var isAdmin = JSON.parse(user.default_admin);
+            // Convert is_current_user_default_admin to a boolean
+            var current_default_admin = JSON.parse(
+                is_current_user_default_admin
+            );
+
+            // Determine whether to hide action buttons based on conditions
+            const hideActions = !current_default_admin && isAdmin;
+
+            // Generate the row HTML
+            return `
 <tr>
-<td data-label="Username">${user.username}</td>
-<td data-label="Email">${user.email}</td>
-<td data-label="Role">${user.role}</td>
-<td>
-    <div class="btn-group">
-        <button class="btn btn-primary edit-user-button" data-id="${user.user_id}">Edit</button>
-        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>
-    </div>
-</td>
+    <td data-label="Username">${user.username}</td>
+    <td data-label="Email">${user.email}</td>
+    <td data-label="Role">${user.role}</td>
+    <td>
+        <div class="btn-group">
+            ${
+                hideActions
+                    ? "" // Hide buttons if conditions are met
+                    : `<button class="btn btn-primary edit-user-button" data-id="${user.user_id}">Edit</button>
+                       <button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>`
+            }
+        </div>
+    </td>
 </tr>
-`
-        );
+`;
+        });
 
         // Add the rows to the users table
         $("#users-table tbody").html(userRows.join(""));

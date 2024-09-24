@@ -18,10 +18,11 @@ import (
 
 // CustomClaims represents JWT custom claims
 type CustomClaims struct {
-	UserID   string `json:"user_id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+	UserID       string `json:"user_id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	Role         string `json:"role"`
+	DefaultAdmin bool   `json:"default_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -195,6 +196,7 @@ func (a *App) HandleGetLogin(c echo.Context) error {
 				c.Set("username", claims.Username)
 				c.Set("role", claims.Role)
 				c.Set("email", claims.Email)
+				c.Set("default_admin", claims.DefaultAdmin)
 
 				// User is already logged in, redirect to the dashboard
 				return c.Redirect(http.StatusSeeOther, "/dashboard")
@@ -293,6 +295,7 @@ func GenerateToken(user *models.User, expiresAt time.Time) (string, error) {
 		Email:    user.Email,
 		Username: user.Username,
 		Role:     user.Role,
+		DefaultAdmin: user.DefaultAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},
