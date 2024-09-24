@@ -97,6 +97,11 @@ func (a *App) HandleEditUser(c echo.Context) error {
 
 	// Check if the user is trying to edit their own account
 	if currentUserID == userID {
+		// Check if the user is trying to change their role
+		if defaultAdmin == "true" && role != "Admin" {
+			return c.Redirect(http.StatusSeeOther, "/admin?error=Cannot change role on default admin account.")
+		}
+
 		// parse tthe password
 		password := c.FormValue("editUserPassword")
 		confirmedPassword := c.FormValue("editUserConfirmPassword")
