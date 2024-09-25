@@ -17,9 +17,7 @@ func (a *App) AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 		role := claims["role"]
 
 		if role != "Admin" {
-			return c.Render(http.StatusForbidden, "dashboard.html", map[string]interface{}{
-				"error": "You do not have permission to access this page/action",
-			})
+			return c.Redirect(http.StatusSeeOther, "/dashboard?error=You%20do%20not%20have%20permission%20to%20access%20this%20page")
 		}
 		return next(c)
 	}
