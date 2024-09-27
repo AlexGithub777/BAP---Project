@@ -357,7 +357,7 @@ function formatDeviceRow(device) {
                 <span class="badge ${badgeClass}">${device.status.String}</span>
             </td>
             <td>
-                <div class="action-buttons">
+                <div class="btn-group">
                     ${buttons}
                 </div>
             </td>

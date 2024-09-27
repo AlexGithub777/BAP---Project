@@ -146,28 +146,30 @@ fetch("/api/user")
 
             // Generate the row HTML
             return `
-<tr${user.user_id === currentUserIdNumber ? ' class="table-primary"' : ""}>
-    <td data-label="Username">${user.username}</td>
-    <td data-label="Email">${user.email}</td>
-    <td data-label="Role">${user.role}</td>
-    <td>
-        <div class="btn-group">
-            ${
-                hideActions
-                    ? ""
-                    : `<button class="btn btn-primary edit-user-button" data-id="${
-                          user.user_id
-                      }">Edit</button>
-                       ${
-                           hideDelete
-                               ? ""
-                               : `<button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>`
-                       }`
-            }
-        </div>
-    </td>
-</tr>
-`;
+    <tr${user.user_id === currentUserIdNumber ? ' class="table-primary"' : ""}>
+        <td data-label="Username">${user.username}</td>
+        <td data-label="Email">${user.email}</td>
+        <td data-label="Role">${user.role}</td>
+        ${
+            hideActions
+                ? ""
+                : `
+        <td>
+            <div class="btn-group">
+                <button class="btn btn-primary edit-user-button" data-id="${
+                    user.user_id
+                }">Edit</button>
+                ${
+                    hideDelete
+                        ? ""
+                        : `<button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}')" data-id="${user.user_id}">Delete</button>`
+                }
+            </div>
+        </td>
+        `
+        }
+    </tr>
+    `;
         });
 
         // Add the rows to the users table
