@@ -231,6 +231,61 @@ func (a *App) HandleEditUser(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/admin?message=User updated successfully")
 }
 
+// func to HandleDeleteUser
+func (a *App) HandleDeleteUser(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodDelete {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{
+			"error":       "Method not allowed",
+			"redirectURL": "/admin?error=Method not allowed",
+		})
+	}
+
+	// Get the user ID from the URL
+	userID := c.Param("id")
+
+	// convert the user ID to an integer
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid user ID",
+			"redirectURL": "/admin?error=Invalid user ID",
+		})
+	}
+
+	// Get the user by ID
+	user, err := a.DB.GetUserByID(userIDInt)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching user",
+			"redirectURL": "/admin?error=Error fetching user",
+		})
+	}
+
+	// Check if the user is trying to delete the default admin
+	if user.DefaultAdmin {
+		return c.JSON(http.StatusOK, map[string]string{
+			"error":       "Cannot delete the default admin",
+			"redirectURL": "/admin?error=Cannot delete the default admin",
+		})
+	}
+
+	// Delete the user from the database
+	err = a.DB.DeleteUser(userIDInt)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error deleting user",
+			"redirectURL": "/admin?error=Error deleting user",
+		})
+	}
+
+	// Respond to the client
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":     "User deleted successfully",
+		"redirectURL": "/admin?message=User deleted successfully",
+	})
+}
+
 // GetAllDevices fetches all emergency devices from the database with optional filtering by building code
 // and returns the results as JSON
 func (a *App) HandleGetAllDevices(c echo.Context) error {

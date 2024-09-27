@@ -40,17 +40,13 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 	// Check if the email exists in the database
 	user, err := a.DB.GetUserByEmail(email)
 	if err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"error": "Email not found",
-		})
+		return c.Redirect(http.StatusSeeOther, "/forgot-password?error=Email%20not%20found")
 	}
 
 	// Generate a new password
 	newPassword, err := password.Generate(10, 8, 2, false, false)
 	if err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"error": "Could not generate password",
-		})
+		return c.Redirect(http.StatusSeeOther, "/forgot-password?error=Could%20not%20generate%20password")
 	}
 
 	// Hash the new password
@@ -61,16 +57,14 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 
 	// Update the user's password
 	if err := a.DB.UpdatePassword(user.UserID, string(hashedPassword)); err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"error": "Could not update password",
-		})
+		return c.Redirect(http.StatusSeeOther, "/forgot-password?error=Could%20not%20update%20password")
 	}
+
+	emailmessage := fmt.Sprintf("Could not send email but Your new password is: %s", newPassword)
 
 	// Send the new password to the user's email
 	if err := sendPasswordResetEmail(email, user.Username, newPassword); err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"email": "Could not send email, but password reset successful. Your new password is: " + newPassword,
-		})
+		return c.Redirect(http.StatusSeeOther, "/?message="+emailmessage)
 	}
 	message := fmt.Sprintf("Password reset successful. Check your %s for the new password.", email)
 
@@ -284,6 +278,11 @@ func (a *App) HandleGetLogout(c echo.Context) error {
 	}
 	c.SetCookie(cookie)
 
+	// if message is empty, don't show it
+	if message == "" {
+		return c.Redirect(http.StatusSeeOther, "/")
+	}
+
 	// Redirect the user to the login page
 	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
@@ -291,10 +290,10 @@ func (a *App) HandleGetLogout(c echo.Context) error {
 // GenerateToken generates a JWT token
 func GenerateToken(user *models.User, expiresAt time.Time) (string, error) {
 	claims := &CustomClaims{
-		UserID:   strconv.Itoa(user.UserID),
-		Email:    user.Email,
-		Username: user.Username,
-		Role:     user.Role,
+		UserID:       strconv.Itoa(user.UserID),
+		Email:        user.Email,
+		Username:     user.Username,
+		Role:         user.Role,
 		DefaultAdmin: user.DefaultAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),

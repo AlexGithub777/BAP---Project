@@ -24,7 +24,8 @@ function formatEntityType(entityType) {
         .join(" ");
 }
 
-function showDeleteModal(id, entityType, entityName) {
+function showDeleteModal(id, entityType, entityName, currentUserId) {
+    console.log(id, entityType, entityName, currentUserId);
     const deleteModal = document.getElementById("deleteModal");
     const deleteForm = document.getElementById("deleteForm");
     const deleteIdInput = document.getElementById("deleteId");

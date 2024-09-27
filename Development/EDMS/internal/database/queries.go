@@ -135,6 +135,50 @@ func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 	return &user, nil
 }
 
+// Get user by ID function
+func (db *DB) GetUserByID(userid int) (*models.User, error) {
+	query := `
+		SELECT userid, username, password, email, role, defaultadmin
+		FROM userT
+		WHERE userid = $1
+		`
+
+	var user models.User
+	err := db.QueryRow(query, userid).Scan(
+		&user.UserID,
+		&user.Username,
+		&user.Password,
+		&user.Email,
+		&user.Role,
+		&user.DefaultAdmin,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// Delete user function
+func (db *DB) DeleteUser(userid int) error {
+	query := `DELETE FROM userT WHERE userid = $1`
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(userid)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Update password function
 func (db *DB) UpdatePassword(userid int, password string) error {
 	query := `
