@@ -25,9 +25,9 @@ function formatEntityType(entityType) {
 }
 
 function showDeleteModal(id, entityType, entityName, currentUserId) {
-    console.log(id, entityType, entityName, currentUserId);
     const deleteModal = document.getElementById("deleteModal");
     const deleteForm = document.getElementById("deleteForm");
+    const currentUserIdInput = document.getElementById("deleteCurrentUserID");
     const deleteIdInput = document.getElementById("deleteId");
     const modalBody = deleteModal.querySelector(".modal-body p");
     const deleteButton = deleteModal.querySelector(".modal-footer .btn-danger");
@@ -36,6 +36,7 @@ function showDeleteModal(id, entityType, entityName, currentUserId) {
         deleteModal &&
         deleteForm &&
         deleteIdInput &&
+        currentUserIdInput &&
         modalBody &&
         deleteButton
     ) {
@@ -48,11 +49,21 @@ function showDeleteModal(id, entityType, entityName, currentUserId) {
 
         // Add any additional logic here
 
-        // Set form action and ID
-        deleteForm.action = `/api/${entityType}/${id}`;
-        deleteIdInput.value = id;
+        // if the current user id is passed, add to delete form action
+        if (currentUserId) {
+            deleteForm.action = `/api/${entityType}/${id}?currentUserId=${currentUserId}`;
+        } else {
+            deleteForm.action = `/api/${entityType}/${id}`;
+        }
 
-        console.log(deleteForm.action, deleteIdInput.value);
+        deleteIdInput.value = id;
+        currentUserIdInput.value = currentUserId;
+
+        console.log(
+            deleteForm.action,
+            deleteIdInput.value,
+            currentUserIdInput.value
+        );
 
         // Show the modal
         const modal = new bootstrap.Modal(deleteModal);
@@ -71,12 +82,19 @@ document
     .addEventListener("submit", function (event) {
         event.preventDefault();
 
+        // Create a FormData object
+        const formData = new FormData(this);
+
+        // Convert FormData to a plain object
+        const plainFormData = Object.fromEntries(formData.entries());
+
         fetch(this.action, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 // Add any other necessary headers here
             },
+            // add cur
         })
             .then((response) => response.json())
             .then((data) => {
@@ -86,7 +104,7 @@ document
                     window.location.href = data.redirectURL;
                 } else {
                     console.error("Error:", data);
-                    // Handle errors (e.g., show an error message
+                    // Handle errors (e.g., show an error message)
                 }
             })
             .catch((error) => {

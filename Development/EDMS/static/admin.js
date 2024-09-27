@@ -89,13 +89,12 @@ $(document).ready(function () {
         console.log(
             "File input element:",
             $("#editSiteModal #editSiteImgInput")[0]
-        );5
+        );
+        5;
     });
 });
 
 console.log(is_current_user_default_admin);
-current_user_id = parseInt(current_user_id, 10);
-console.log(current_user_id);
 
 // whenever is_current_user_default_admin is false, hide the actions buttons from any row with user.default_admin = true
 

@@ -243,13 +243,23 @@ func (a *App) HandleDeleteUser(c echo.Context) error {
 
 	// Get the user ID from the URL
 	userID := c.Param("id")
+	currentUserID := c.QueryParam("currentUserId")
 
-	// convert the user ID to an integer
+	// convert the user ID & currentuserid to an integers
 	userIDInt, err := strconv.Atoi(userID)
+
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error":       "Invalid user ID",
-			"redirectURL": "/admin?error=Invalid user ID",
+			"redirectURL": "/admin?error=Invalid user ID" + userID,
+		})
+	}
+
+	currentUserIDInt, err := strconv.Atoi(currentUserID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid user ID",
+			"redirectURL": "/admin?error=Invalid user ID" + currentUserID,
 		})
 	}
 
@@ -276,6 +286,15 @@ func (a *App) HandleDeleteUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error":       "Error deleting user",
 			"redirectURL": "/admin?error=Error deleting user",
+		})
+	}
+
+	// Check if the user is trying to delete their own account
+	if currentUserIDInt == userIDInt {
+		// Log the user out
+		return c.JSON(http.StatusOK, map[string]string{
+			"message":     "User deleted successfully",
+			"redirectURL": "/logout?message=User deleted successfully. Please log in again",
 		})
 	}
 
