@@ -16,6 +16,7 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
+
 // CustomClaims represents JWT custom claims
 type CustomClaims struct {
 	UserID       string `json:"user_id"`
