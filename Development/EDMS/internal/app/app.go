@@ -30,7 +30,13 @@ func NewApp(cfg config.Config) *App {
 	router := echo.New()
 
 	// Set up renderer
-	router.Renderer = utils.NewTemplateRenderer()
+	renderer, err := utils.NewTemplateRenderer()
+	if err != nil {
+		// Handle the error, e.g.:
+		panic(err)
+	}
+
+	router.Renderer = renderer
 
 	// Serve static files
 	router.Static("/static", "static")
