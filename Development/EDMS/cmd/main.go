@@ -27,7 +27,7 @@ func main() {
 
 	// HTTP listener is in a goroutine as its blocking
 	go func() {
-		if err := application.Router.StartTLS(ip+":3000", "./certs/cert.pem", "./certs/key.pem"); err != nil && err != http.ErrServerClosed {
+		if err := application.Router.Start(ip + ":3000"); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Error starting the server: %v", err)
 		}
 	}()
