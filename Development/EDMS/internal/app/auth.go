@@ -244,7 +244,7 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 		Expires:  expiresAt,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false, // Set to true if using HTTPS
 		SameSite: http.SameSiteStrictMode,
 	}
 	c.SetCookie(cookie)
@@ -273,7 +273,7 @@ func (a *App) HandleGetLogout(c echo.Context) error {
 		Expires:  time.Now().Add(-time.Hour),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true, // Set to true if using HTTPS
+		Secure:   false, // Set to true if using HTTPS
 		SameSite: http.SameSiteStrictMode,
 	}
 	c.SetCookie(cookie)
