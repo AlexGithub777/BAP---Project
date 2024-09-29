@@ -3,7 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>EDMS Forgot Password</title>
+        <title>EDMS Register</title>
+        <!-- favicon-->
+        <link
+            rel="icon"
+            type="image/png"
+            href="/static/app_icon.png"
+            sizes="16x16"
+        />
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -21,9 +28,6 @@
             crossorigin="anonymous"
         ></script>
 
-        <!-- Custom CSS-->
-        <link rel="stylesheet" href="/static/login.css" />
-
         <!-- Toastify JS -->
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"
@@ -39,7 +43,6 @@
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
         />
-
         <script type="text/javascript">
             $(document).ready(function () {
                 // Function to get query parameters by name
@@ -67,7 +70,7 @@
                     window.history.replaceState(
                         {},
                         document.title,
-                        "/forgot-password"
+                        "/register"
                     );
                 }
 
@@ -86,7 +89,7 @@
                     window.history.replaceState(
                         {},
                         document.title,
-                        "/forgot-password"
+                        "/register"
                     );
                 }
             });
@@ -110,15 +113,40 @@
                         <div class="card shadow-lg">
                             <div class="card-body p-5">
                                 <h1 class="fs-4 card-title fw-bold mb-4">
-                                    Forgot Password
+                                    Register
                                 </h1>
                                 <form
+                                    id="register-form"
                                     method="POST"
                                     class="needs-validation"
-                                    novalidate
                                     autocomplete="off"
-                                    action="/forgot-password"
+                                    action="/register"
+                                    novalidate
                                 >
+                                    <div class="mb-3">
+                                        <label
+                                            class="mb-2 text-muted"
+                                            for="username"
+                                            >Username</label
+                                        >
+                                        <input
+                                            id="username"
+                                            type="text"
+                                            class="form-control"
+                                            name="username"
+                                            value=""
+                                            required
+                                            minlength="6"
+                                            autofocus
+                                            pattern="^[a-zA-Z0-9_]{6,}$"
+                                        />
+                                        <div class="invalid-feedback">
+                                            Username must be at least 6
+                                            characters long and contain only
+                                            letters, numbers, and underscores.
+                                        </div>
+                                    </div>
+
                                     <div class="mb-3">
                                         <label
                                             class="mb-2 text-muted"
@@ -131,34 +159,68 @@
                                             class="form-control"
                                             name="email"
                                             value=""
+                                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                                             required
-                                            autofocus
                                         />
                                         <div class="invalid-feedback">
-                                            Email is invalid
+                                            Invalid email address.
                                         </div>
                                     </div>
 
-                                    <div class="d-flex align-items-center">
+                                    <div class="mb-3">
+                                        <label
+                                            class="mb-2 text-muted"
+                                            for="password"
+                                            >Password</label
+                                        >
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            class="form-control"
+                                            name="password"
+                                            required
+                                            pattern="(?=.*\d)(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}"
+                                        />
+                                        <div class="invalid-feedback">
+                                            Password must contain at least one
+                                            number, one special character, and
+                                            one capital letter, and be at least
+                                            8 characters long.
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label
+                                            class="mb-2 text-muted"
+                                            for="confirm-password"
+                                            >Confirm Password</label
+                                        >
+                                        <input
+                                            id="confirm-password"
+                                            type="password"
+                                            class="form-control"
+                                            name="confirm-password"
+                                            pattern="(?=.*\d)(?=.*[!@#$%^&*]).{8,}"
+                                            required
+                                        />
+                                        <div class="invalid-feedback">
+                                            Passwords do not match.
+                                        </div>
+                                    </div>
+
+                                    <div class="align-items-center d-flex">
                                         <button
                                             type="submit"
                                             class="btn btn-primary ms-auto"
-                                            id="submitButton"
                                         >
-                                            <span
-                                                class="spinner-border spinner-border-sm d-none"
-                                                aria-hidden="true"
-                                            ></span>
-                                            <span class="button-text"
-                                                >Send Link</span
-                                            >
+                                            Register
                                         </button>
                                     </div>
                                 </form>
                             </div>
                             <div class="card-footer py-3 border-0">
                                 <div class="text-center">
-                                    Remember your password?
+                                    Already have an account?
                                     <a href="/" class="text-dark">Login</a>
                                 </div>
                             </div>
@@ -167,7 +229,7 @@
                 </div>
             </div>
         </section>
-        <script src="/static/login.js"></script>
+        <script src="/static/register.js"></script>
         <script>
             // hot reaload
             if (window.EventSource) {

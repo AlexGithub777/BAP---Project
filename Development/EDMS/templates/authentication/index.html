@@ -3,7 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>EDMS Register</title>
+        <title>EDMS Login</title>
+        <!-- favicon-->
+        <link
+            rel="icon"
+            type="image/png"
+            href="/static/app_icon.png"
+            sizes="16x16"
+        />
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -20,7 +27,6 @@
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"
         ></script>
-
         <!-- Toastify JS -->
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"
@@ -60,11 +66,7 @@
                             "linear-gradient(to right, #008000, #008000)",
                     }).showToast();
                     // remove the message from the URL
-                    window.history.replaceState(
-                        {},
-                        document.title,
-                        "/register"
-                    );
+                    window.history.replaceState({}, document.title, "/");
                 }
 
                 // If there's an error, display it using Toastify
@@ -79,14 +81,12 @@
                             "linear-gradient(to right, #ff5f6d, #ffc371)",
                     }).showToast();
                     // remove the message from the URL
-                    window.history.replaceState(
-                        {},
-                        document.title,
-                        "/register"
-                    );
+                    window.history.replaceState({}, document.title, "/");
                 }
             });
         </script>
+        <!-- Custom CSS-->
+        <link rel="stylesheet" href="/static/login.css" />
     </head>
     <body class="bg-dark">
         <section class="h-100">
@@ -106,15 +106,15 @@
                         <div class="card shadow-lg">
                             <div class="card-body p-5">
                                 <h1 class="fs-4 card-title fw-bold mb-4">
-                                    Register
+                                    Login
                                 </h1>
                                 <form
-                                    id="register-form"
-                                    method="POST"
                                     class="needs-validation"
+                                    novalidate=""
                                     autocomplete="off"
-                                    action="/register"
-                                    novalidate
+                                    id="login-form"
+                                    action="/login"
+                                    method="POST"
                                 >
                                     <div class="mb-3">
                                         <label
@@ -134,87 +134,69 @@
                                             pattern="^[a-zA-Z0-9_]{6,}$"
                                         />
                                         <div class="invalid-feedback">
-                                            Username must be at least 6
-                                            characters long and contain only
-                                            letters, numbers, and underscores.
+                                            Invalid username.
                                         </div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label
-                                            class="mb-2 text-muted"
-                                            for="email"
-                                            >E-Mail Address</label
-                                        >
-                                        <input
-                                            id="email"
-                                            type="email"
-                                            class="form-control"
-                                            name="email"
-                                            value=""
-                                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                                            required
-                                        />
-                                        <div class="invalid-feedback">
-                                            Invalid email address.
+                                        <div class="mb-2 w-100">
+                                            <label
+                                                class="text-muted"
+                                                for="password"
+                                                >Password</label
+                                            >
+                                            <a
+                                                href="/forgot-password"
+                                                class="float-end"
+                                            >
+                                                Forgot Password?
+                                            </a>
                                         </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label
-                                            class="mb-2 text-muted"
-                                            for="password"
-                                            >Password</label
-                                        >
                                         <input
                                             id="password"
                                             type="password"
                                             class="form-control"
                                             name="password"
                                             required
-                                            pattern="(?=.*\d)(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}"
                                         />
-                                        <div class="invalid-feedback">
-                                            Password must contain at least one
-                                            number, one special character, and
-                                            one capital letter, and be at least
-                                            8 characters long.
-                                        </div>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label
-                                            class="mb-2 text-muted"
-                                            for="confirm-password"
-                                            >Confirm Password</label
-                                        >
-                                        <input
-                                            id="confirm-password"
-                                            type="password"
-                                            class="form-control"
-                                            name="confirm-password"
-                                            pattern="(?=.*\d)(?=.*[!@#$%^&*]).{8,}"
-                                            required
-                                        />
-                                        <div class="invalid-feedback">
-                                            Passwords do not match.
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check">
+                                            <input
+                                                type="checkbox"
+                                                name="remember"
+                                                id="remember"
+                                                class="form-check-input"
+                                            />
+                                            <label
+                                                for="remember"
+                                                class="form-check-label"
+                                                >Remember Me</label
+                                            >
                                         </div>
-                                    </div>
 
-                                    <div class="align-items-center d-flex">
                                         <button
                                             type="submit"
                                             class="btn btn-primary ms-auto"
+                                            id="submitButton"
                                         >
-                                            Register
+                                            <span
+                                                class="spinner-border spinner-border-sm d-none"
+                                                aria-hidden="true"
+                                            ></span>
+                                            <span class="button-text"
+                                                >Login</span
+                                            >
                                         </button>
                                     </div>
                                 </form>
                             </div>
                             <div class="card-footer py-3 border-0">
                                 <div class="text-center">
-                                    Already have an account?
-                                    <a href="/" class="text-dark">Login</a>
+                                    Don't have an account?
+                                    <a href="/register" class="text-dark"
+                                        >Create One</a
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -222,7 +204,7 @@
                 </div>
             </div>
         </section>
-        <script src="/static/register.js"></script>
+        <script src="/static/login.js"></script>
         <script>
             // hot reaload
             if (window.EventSource) {

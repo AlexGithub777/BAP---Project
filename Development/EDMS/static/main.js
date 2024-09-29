@@ -121,15 +121,6 @@ function toggleDarkMode() {
     // toggle data-theme attribute
     if (currentTheme === "dark") {
         html.setAttribute("data-bs-theme", "light");
-        // update all navbar color to blue
-        const navbar = document.querySelector(".navbar");
-        navbar.classList.remove("bg-dark");
-        navbar.classList.add("bg-secondary");
-
-        // change the brand name to white
-        const brand = document.querySelector("#brand-name");
-        brand.classList.remove("text-dark");
-        brand.classList.add("text-white");
 
         // change table header to secondary
         const tableHeaders = document.querySelectorAll("thead");
@@ -142,11 +133,6 @@ function toggleDarkMode() {
         localStorage.setItem("theme", "light");
     } else {
         html.setAttribute("data-bs-theme", "dark");
-
-        // update all navbar color to dark
-        const navbar = document.querySelector(".navbar");
-        navbar.classList.remove("bg-secondary");
-        navbar.classList.add("bg-dark");
 
         // change table header to dark
         const tableHeaders = document.querySelectorAll("thead");
@@ -171,21 +157,11 @@ if (savedTheme) {
     if (savedTheme === "dark") {
         $(".darkSwitch").prop("checked", true);
 
-        // update all navbar color to dark
-        const navbar = document.querySelector(".navbar");
-        navbar.classList.remove("navbar-light", "bg-secondary");
-        navbar.classList.add("navbar-dark", "bg-dark");
-
         // change table header to dark
         const tableHeaders = document.querySelectorAll("thead");
         tableHeaders.forEach((header) => {
             header.classList.remove("table-secondary");
             header.classList.add("table-dark");
         });
-
-        // change the brand name to white
-        const brand = document.querySelector("#brand-name");
-        brand.classList.remove("text-dark");
-        brand.classList.add("text-white");
     }
 }
