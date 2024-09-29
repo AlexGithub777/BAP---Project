@@ -262,6 +262,10 @@ document.getElementById("siteFilter").addEventListener("change", () => {
 initializeMap("map");
 getFilterOptions();
 
+let currentPage = 1;
+let rowsPerPage = 10;
+let allDevices = [];
+
 async function getAllDevices(buildingCode = "", siteId = "") {
     try {
         let url = "/api/emergency-device";
@@ -277,20 +281,10 @@ async function getAllDevices(buildingCode = "", siteId = "") {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const devices = await response.json();
-        console.log("Devices:", devices);
+        allDevices = await response.json();
+        console.log("Devices:", allDevices);
 
-        const tbody = document.getElementById("emergency-device-body");
-        if (!tbody) {
-            console.error("Table body element not found");
-            return;
-        }
-
-        if (!Array.isArray(devices) || devices.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
-        } else {
-            tbody.innerHTML = devices.map(formatDeviceRow).join("");
-        }
+        updateTable();
     } catch (err) {
         console.error("Failed to fetch devices:", err);
         const tbody = document.getElementById("emergency-device-body");
@@ -299,6 +293,87 @@ async function getAllDevices(buildingCode = "", siteId = "") {
         }
     }
 }
+
+function updateTable() {
+    const tbody = document.getElementById("emergency-device-body");
+    if (!tbody) {
+        console.error("Table body element not found");
+        return;
+    }
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const pageDevices = allDevices.slice(startIndex, endIndex);
+
+    if (!Array.isArray(pageDevices) || pageDevices.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
+    } else {
+        tbody.innerHTML = pageDevices.map(formatDeviceRow).join("");
+    }
+
+    updatePaginationControls();
+}
+
+function updatePaginationControls() {
+    const totalPages = Math.ceil(allDevices.length / rowsPerPage);
+    const paginationEl = document.querySelector(".pagination");
+
+    let paginationHTML = `
+        <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+            <a class="page-link" href="#" data-page="${
+                currentPage - 1
+            }">Previous</a>
+        </li>
+    `;
+
+    for (let i = 1; i <= totalPages; i++) {
+        paginationHTML += `
+            <li class="page-item ${
+                currentPage === i ? "active" : ""
+            }" aria-current="page">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>
+        `;
+    }
+
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+            <a class="page-link" href="#" data-page="${
+                currentPage + 1
+            }">Next</a>
+        </li>
+    `;
+
+    paginationEl.innerHTML = paginationHTML;
+
+    // Add event listeners to pagination controls
+    paginationEl.querySelectorAll(".page-link").forEach((link) => {
+        link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const newPage = parseInt(e.target.getAttribute("data-page"));
+            if (
+                newPage !== currentPage &&
+                newPage > 0 &&
+                newPage <= totalPages
+            ) {
+                currentPage = newPage;
+                updateTable();
+            }
+        });
+    });
+}
+
+// Keep your existing helper functions (formatDeviceRow, formatDate, getBadgeClass, getActionButtons) as they are
+
+// Event listener for rows per page dropdown
+document.getElementById("rowsPerPage").addEventListener("change", (e) => {
+    rowsPerPage = parseInt(e.target.value);
+    currentPage = 1; // Reset to first page when changing rows per page
+    updateTable();
+});
+
+// Initial fetch without filtering
+getAllDevices();
 
 function formatDeviceRow(device) {
     if (!device) return "";
@@ -395,9 +470,6 @@ function getActionButtons(device) {
     }
     return buttons;
 }
-
-// Initial fetch without filtering
-getAllDevices();
 
 function addDevice() {
     // Fetch the sites and populate the select options
