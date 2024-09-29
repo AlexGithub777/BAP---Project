@@ -12,6 +12,16 @@
     border-radius: 8px;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.footer {
+    margin-top: auto;
+}
+
 @media (max-width: 767px) {
     .pagination {
         justify-content: center;
