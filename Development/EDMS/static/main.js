@@ -123,15 +123,8 @@ function toggleDarkMode() {
         html.setAttribute("data-bs-theme", "light");
         // update all navbar color to blue
         const navbar = document.querySelector(".navbar");
-        navbar.classList.remove("navbar-dark", "bg-dark");
-        navbar.classList.add("navbar-light", "bg-secondary");
-
-        // chhange navbar text to whihite
-        const navLinks = document.querySelectorAll(".nav-link");
-        navLinks.forEach((link) => {
-            link.classList.remove("text-dark");
-            link.classList.add("text-white");
-        });
+        navbar.classList.remove("bg-dark");
+        navbar.classList.add("bg-secondary");
 
         // change the brand name to white
         const brand = document.querySelector("#brand-name");
@@ -152,8 +145,8 @@ function toggleDarkMode() {
 
         // update all navbar color to dark
         const navbar = document.querySelector(".navbar");
-        navbar.classList.remove("navbar-light", "bg-secondary");
-        navbar.classList.add("navbar-dark", "bg-dark");
+        navbar.classList.remove("bg-secondary");
+        navbar.classList.add("bg-dark");
 
         // change table header to dark
         const tableHeaders = document.querySelectorAll("thead");

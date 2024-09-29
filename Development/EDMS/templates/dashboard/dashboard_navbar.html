@@ -1,6 +1,6 @@
 <header>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg bg-secondary navbar-light">
+    <nav class="navbar navbar-expand-lg bg-secondary navbar-dark">
         <!-- Container wrapper -->
         <div class="container-fluid">
             <!-- Navbar brand -->
@@ -36,7 +36,7 @@
                 <!-- Left links -->
                 <ul class="navbar-nav me-auto d-flex flex-row mt-3 mt-lg-0">
                     <li class="nav-item text-center mx-2 mx-lg-1">
-                        <a class="nav-link text-light active" href="/dashboard">
+                        <a class="nav-link active" href="/dashboard">
                             <div>
                                 <i class="fas fa-dashboard fa-lg mb-1"></i>
                             </div>
@@ -45,7 +45,7 @@
                     </li>
                     {{if eq .role "Admin"}}
                     <li class="nav-item text-center mx-2 mx-lg-1">
-                        <a class="nav-link text-light" href="/admin">
+                        <a class="nav-link" href="/admin">
                             <div>
                                 <i class="fas fa-gear fa-lg mb-1"></i>
                             </div>
@@ -54,11 +54,7 @@
                     </li>
                     {{end}}
                 </ul>
-
-                <!-- Left links -->
-
                 <!-- Right links -->
-
                 <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">
                     <!-- Dark mode toggle -->
                     <li class="nav-item text-center mx-2 mx-lg-1">
