@@ -76,7 +76,6 @@ function showDeleteModal(id, entityType, entityName, currentUserId) {
 }
 
 // Event listener for delete form submission
-// Event listener for delete form submission
 document
     .getElementById("deleteForm")
     .addEventListener("submit", function (event) {
@@ -112,3 +111,88 @@ document
                 // Handle errors (e.g., show an error message to the user)
             });
     });
+
+// function to toggle dark mode
+function toggleDarkMode() {
+    // check data-theme attribute on html element
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute("data-bs-theme");
+
+    // toggle data-theme attribute
+    if (currentTheme === "dark") {
+        html.setAttribute("data-bs-theme", "light");
+        // update all navbar color to blue
+        const navbar = document.querySelector(".navbar");
+        navbar.classList.remove("navbar-dark", "bg-dark");
+        navbar.classList.add("navbar-light", "bg-secondary");
+
+        // chhange navbar text to whihite
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach((link) => {
+            link.classList.remove("text-dark");
+            link.classList.add("text-white");
+        });
+
+        // change the brand name to white
+        const brand = document.querySelector("#brand-name");
+        brand.classList.remove("text-dark");
+        brand.classList.add("text-white");
+
+        // change table header to secondary
+        const tableHeaders = document.querySelectorAll("thead");
+        tableHeaders.forEach((header) => {
+            header.classList.remove("table-dark");
+            header.classList.add("table-secondary");
+        });
+
+        // save the theme in local storage
+        localStorage.setItem("theme", "light");
+    } else {
+        html.setAttribute("data-bs-theme", "dark");
+
+        // update all navbar color to dark
+        const navbar = document.querySelector(".navbar");
+        navbar.classList.remove("navbar-light", "bg-secondary");
+        navbar.classList.add("navbar-dark", "bg-dark");
+
+        // change table header to dark
+        const tableHeaders = document.querySelectorAll("thead");
+        tableHeaders.forEach((header) => {
+            header.classList.remove("table-secondary");
+            header.classList.add("table-dark");
+        });
+
+        // save the theme in local storage
+        localStorage.setItem("theme", "dark");
+    }
+}
+
+// check if the theme is saved in local storage
+const savedTheme = localStorage.getItem("theme");
+
+// if the theme is saved, set the theme
+if (savedTheme) {
+    document.documentElement.setAttribute("data-bs-theme", savedTheme);
+    // update the switch
+    // use jqeury to upfdaste the switch with class name darkSwitch
+    if (savedTheme === "dark") {
+        $(".darkSwitch").prop("checked", true);
+
+        // update all navbar color to dark
+        const navbar = document.querySelector(".navbar");
+        navbar.classList.remove("navbar-light", "bg-secondary");
+        navbar.classList.add("navbar-dark", "bg-dark");
+
+        // change table header to dark
+        const tableHeaders = document.querySelectorAll("thead");
+        tableHeaders.forEach((header) => {
+            header.classList.remove("table-secondary");
+            header.classList.add("table-dark");
+        });
+
+        // change the brand name to white
+        const brand = document.querySelector("#brand-name");
+        brand.classList.remove("text-dark");
+        brand.classList.add("text-white");
+    }
+}
