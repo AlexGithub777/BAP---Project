@@ -314,56 +314,114 @@ function updateTable() {
     updatePaginationControls();
 }
 
+// JavaScript
 function updatePaginationControls() {
     const totalPages = Math.ceil(allDevices.length / rowsPerPage);
     const paginationEl = document.querySelector(".pagination");
+    const isMobile = window.innerWidth < 768; // Detect mobile devices
 
     let paginationHTML = `
         <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
             <a class="page-link" href="#" data-page="${
                 currentPage - 1
-            }">Previous</a>
+            }" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
         </li>
     `;
 
-    for (let i = 1; i <= totalPages; i++) {
+    function addPageNumber(pageNum) {
         paginationHTML += `
             <li class="page-item ${
-                currentPage === i ? "active" : ""
+                currentPage === pageNum ? "active" : ""
             }" aria-current="page">
-                <a class="page-link" href="#" data-page="${i}">${i}</a>
+                <a class="page-link" href="#" data-page="${pageNum}">${pageNum}</a>
             </li>
         `;
+    }
+
+    function addEllipsis() {
+        paginationHTML += `
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+        `;
+    }
+
+    if (isMobile) {
+        // Simplified pagination for mobile
+        if (totalPages <= 3) {
+            for (let i = 1; i <= totalPages; i++) {
+                addPageNumber(i);
+            }
+        } else {
+            addPageNumber(1);
+            if (currentPage !== 1 && currentPage !== totalPages) {
+                addPageNumber(currentPage);
+            }
+            addPageNumber(totalPages);
+        }
+    } else {
+        // Desktop pagination (keep your existing logic here)
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                addPageNumber(i);
+            }
+        } else {
+            addPageNumber(1);
+            if (currentPage > 3) addEllipsis();
+
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+
+            if (currentPage <= 3) {
+                end = 4;
+            } else if (currentPage >= totalPages - 2) {
+                start = totalPages - 3;
+            }
+
+            for (let i = start; i <= end; i++) {
+                addPageNumber(i);
+            }
+
+            if (currentPage < totalPages - 2) addEllipsis();
+            addPageNumber(totalPages);
+        }
     }
 
     paginationHTML += `
         <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
             <a class="page-link" href="#" data-page="${
                 currentPage + 1
-            }">Next</a>
+            }" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
         </li>
     `;
 
     paginationEl.innerHTML = paginationHTML;
 
-    // Add event listeners to pagination controls
+    // Add event listeners (keep your existing code here)
     paginationEl.querySelectorAll(".page-link").forEach((link) => {
-        link.addEventListener("click", (e) => {
-            e.preventDefault();
-            const newPage = parseInt(e.target.getAttribute("data-page"));
-            if (
-                newPage !== currentPage &&
-                newPage > 0 &&
-                newPage <= totalPages
-            ) {
-                currentPage = newPage;
-                updateTable();
-            }
+        // Add support for 'click' and 'touchstart' to ensure it's responsive on mobile
+        ["click", "touchstart"].forEach((eventType) => {
+            link.addEventListener(eventType, (e) => {
+                e.preventDefault(); // Prevent default link behavior
+                e.stopPropagation(); // Stop propagation to avoid focus issues
+
+                const newPage = parseInt(e.target.getAttribute("data-page"));
+                if (
+                    newPage !== currentPage &&
+                    newPage > 0 &&
+                    newPage <= totalPages
+                ) {
+                    currentPage = newPage;
+                    updateTable(); // Trigger table update when the new page is selected
+                }
+            });
         });
     });
 }
-
-// Keep your existing helper functions (formatDeviceRow, formatDate, getBadgeClass, getActionButtons) as they are
 
 // Event listener for rows per page dropdown
 document.getElementById("rowsPerPage").addEventListener("change", (e) => {
