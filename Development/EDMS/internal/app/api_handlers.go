@@ -471,23 +471,10 @@ func (a *App) HandleDeleteBuilding(c echo.Context) error {
 		})
 	}
 
-	// Check if the site has a map image
-	if site.SiteMapImagePath.Valid {
-		// Delete the map image file
-		imagePath := "." + site.SiteMapImagePath.String
-		if err := os.Remove(imagePath); err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error":       "Error deleting site map image",
-				"redirectURL": "/admin?error=Error deleting site map image",
-			})
-
-		}
-	}
-
 	// Respond to the client
 	return c.JSON(http.StatusOK, map[string]string{
-		"message":     "Site deleted successfully",
-		"redirectURL": "/admin?message=Site deleted successfully",
+		"message":     "Building deleted successfully",
+		"redirectURL": "/admin?message=Building deleted successfully",
 	})
 }
 
