@@ -401,26 +401,33 @@ function updatePaginationControls() {
 
     paginationEl.innerHTML = paginationHTML;
 
-    // Add event listeners (keep your existing code here)
-    paginationEl.querySelectorAll(".page-link").forEach((link) => {
-        // Add support for 'click' and 'touchstart' to ensure it's responsive on mobile
-        ["click", "touchstart"].forEach((eventType) => {
-            link.addEventListener(eventType, (e) => {
-                e.preventDefault(); // Prevent default link behavior
-                e.stopPropagation(); // Stop propagation to avoid focus issues
+    function handlePaginationClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-                const newPage = parseInt(e.target.getAttribute("data-page"));
-                if (
-                    newPage !== currentPage &&
-                    newPage > 0 &&
-                    newPage <= totalPages
-                ) {
-                    currentPage = newPage;
-                    updateTable(); // Trigger table update when the new page is selected
-                }
-            });
-        });
-    });
+        let target = e.target.closest(".page-link");
+
+        if (target && target.hasAttribute("data-page")) {
+            const newPage = parseInt(target.getAttribute("data-page"), 10);
+
+            if (
+                newPage !== currentPage &&
+                newPage > 0 &&
+                newPage <= totalPages
+            ) {
+                currentPage = newPage;
+                updateTable();
+            }
+        }
+    }
+
+    // Remove existing event listeners
+    paginationEl.removeEventListener("click", handlePaginationClick);
+    paginationEl.removeEventListener("touchstart", handlePaginationClick);
+
+    // Add event listeners to the pagination container
+    paginationEl.addEventListener("click", handlePaginationClick);
+    paginationEl.addEventListener("touchstart", handlePaginationClick);
 }
 
 // Event listener for rows per page dropdown
