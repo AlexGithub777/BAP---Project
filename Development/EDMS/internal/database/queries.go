@@ -517,3 +517,8 @@ func (db *DB) AddSite(site *models.Site) error {
 
 	return nil
 }
+
+func (db *DB) GetRoomByID(roomID string){
+	query := ""
+
+}
