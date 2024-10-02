@@ -690,7 +690,97 @@ func (db *DB) GetRoomsBySiteID(siteID string) ([]models.Room, error) {
 	return rooms, nil
 }
 
-func (db *DB) GetRoomByID(roomID string){
-	
+func (db *DB) GetRoomByID(roomID int) (*models.Room, error) {
+	query := `
+	SELECT r.roomid, r.roomcode, b.buildingcode, s.sitename
+	FROM roomT r
+	JOIN buildingT b ON r.buildingid = b.buildingid
+	JOIN siteT s ON b.siteid = s.siteid
+	WHERE r.roomid = $1
+	`
 
+	var room models.Room
+	err := db.QueryRow(query, roomID).Scan(
+		&room.RoomID,
+		&room.RoomCode,
+		&room.BuildingCode,
+		&room.SiteName,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &room, nil
+}
+
+func (db *DB) GetEmergencyDeviceTypeByID(emergencyDeviceTypeID int) (*models.EmergencyDeviceType, error) {
+	query := `
+	SELECT emergencydevicetypeid, emergencydevicetypename
+	FROM emergency_device_typeT
+	WHERE emergencydevicetypeid = $1
+	`
+
+	var deviceType models.EmergencyDeviceType
+	err := db.QueryRow(query, emergencyDeviceTypeID).Scan(
+		&deviceType.EmergencyDeviceTypeID,
+		&deviceType.EmergencyDeviceTypeName,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &deviceType, nil
+}
+
+func (db *DB) GetExtinguisherTypeByID(extinguisherTypeID int) (*models.ExtinguisherType, error) {
+	query := `
+	SELECT extinguishertypeid, extinguishertypename
+	FROM extinguisher_typeT
+	WHERE extinguishertypeid = $1
+	`
+
+	var extinguisherType models.ExtinguisherType
+	err := db.QueryRow(query, extinguisherTypeID).Scan(
+		&extinguisherType.ExtinguisherTypeID,
+		&extinguisherType.ExtinguisherTypeName,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &extinguisherType, nil
+}
+
+func (db *DB) AddEmergencyDevice(device *models.EmergencyDevice) error {
+	query := `
+	INSERT INTO emergency_deviceT (emergencydevicetypeid, extinguishertypeid, roomid, serialnumber, manufacturedate, lastinspectiondate, description, size, status)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`
+	insertStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer insertStmt.Close()
+
+	_, err = insertStmt.Exec(
+		device.EmergencyDeviceTypeID,
+		device.ExtinguisherTypeID,
+		device.RoomID,
+		device.SerialNumber,
+		device.ManufactureDate,
+		device.LastInspectionDate,
+		device.Description,
+		device.Size,
+		device.Status,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

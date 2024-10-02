@@ -541,7 +541,7 @@ function addDevice() {
     fetch("/api/site")
         .then((response) => response.json())
         .then((data) => {
-            const select = document.getElementById("site");
+            const select = document.getElementById("addDeviceSite");
             // Clear previous options
             select.innerHTML = "";
             // Add a default option and select it
@@ -562,8 +562,8 @@ function addDevice() {
 
     // Function to clear building and room options
     function clearBuildingAndRoom() {
-        const buildingSelect = document.getElementById("building");
-        const roomSelect = document.getElementById("room");
+        const buildingSelect = document.getElementById("addDeviceBuilding");
+        const roomSelect = document.getElementById("addDeviceRoom");
         buildingSelect.innerHTML =
             "<option value='' selected disabled>Select a Building</option>";
         roomSelect.innerHTML =
@@ -575,7 +575,7 @@ function addDevice() {
         fetch(`/api/building?siteId=${siteId}`)
             .then((response) => response.json())
             .then((data) => {
-                const select = document.getElementById("building");
+                const select = document.getElementById("addDeviceBuilding");
                 select.innerHTML =
                     "<option value='' selected disabled>Select a Building</option>";
                 data.forEach((item) => {
@@ -599,7 +599,7 @@ function addDevice() {
         fetch(`/api/room?buildingId=${buildingId}`)
             .then((response) => response.json())
             .then((data) => {
-                const select = document.getElementById("room");
+                const select = document.getElementById("addDeviceRoom");
                 select.innerHTML =
                     "<option value='' selected disabled>Select a Room</option>";
                 data.forEach((item) => {
@@ -613,29 +613,33 @@ function addDevice() {
     }
 
     // Event listener for site change
-    document.getElementById("site").addEventListener("change", (event) => {
-        const selectedSiteId = event.target.value;
-        clearBuildingAndRoom();
+    document
+        .getElementById("addDeviceSite")
+        .addEventListener("change", (event) => {
+            const selectedSiteId = event.target.value;
+            clearBuildingAndRoom();
 
-        if (selectedSiteId) {
-            fetchAndPopulateBuildings(selectedSiteId);
-        }
-    });
+            if (selectedSiteId) {
+                fetchAndPopulateBuildings(selectedSiteId);
+            }
+        });
 
     // Event listener for building change
-    document.getElementById("building").addEventListener("change", (event) => {
-        const selectedBuildingId = event.target.value;
+    document
+        .getElementById("addDeviceBuilding")
+        .addEventListener("change", (event) => {
+            const selectedBuildingId = event.target.value;
 
-        if (selectedBuildingId) {
-            fetchAndPopulateRooms(selectedBuildingId);
-        }
-    });
+            if (selectedBuildingId) {
+                fetchAndPopulateRooms(selectedBuildingId);
+            }
+        });
 
     // Fetch the device types and populate the select options
     fetch("/api/emergency-device-type")
         .then((response) => response.json())
         .then((data) => {
-            const select = document.getElementById("status");
+            const select = document.getElementById("addEmergencyDeviceType");
             // Clear previous options
             select.innerHTML = "";
             // Add a default option and select it
@@ -657,7 +661,7 @@ function addDevice() {
     fetch("/api/extinguisher-type")
         .then((response) => response.json())
         .then((data) => {
-            const select = document.getElementById("extinguisherType");
+            const select = document.getElementById("addExtinguisherType");
             // Clear previous options
             select.innerHTML = "";
             // Add a default option and select it
@@ -669,6 +673,7 @@ function addDevice() {
             data.forEach((item) => {
                 const option = document.createElement("option");
                 option.text = item.extinguisher_type_name; // Set the text of the option
+                option.value = item.extinguisher_type_id; // Set the value of the option
                 select.add(option);
             });
         })

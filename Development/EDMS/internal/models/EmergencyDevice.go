@@ -6,9 +6,12 @@ import (
 
 type EmergencyDevice struct {
 	EmergencyDeviceID       int            `json:"emergency_device_id"`        // From emergency_deviceT table
+	EmergencyDeviceTypeID   int            `json:"emergency_device_type_id"`   // From emergency_deviceT table (FK)
 	EmergencyDeviceTypeName string         `json:"emergency_device_type_name"` // From emergency_device_typeT table
 	ExtinguisherTypeName    sql.NullString `json:"extinguisher_type_name"`     // From Extinguisher_TypeT table
+	ExtinguisherTypeID      sql.NullInt64  `json:"extinguisher_type_id"`       // From Extinguisher_TypeT table
 	RoomCode                string         `json:"room_code"`                  // From roomT table
+	RoomID                  int            `json:"room_id"`                    // From emergency_deviceT table (FK)
 	SerialNumber            sql.NullString `json:"serial_number"`              // From emergency_deviceT table
 	ManufactureDate         sql.NullTime   `json:"manufacture_date"`           // From emergency_deviceT table
 	ExpireDate              sql.NullTime   `json:"expire_date"`                // Calculated

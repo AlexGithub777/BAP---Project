@@ -55,13 +55,13 @@ CREATE TABLE Emergency_DeviceT (
     EmergencyDeviceID SERIAL PRIMARY KEY,
     EmergencyDeviceTypeID INT NOT NULL,
     RoomID INT NOT NULL,
-    ExtinguisherTypeID INT,
-    ManufactureDate DATE NOT NULL,
-    SerialNumber VARCHAR(100) UNIQUE,
-    Description VARCHAR(80),
-    Size VARCHAR(50),
-    LastInspectionDate DATE,
-    Status VARCHAR(50),
+    ExtinguisherTypeID INT NULL,
+    ManufactureDate DATE NULL,
+    SerialNumber VARCHAR(50) NULL,
+    Description VARCHAR(80) NULL,
+    Size VARCHAR(50) NULL,
+    LastInspectionDate DATE NULL,
+    Status VARCHAR(50) NULL,
     FOREIGN KEY (EmergencyDeviceTypeID) REFERENCES Emergency_Device_TypeT(EmergencyDeviceTypeID)
         ON UPDATE CASCADE  -- If an EmergencyDeviceTypeID changes, update it in Emergency_DeviceT
         ON DELETE RESTRICT, -- Prevent deletion of an Emergency Device Type if it's associated with any devices
