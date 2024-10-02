@@ -90,41 +90,150 @@ $(document).ready(function () {
             "File input element:",
             $("#editSiteModal #editSiteImgInput")[0]
         );
+        5;
     });
 });
+
+console.log(is_current_user_default_admin);
+
+// whenever is_current_user_default_admin is false, hide the actions buttons from any row with user.default_admin = true
 
 // Fetch users from the server
 fetch("/api/user")
     .then((response) => response.json())
     .then((users) => {
-        // Create a table row for each user
-        const userRows = users.map(
-            (user) => `
-<tr>
-<td data-label="Username">${user.username}</td>
-<td data-label="Email">${user.email}</td>
-<td data-label="Role">${user.role}</td>
-<td>
-    <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${user.user_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${user.user_id}">Delete</button>
-    </div>
-</td>
-</tr>
-`
+        console.log("Original users:", users);
+        console.log(
+            "Current user ID:",
+            current_user_id,
+            "Type:",
+            typeof current_user_id
         );
+
+        // Convert current_user_id to a number
+        const currentUserIdNumber = parseInt(current_user_id, 10);
+
+        // Log the converted current user ID
+        console.log(
+            "Converted current user ID:",
+            currentUserIdNumber,
+            "Type:",
+            typeof currentUserIdNumber
+        );
+
+        // Sort the users array to put the current user first
+        users.sort((a, b) => {
+            if (a.user_id === currentUserIdNumber) return -1;
+            if (b.user_id === currentUserIdNumber) return 1;
+            return a.username.localeCompare(b.username); // Sort others alphabetically
+        });
+
+        console.log("Sorted users:", users);
+
+        // Create a table row for each user
+        const userRows = users.map((user) => {
+            console.log("Processing user:", user);
+            // Convert user.default_admin to a boolean
+            var isAdmin = JSON.parse(user.default_admin);
+            // Convert is_current_user_default_admin to a boolean
+            var current_default_admin = JSON.parse(
+                is_current_user_default_admin
+            );
+
+            const hideDelete = current_default_admin && isAdmin;
+
+            // Determine whether to hide action buttons based on conditions
+            const hideActions = !current_default_admin && isAdmin;
+
+            // Generate the row HTML
+            return `
+<tr${user.user_id === currentUserIdNumber ? ' class="table-primary"' : ""}>
+    <td data-label="Username">${user.username}</td>
+    <td data-label="Email">${user.email}</td>
+    <td data-label="Role">${user.role}</td>
+    <td>
+        <div class="btn-group">
+            ${
+                hideActions
+                    ? "<span class='text-muted'>No actions available</span>"
+                    : `<button class="btn btn-primary edit-user-button" data-id="${
+                          user.user_id
+                      }">Edit</button>
+                       ${
+                           hideDelete
+                               ? ""
+                               : `<button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}', '${currentUserIdNumber}')" data-id="${user.user_id}">Delete</button>`
+                       }`
+            }
+        </div>
+    </td>
+</tr>
+`;
+        });
 
         // Add the rows to the users table
         $("#users-table tbody").html(userRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-user-button").click(async (event) => {
             const id = $(event.target).data("id");
+            console.log("Edit button clicked for user with ID:", id);
             // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
+            // Fetch the user data from the nearest row
+            const row = $(event.target).closest("tr");
+            const username = row.find("td[data-label=Username]").text();
+            const email = row.find("td[data-label=Email]").text();
+            const role = row.find("td[data-label=Role]").text();
+
+            const default_admin = await fetch(`/api/user/${username}`)
+                .then((response) => response.json())
+                .then((user) => {
+                    return user.default_admin.toString();
+                });
+
+            // Fill in the form with the user data
+            $("#editUserForm")[0].reset();
+            $("#editUserForm input[name=currentUserID]").val(current_user_id);
+            $("#editUserForm input[name=editUserID]").val(id);
+            $("#editUserForm input[name=editUserUsername]").val(username);
+            $("#editUserForm input[name=editUserEmail]").val(email);
+            $("#editUserForm select[name=editUserRole]").val(role);
+            $("#editUserForm input[name=defaultAdmin]").val(default_admin);
+
+            // Set the form action to the update endpoint for this user
+            $("#editUserForm").attr("action", `/api/user/${id}`);
+
+            // Get the user ID of the user being updated
+            const updatedUserId = $(
+                "#editUserForm input[name=editUserID]"
+            ).val();
+
+            // If the current user ID is equal to the user being updated, display the password field
+            if (current_user_id === updatedUserId) {
+                $("#passwordField").show();
+            } else {
+                $("#passwordField").hide();
+            }
+
+            // Show the modal
+            $("#editUserModal").modal("show");
+            // Clear validation classes
+            $("#editUserForm").removeClass("was-validated");
+
+            // Add event listener to the submit button
+            $("#editUserBtn").click(function (event) {
+                // Check if the form is valid
+                if (!$("#editUserForm")[0].checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    // If the form is valid, submit it
+                    $("#editUserForm").submit();
+                }
+
+                // Add the was-validated class to the form
+                $("#editUserForm").addClass("was-validated");
+            });
         });
     });
 
@@ -135,17 +244,17 @@ fetch("/api/site")
         // Create a table row for each site
         const siteRows = sites.map(
             (site) => `
-<tr>
-<td data-label="Site Name">${site.site_name}</td>
-<td data-label="Site Address">${site.site_address}</td>
-<td data-label="Actions">
-    <div class="btn-group">
-        <button class="btn btn-primary edit-button" onclick="editSite(${site.site_id})" data-id="${site.site_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${site.site_id}">Delete</button>
-    </div>
-</td>
-</tr>
-`
+        <tr>
+            <td data-label="Site Name">${site.site_name}</td>
+            <td data-label="Site Address">${site.site_address}</td>
+            <td data-label="Actions">
+                <div class="btn-group">
+                    <button class="btn btn-primary edit-button" onclick="editSite(${site.site_id})" data-id="${site.site_id}">Edit</button>
+                    <button class="btn btn-danger delete-button" onclick="showDeleteModal(${site.site_id}, 'site', '${site.site_name}')">Delete</button>
+                </div>
+            </td>
+        </tr>
+        `
         );
 
         // Add the rows to the sites table
@@ -164,8 +273,8 @@ fetch("/api/building")
 <td data-label="Site Name">${building.site_name}</td>
 <td>
     <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${building.building_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${building.building_id}">Delete</button>
+        <button class="btn btn-primary edit-building-button" data-id="${building.building_id}">Edit</button>
+        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${building.building_id}, 'building', '${building.building_code}')" data-id="${building.building_id}">Delete</button>
     </div> 
 </td>
 </tr>
@@ -176,13 +285,10 @@ fetch("/api/building")
         $("#buildings-table tbody").html(buildingRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-building-button").click((event) => {
             const id = $(event.target).data("id");
+            console.log("Edit button clicked for building with ID:", id);
             // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
         });
     });
 
@@ -199,8 +305,8 @@ fetch("/api/room")
 <td data-label="Site Name">${room.site_name}</td>
 <td>
     <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${room.room_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${room.room_id}">Delete</button>
+        <button class="btn btn-primary edit-room-button" data-id="${room.room_id}">Edit</button>
+        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${room.room_id}, 'room', '${room.room_code}')" data-id="${room.room_id}">Delete</button>
     </div>
 </td>
 </tr>
@@ -211,13 +317,9 @@ fetch("/api/room")
         $("#rooms-table tbody").html(roomRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-room-button").click((event) => {
             const id = $(event.target).data("id");
-            // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
+            console.log("Edit button clicked for room with ID:", id);
         });
     });
 
@@ -232,8 +334,8 @@ fetch("/api/emergency-device-type")
 <td data-label="Device Type">${deviceType.emergency_device_type_name}</td>
 <td>
     <div class="btn-group">
-        <button class="btn btn-primary edit-button" data-id="${deviceType.emergency_device_type_id}">Edit</button>
-        <button class="btn btn-danger delete-button" data-id="${deviceType.emergency_device_type_id}">Delete</button>
+        <button class="btn btn-primary edit-device-type-button" data-id="${deviceType.emergency_device_type_id}">Edit</button>
+        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${deviceType.emergency_device_type_id}, 'emergency-device-type', '<br>${deviceType.emergency_device_type_name}')" data-id="${deviceType.emergency_device_type_id}">Delete</button>
     </div>
 </td>
 </tr>
@@ -244,13 +346,10 @@ fetch("/api/emergency-device-type")
         $("#device-types-table tbody").html(deviceTypeRows.join(""));
 
         // Add event listeners to the edit and delete buttons
-        $(".edit-button").click((event) => {
+        $(".edit-device-type-button").click((event) => {
             const id = $(event.target).data("id");
+            console.log("Edit button clicked for device type with ID:", id);
             // Handle edit
-        });
-        $(".delete-button").click((event) => {
-            const id = $(event.target).data("id");
-            // Handle delete
         });
     });
 
@@ -362,3 +461,30 @@ function editSite(siteId) {
         false
     );
 })();
+
+/*
+(function () {
+    "use strict";
+
+    // Fetch the form and the submit button
+    var form = document.querySelector("#editUserForm");
+    var submitButton = document.querySelector("#editUserBtn");
+
+    // Add event listener to the submit button
+    submitButton.addEventListener(
+        "click",
+        function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // If the form is valid, submit it
+                form.submit();
+            }
+
+            form.classList.add("was-validated");
+        },
+        false
+    );
+})();
+*/

@@ -12,6 +12,32 @@
     border-radius: 8px;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+@media (max-width: 767px) {
+    .pagination {
+        justify-content: center;
+    }
+
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 14px;
+    }
+
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        padding: 0.5rem 0.5rem;
+    }
+}
+
 @media screen and (max-width: 1009px) {
     body table thead {
         display: none;

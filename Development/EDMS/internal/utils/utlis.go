@@ -17,15 +17,33 @@ type TemplateRenderer struct {
 }
 
 // NewTemplateRenderer creates a new TemplateRenderer
-func NewTemplateRenderer() *TemplateRenderer {
-	rootDir, _ := os.Getwd()
-	templateDir := filepath.Join(rootDir, "templates", "*.html")
-	dashboardComponentDir := filepath.Join(rootDir, "templates", "components", "dashboard", "*.html")
-	adminComponentDir := filepath.Join(rootDir, "templates", "components", "admin", "*.html")
-	t := template.Must(template.New("").ParseGlob(templateDir))
-	t = template.Must(t.ParseGlob(dashboardComponentDir))
-	t = template.Must(t.ParseGlob(adminComponentDir))
-	return &TemplateRenderer{templates: t}
+func NewTemplateRenderer() (*TemplateRenderer, error) {
+	rootDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	templateDir := filepath.Join(rootDir, "templates")
+	t := template.New("")
+
+	err = filepath.Walk(templateDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && filepath.Ext(path) == ".html" {
+			_, err = t.ParseFiles(path)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &TemplateRenderer{templates: t}, nil
 }
 
 // Render implements echo.Renderer

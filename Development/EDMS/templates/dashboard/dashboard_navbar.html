@@ -1,7 +1,6 @@
 <header>
     <!-- Navbar -->
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
         <!-- Container wrapper -->
         <div class="container-fluid">
             <!-- Navbar brand -->
@@ -14,7 +13,7 @@
                     class="mx-2 d-inline-block align-text-center"
                     style="object-fit: contain"
                 />
-                <span id="brand-name">
+                <span id="brand-name" class="text-light">
                     Emergency Device Management System</span
                 ></a
             >
@@ -37,29 +36,50 @@
                 <!-- Left links -->
                 <ul class="navbar-nav me-auto d-flex flex-row mt-3 mt-lg-0">
                     <li class="nav-item text-center mx-2 mx-lg-1">
-                        <a class="nav-link" href="/dashboard">
+                        <a class="nav-link active" href="/dashboard">
                             <div>
                                 <i class="fas fa-dashboard fa-lg mb-1"></i>
                             </div>
                             Dashboard
                         </a>
                     </li>
+                    {{if eq .role "Admin"}}
                     <li class="nav-item text-center mx-2 mx-lg-1">
-                        <a class="nav-link active" href="/admin">
+                        <a class="nav-link" href="/admin">
                             <div>
                                 <i class="fas fa-gear fa-lg mb-1"></i>
                             </div>
                             Admin Settings
                         </a>
                     </li>
+                    {{end}}
                 </ul>
-
-                <!-- Left links -->
-
                 <!-- Right links -->
                 <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">
+                    <!-- Dark mode toggle -->
                     <li class="nav-item text-center mx-2 mx-lg-1">
-                        <a class="nav-link" onclick="viewNotifications()">
+                        <a
+                            class="nav-link d-flex flex-column align-items-center"
+                        >
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-moon fa-lg mb-1 me-2"></i>
+                                <div class="form-check form-switch my-0 py-0">
+                                    <input
+                                        class="form-check-input darkSwitch"
+                                        type="checkbox"
+                                        onclick="toggleDarkMode()"
+                                    />
+                                </div>
+                            </div>
+                            <div>Dark Mode</div>
+                        </a>
+                    </li>
+                    {{if eq .role "Admin"}}
+                    <li class="nav-item text-center mx-2 mx-lg-1">
+                        <a
+                            class="nav-link"
+                            onclick="viewNotifications()"
+                        >
                             <div>
                                 <i class="fas fa-bell fa-lg mb-1"></i>
                                 <span
@@ -71,10 +91,10 @@
                             Notifications
                         </a>
                     </li>
+                    {{end}}
                     <li class="nav-item dropdown text-center mx-2 mx-lg-1">
                         <a
                             class="nav-link dropdown-toggle"
-                            href="#"
                             id="navbarDropdown"
                             role="button"
                             data-bs-toggle="dropdown"
@@ -90,14 +110,8 @@
                             aria-labelledby="navbarDropdown"
                         >
                             <li>
-                                <a class="dropdown-header" aria-disabled="true"
+                                <a class="dropdown-header"
                                     >Logged in as: {{.username}}</a
-                                >
-                            </li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li>
-                                <a class="dropdown-item" href="#"
-                                    >Profile Settings</a
                                 >
                             </li>
                             <li><hr class="dropdown-divider" /></li>
@@ -119,4 +133,5 @@
         <!-- Container wrapper -->
     </nav>
     <!-- Navbar -->
+    <hr class="my-0" />
 </header>

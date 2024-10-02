@@ -16,10 +16,8 @@ func (a *App) AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 		claims := user.Claims.(jwt.MapClaims)
 		role := claims["role"]
 
-		if role != "admin" {
-			return c.Render(http.StatusForbidden, "dashboard.html", map[string]interface{}{
-				"error": "You do not have permission to access this page/action",
-			})
+		if role != "Admin" {
+			return c.Redirect(http.StatusSeeOther, "/dashboard?error=You%20do%20not%20have%20permission%20to%20access%20this%20page")
 		}
 		return next(c)
 	}
@@ -56,16 +54,16 @@ func (a *App) initRoutes() {
 	admin := protected.Group("")
 	admin.Use(a.AdminOnly)
 	admin.GET("/admin", a.HandleGetAdmin)
-	admin.GET("/api/user", a.HandleGetAllUsers)
 	// Add any other admin-only routes as needed
 	// User management routes - Alex
-	//admin.POST("/api/user", a.HandlePostUser)
-	//admin.PUT("/api/user/:id", a.HandlePutUser)
-	//admin.DELETE("/api/user/:id", a.HandleDeleteUser)
+	admin.GET("/api/user", a.HandleGetAllUsers)
+	admin.GET("/api/user/:username", a.HandleGetUserByUsername)
+	admin.POST("/api/user/:id", a.HandleEditUser)
+	admin.DELETE("/api/user/:id", a.HandleDeleteUser)
 	// Site management routes - Alex
 	admin.POST("/api/site", a.HandlePostSite)
 	admin.POST("/api/site/:id", a.HandleEditSite)
-	//admin.DELETE("/api/site/:id", a.HandleDeleteSite)
+	admin.DELETE("/api/site/:id", a.HandleDeleteSite)
 	// Building management routes - Joe
 	//admin.POST("/api/building", a.HandlePostBuilding)
 	//admin.PUT("/api/building/:id", a.HandlePutBuilding)

@@ -1,9 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light" class="bg-dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Device List</title>
+        <title>Admin Settings</title>
+        <!-- favicon-->
+        <link
+            rel="icon"
+            type="image/png"
+            href="/static/app_icon.png"
+            sizes="16x16"
+        />
         <!-- Toastify JS -->
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"
@@ -18,13 +25,6 @@
             integrity="sha512-VSD3lcSci0foeRFRHWdYX4FaLvec89irh5+QAGc00j5AOdow2r5MFPhoPEYBUQdyarXwbzyJEO7Iko7+PnPuBw=="
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
-        />
-        <!-- Leaflet CSS -->
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-            crossorigin=""
         />
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -73,11 +73,7 @@
                             "linear-gradient(to right, #008000, #008000)",
                     }).showToast();
                     // remove the message from the URL
-                    window.history.replaceState(
-                        {},
-                        document.title,
-                        "/dashboard"
-                    );
+                    window.history.replaceState({}, document.title, "/admin");
                 }
 
                 // If there's an error, display it using Toastify
@@ -92,48 +88,54 @@
                             "linear-gradient(to right, #ff5f6d, #ffc371)",
                     }).showToast();
                     // remove the message from the URL
-                    window.history.replaceState(
-                        {},
-                        document.title,
-                        "/dashboard"
-                    );
+                    window.history.replaceState({}, document.title, "/admin");
                 }
             });
         </script>
     </head>
     <body>
-        <!-- Dashboard Navbar -->
-        {{ template "dashboard_navbar.html" . }}
+        <!-- Admin navbar-->
+        {{ template "admin_navbar.html" . }}
 
-        <!-- Map and Device List table -->
-        {{ template "device_list.html" . }}
+        <div class="container">
+            <!-- Manage Users -->
+            {{ template "user_list.html" . }}
 
-        <!-- Notifications modal -->
-        {{ template "notifications.html" . }}
+            <!-- Manage Locations -->
+            <div>
+                <h2>Manage Locations</h2>
 
-        <!-- View Notes Modal-->
-        {{ template "notes_modal.html" . }}
+                <!-- Manage Sites -->
+                {{ template "site_list.html" . }}
 
-        <!-- Add Device Modal -->
-        {{ template "add_device.html" . }}
+                <!-- Manage Buildings-->
+                {{ template "building_list.html" . }}
 
-        <!-- Add Inspection Device Modal -->
-        {{ template "add_inspection.html" . }}
+                <!-- Manage Rooms -->
+                {{ template "room_list.html" . }}
+            </div>
 
-        <!-- View Device Inspection modal -->
-        {{ template "device_inspection.html" . }}
+            <!-- Manage Device Types -->
+            {{ template "device_type_list.html" . }}
 
-        <!-- Leaflet js-->
-        <script
-            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-            crossorigin=""
-        ></script>
+            <!-- Modals -->
+            {{ template "add_site.html" . }} {{ template "edit_site.html" .}} {{
+            template "edit_user.html" . }} {{ template "delete_modal.html". }}
+
+            <!-- Notifications modal -->
+            {{ template "notifications.html" . }}
+        </div>
+
+        <!-- Footer -->
+        {{ template "footer.html" . }}
         <!-- Custom JS-->
         <script>
             var role = "{{.role}}";
+            console.log(role);
+            var current_user_id = "{{.user_id}}";
+            var is_current_user_default_admin = "{{.default_admin}}";
         </script>
-        <script src="/static/navbar.js"></script>
-        <script src="/static/dashboard.js"></script>
+        <script src="/static/main.js"></script>
+        <script src="/static/admin.js"></script>
     </body>
 </html>
