@@ -69,7 +69,7 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 	err = a.DB.AddEmergencyDevice(emergencyDevice)
 	if err != nil {
 		a.handleLogger("Error adding device: " + err.Error())
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Error adding device")
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error="+err.Error())
 	}
 
 	// Redirect to dashboard with success message
