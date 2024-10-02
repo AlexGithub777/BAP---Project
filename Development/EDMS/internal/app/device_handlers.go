@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -55,175 +56,13 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 	a.handleLogger("size: " + size)
 	a.handleLogger("description: " + description)
 	a.handleLogger("status: " + status)
-	//Validating device details
-	if roomIDStr == "" || emergencyDeviceTypeIDStr == "" {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Room and Device Type are required")
-	}
 
-	// Convert room ID an to integer
-	roomID, err := strconv.Atoi(roomIDStr)
+	// Validate input
+	emergencyDevice, err := validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, lastInspectionDateStr, size, description, status)
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid room ID")
-	}
-
-	// Convert emergency device type ID to integer
-	emergencyDeviceTypeID, err := strconv.Atoi(emergencyDeviceTypeIDStr)
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid emergency device type ID")
-	}
-
-	// Convert extinguisher type ID to integer if provided
-	var extinguisherTypeID sql.NullInt64
-	if extinguisherTypeIDStr != "" {
-		var err error
-		extinguisherTypeID.Int64, err = strconv.ParseInt(extinguisherTypeIDStr, 10, 32)
-		if err != nil {
-			return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid extinguisher type ID")
-		}
-		extinguisherTypeID.Valid = true
-	} else {
-		extinguisherTypeID.Valid = false
-	}
-
-	//validate room_id exists
-	room, err := a.DB.GetRoomByID(roomID)
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Error fetching room")
-	}
-
-	if room.RoomID != roomID {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Room does not exist")
-	}
-
-	//validate emergency_device_type_id exists
-	emergencyDeviceType, err := a.DB.GetEmergencyDeviceTypeByID(emergencyDeviceTypeID)
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Emergency Device Type does not exist")
-	}
-
-	if emergencyDeviceType.EmergencyDeviceTypeID != emergencyDeviceTypeID {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Emergency Device Type does not exist")
-	}
-
-	// Validate extinguisher type ID exists if provided
-	if extinguisherTypeID.Valid {
-		// convert extinguisher type ID to int
-		extinguisherTypeIDInt := int(extinguisherTypeID.Int64)
-		extinguisherType, err := a.DB.GetExtinguisherTypeByID(extinguisherTypeIDInt)
-		if err != nil {
-			return c.Redirect(http.StatusSeeOther, "/dashboard?error=Extinguisher Type does not exist")
-		}
-
-		if extinguisherType.ExtinguisherTypeID != extinguisherTypeIDInt {
-			return c.Redirect(http.StatusSeeOther, "/dashboard?error=Extinguisher Type does not exist")
-		}
-	}
-
-	// Parse date strings into sql.NullTime format
-	manufactureDate := sql.NullTime{}
-
-	if manufactureDateStr != "" {
-		parsedDate, err := time.Parse("2006-01-02", manufactureDateStr)
-		if err != nil {
-			return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid manufacture date format")
-		}
-		manufactureDate = sql.NullTime{Time: parsedDate, Valid: true}
-	}
-
-	// Check if manufacture date is in the future
-	if manufactureDate.Valid && manufactureDate.Time.After(time.Now()) {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Manufacture date cannot be in the future")
-	}
-
-	// Parse last inspection date if provided
-	lastInspectionDate := sql.NullTime{}
-
-	if lastInspectionDateStr != "" {
-		parsedDate, err := time.Parse("2006-01-02", lastInspectionDateStr)
-		if err != nil {
-			return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid last inspection date format")
-		}
-		lastInspectionDate = sql.NullTime{Time: parsedDate, Valid: true}
-	}
-
-	// Check if last inspection date is in the future
-	if lastInspectionDate.Valid && lastInspectionDate.Time.After(time.Now()) {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Last inspection date cannot be in the future")
-	}
-
-	// check serial number length is not more than 50
-	if len(serialNumber) > 50 {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Serial number is too long, maximum 50 characters")
-	}
-
-	// Check description length is not more than 255 characters
-	if len(description) > 255 {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Description is too long, maximum 255 characters")
-	}
-
-	// Check size length is not more than 50 characters
-	if len(size) > 50 {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Size is too long, maximum 50 characters")
-	}
-
-	// Check status length is not more than 50 characters
-	if len(status) > 50 {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Status is too long, maximum 50 characters")
-	}
-
-	// Initialize sql.NullString for optional fields
-	serialNumberNullStr := sql.NullString{}
-	sizeNullStr := sql.NullString{}
-	descriptionNullStr := sql.NullString{}
-	statusNullStr := sql.NullString{}
-
-	// convert serial number to sql.NullString if provided, else set to null
-	if serialNumber == "" {
-		serialNumberNullStr.String = serialNumber
-		serialNumberNullStr.Valid = false
-	} else {
-		serialNumberNullStr.String = serialNumber
-		serialNumberNullStr.Valid = true
-	}
-
-	// convert size to sql.NullString if provided, else set to null
-	if size == "" {
-		sizeNullStr.String = size
-		sizeNullStr.Valid = false
-	} else {
-		sizeNullStr.String = size
-		sizeNullStr.Valid = true
-	}
-
-	// convert description to sql.NullString if provided, else set to null
-	if description == "" {
-		descriptionNullStr.String = description
-		descriptionNullStr.Valid = false
-	} else {
-		descriptionNullStr.String = description
-		descriptionNullStr.Valid = true
-	}
-
-	// convert status to sql.NullString if provided, else set to null
-	if status == "" {
-		statusNullStr.String = status
-		statusNullStr.Valid = false
-	} else {
-		statusNullStr.String = status
-		statusNullStr.Valid = true
-	}
-
-	// Create new emergency device model
-	emergencyDevice := &models.EmergencyDevice{
-		RoomID:                roomID,
-		EmergencyDeviceTypeID: emergencyDeviceTypeID,
-		ExtinguisherTypeID:    extinguisherTypeID,
-		SerialNumber:          serialNumberNullStr,
-		ManufactureDate:       manufactureDate,
-		LastInspectionDate:    lastInspectionDate,
-		Size:                  sizeNullStr,
-		Description:           descriptionNullStr,
-		Status:                statusNullStr,
+		a.handleLogger("Error validating device: " + err.Error())
+		// Redirect to dashboard with error message
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error="+err.Error())
 	}
 
 	// Insert new emergency device
@@ -235,6 +74,124 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 
 	// Redirect to dashboard with success message
 	return c.Redirect(http.StatusFound, "/dashboard?message=Device added successfully")
+}
+
+func validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, lastInspectionDateStr, size, description, status string) (*models.EmergencyDevice, error) {
+	const (
+		ErrDeviceTypeRequired          string = "device Type is required"
+		ErrRoomRequired                string = "room is required"
+		ErrInvalidRoomID               string = "invalid room ID"
+		ErrInvalidEmergencyDeviceID    string = "invalid emergency device type ID"
+		ErrInvalidExtinguisherTypeID   string = "invalid extinguisher type ID"
+		ErrRoomDoesNotExist            string = "room does not exist"
+		ErrDeviceTypeDoesNotExist      string = "emergency Device Type does not exist"
+		ErrExtinguisherTypeNotExist    string = "extinguisher Type does not exist"
+		ErrInvalidManufactureDate      string = "invalid manufacture date format"
+		ErrManufactureDateInFuture     string = "manufacture date cannot be in the future"
+		ErrInvalidInspectionDate       string = "invalid last inspection date format"
+		ErrInspectionDateInFuture      string = "last inspection date cannot be in the future"
+		ErrInspectionBeforeManufacture string = "last inspection date cannot be before manufacture date"
+		ErrSerialNumberTooLong         string = "serial number is too long, maximum 50 characters"
+		ErrDescriptionTooLong          string = "description is too long, maximum 255 characters"
+		ErrSizeTooLong                 string = "size is too long, maximum 50 characters"
+		ErrStatusTooLong               string = "status is too long, maximum 50 characters"
+	)
+
+	var device models.EmergencyDevice
+
+	if roomIDStr == "" {
+		return &device, errors.New(ErrRoomRequired)
+	}
+
+	if emergencyDeviceTypeIDStr == "" {
+		return &device, errors.New(ErrDeviceTypeRequired)
+	}
+
+	roomID, err := strconv.Atoi(roomIDStr)
+	if err != nil {
+		return &device, errors.New(ErrInvalidRoomID)
+	}
+
+	emergencyDeviceTypeID, err := strconv.Atoi(emergencyDeviceTypeIDStr)
+	if err != nil {
+		return &device, errors.New(ErrInvalidEmergencyDeviceID)
+	}
+
+	var extinguisherTypeID sql.NullInt64
+	if extinguisherTypeIDStr != "" {
+		extinguisherTypeID.Int64, err = strconv.ParseInt(extinguisherTypeIDStr, 10, 32)
+		if err != nil {
+			return &device, errors.New(ErrInvalidExtinguisherTypeID)
+		}
+		extinguisherTypeID.Valid = true
+	} else {
+		extinguisherTypeID.Valid = false
+	}
+
+	manufactureDate, err := parseDate(manufactureDateStr)
+	if err != nil {
+		return &device, errors.New(ErrInvalidManufactureDate)
+	}
+
+	if manufactureDate.Valid && manufactureDate.Time.After(time.Now()) {
+		return &device, errors.New(ErrManufactureDateInFuture)
+	}
+
+	lastInspectionDate, err := parseDate(lastInspectionDateStr)
+	if err != nil {
+		return &device, errors.New(ErrInvalidInspectionDate)
+	}
+
+	if lastInspectionDate.Valid && lastInspectionDate.Time.After(time.Now()) {
+		return &device, errors.New(ErrInspectionDateInFuture)
+	}
+
+	if lastInspectionDate.Valid && manufactureDate.Valid && lastInspectionDate.Time.Before(manufactureDate.Time) {
+		return &device, errors.New(ErrInspectionBeforeManufacture)
+	}
+
+	if len(serialNumber) > 50 {
+		return &device, errors.New(ErrSerialNumberTooLong)
+	}
+
+	if len(description) > 255 {
+		return &device, errors.New(ErrDescriptionTooLong)
+	}
+
+	if len(size) > 50 {
+		return &device, errors.New(ErrSizeTooLong)
+	}
+
+	if len(status) > 50 {
+		return &device, errors.New(ErrStatusTooLong)
+	}
+
+	// Set the values of the device model
+	// Initialize sql.NullString for optional fields
+	device.SerialNumber = sql.NullString{String: serialNumber, Valid: serialNumber != ""}
+	device.Size = sql.NullString{String: size, Valid: size != ""}
+	device.Description = sql.NullString{String: description, Valid: description != ""}
+	device.Status = sql.NullString{String: status, Valid: status != ""}
+	device.RoomID = roomID
+	device.EmergencyDeviceTypeID = emergencyDeviceTypeID
+	device.ExtinguisherTypeID = extinguisherTypeID
+	device.ManufactureDate = manufactureDate
+	device.LastInspectionDate = lastInspectionDate
+
+	return &device, nil
+}
+
+func parseDate(dateStr string) (sql.NullTime, error) {
+	if dateStr == "" {
+		return sql.NullTime{}, nil
+	}
+
+	parsedDate, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return sql.NullTime{}, err
+	}
+
+	return sql.NullTime{Time: parsedDate, Valid: true}, nil
 }
 
 /*
