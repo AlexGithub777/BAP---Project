@@ -25,6 +25,65 @@ func (a *App) HandleGetAllDevices(c echo.Context) error {
 	return c.JSON(http.StatusOK, emergencyDevices)
 }
 
+func (a *App) HandlePostDevice(c echo.Context) error {
+	// Check if request if a GET request
+	if c.Request().Method != http.MethodPost {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+	// Parse form data
+	roomIDStr := c.FormValue("room_id")
+	emergencyDeviceTypeIDStr := c.FormValue("emergency_device_type_id")
+	extinguisherTypeIDStr := c.FormValue("extinguisher_type_id")
+	serialNumber := c.FormValue("serial_number")
+	manufactureDateStr := c.FormValue("manufacture_date")
+	lastInspectionDateStr := c.FormValue("last_inspection_date")
+	size := c.FormValue("size")
+	description := c.FormValue("description")
+	status := c.FormValue("status")
+	a.handleLogger("Room: " + roomIDStr)
+	a.handleLogger("extinguisher_type_id: " + extinguisherTypeIDStr)
+	a.handleLogger("serial_number: " + serialNumber)
+	a.handleLogger("manufacture_date: " + manufactureDateStr)
+	a.handleLogger("last_inspection_date: " + lastInspectionDateStr)
+	a.handleLogger("size: " + size)
+	a.handleLogger("description: " + description)
+	a.handleLogger("status: " + status)
+	a.handleLogger("extinguisher type: " + extinguisherTypeIDStr)
+	//Validating device details
+	if roomIDStr == "" || emergencyDeviceTypeIDStr == "" {
+		return c.Redirect(http.StatusSeeOther, "/dashboard")
+	}
+	/*
+		//validate room_id
+		_, err = a.DB.GetRoomByID(roomIDStr)
+		if err == nil {
+			return c.Redirect(http.StatusSeeOther, "/dashboard")
+		} else if err != sql.ErrNoRows { // If the error is not sql.ErrNoRows, it's a database error
+			return c.Render(http.StatusInternalServerError, "admin.html", map[string]interface{}{
+				"error": "Database error",
+			})
+		}
+
+
+		/* Save site information and file path in the database
+		site := &models.Site{
+			SiteName:         siteName,
+			SiteAddress:      siteAddress,
+			SiteMapImagePath: filePath,
+		}
+
+		err = a.DB.AddDevice(site)
+		if err != nil {
+			return a.handleError(c, http.StatusInternalServerError, "Error saving site", err)
+		}
+	*/
+	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
+		"message": "Device added successfully",
+	})
+}
+
 /*
 func (a *App) HandleAddDevice(c echo.Context) error {
     // Parse form data
