@@ -62,7 +62,7 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 	if err != nil {
 		a.handleLogger("Error validating device: " + err.Error())
 		// Redirect to dashboard with error message
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error="+err.Error())
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error="+"Error validating device: "+err.Error())
 	}
 
 	// Insert new emergency device
@@ -78,7 +78,7 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 
 func validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, lastInspectionDateStr, size, description, status string) (*models.EmergencyDevice, error) {
 	const (
-		ErrDeviceTypeRequired          string = "device Type is required"
+		ErrDeviceTypeRequired          string = "device type is required"
 		ErrRoomRequired                string = "room is required"
 		ErrInvalidRoomID               string = "invalid room ID"
 		ErrInvalidEmergencyDeviceID    string = "invalid emergency device type ID"
