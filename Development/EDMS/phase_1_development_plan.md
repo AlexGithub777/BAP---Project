@@ -1,10 +1,12 @@
 # EDMS Phase 1 Development Plan
 
-## All Tasks Due - 27/09/2024
+## All Tasks Due - 04/10/2024
 
-### Testing & Intergation - 27/09/2024 - 29/09/2024
+### Testing & Intergation - 04/10/2024 - 06/10/2024
 
-### Prototype 1.0 Release Date & Presentation - 29/09/2024
+### Prototype 1.0 Release Date - 06/10/2024
+
+### Presentation Date - 10/10/2024
 
 ## Development Workflow:
 

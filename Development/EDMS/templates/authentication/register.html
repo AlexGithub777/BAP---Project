@@ -4,6 +4,13 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>EDMS Register</title>
+        <!-- favicon-->
+        <link
+            rel="icon"
+            type="image/png"
+            href="/static/app_icon.png"
+            sizes="16x16"
+        />
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -36,14 +43,19 @@
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
         />
-
         <script type="text/javascript">
             $(document).ready(function () {
-                // Get the error message from the server-side data
-                var message = "{{.message}}";
-                var error = "{{.error}}";
+                // Function to get query parameters by name
+                function getQueryParameter(param) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(param);
+                }
 
-                // If there's an error message, display it with Toastify
+                // Get the message and error parameters from the query string
+                var message = getQueryParameter("message") || "{{.message}}";
+                var error = getQueryParameter("error") || "{{.error}}";
+
+                // If there's a message, display it using Toastify
                 if (message) {
                     Toastify({
                         text: message,
@@ -54,8 +66,15 @@
                         backgroundColor:
                             "linear-gradient(to right, #008000, #008000)",
                     }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        "/register"
+                    );
                 }
 
+                // If there's an error, display it using Toastify
                 if (error) {
                     Toastify({
                         text: error,
@@ -66,6 +85,12 @@
                         backgroundColor:
                             "linear-gradient(to right, #ff5f6d, #ffc371)",
                     }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        "/register"
+                    );
                 }
             });
         </script>

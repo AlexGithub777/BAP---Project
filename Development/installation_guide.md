@@ -64,13 +64,15 @@ Get the necessary environment variable values (such as `DB_USER`, `DB_PASSWORD`,
 The structure of the `.env` file should look like this:
 
 ```bash
-DB_USER="your_postgres_username"
-DB_PASSWORD="your_postgres_password"
-DB_NAME="your_database_name"
-DB_HOST="localhost"
+DB_USER=your_postgres_username
+DB_PASSWORD=your_postgres_password
+DB_NAME=your_database_name
+DB_HOST=localhost
 DB_PORT=5432
+ADMIN_PASSWORD=you_password
 JWT_SECRET="your_jwt_secret"
 ```
+Ensure password meets the requirements (8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character)
 
 ### 7. Run Database Migrations
 

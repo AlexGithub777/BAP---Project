@@ -1,9 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-dark" data-bs-theme="light">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Admin Settings</title>
+        <title>Dashboard</title>
+        <!-- favicon-->
+        <link
+            rel="icon"
+            type="image/png"
+            href="/static/app_icon.png"
+            sizes="16x16"
+        />
         <!-- Toastify JS -->
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"
@@ -18,6 +25,13 @@
             integrity="sha512-VSD3lcSci0foeRFRHWdYX4FaLvec89irh5+QAGc00j5AOdow2r5MFPhoPEYBUQdyarXwbzyJEO7Iko7+PnPuBw=="
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
+        />
+        <!-- Leaflet CSS -->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
         />
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -44,11 +58,17 @@
         <link rel="stylesheet" href="/static/main.css" />
         <script type="text/javascript">
             $(document).ready(function () {
-                // Get the error message from the server-side data
-                var message = "{{.message}}";
-                var error = "{{.error}}";
+                // Function to get query parameters by name
+                function getQueryParameter(param) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(param);
+                }
 
-                // If there's an error message, display it with Toastify
+                // Get the message and error parameters from the query string
+                var message = getQueryParameter("message") || "{{.message}}";
+                var error = getQueryParameter("error") || "{{.error}}";
+
+                // If there's a message, display it using Toastify
                 if (message) {
                     Toastify({
                         text: message,
@@ -59,8 +79,15 @@
                         backgroundColor:
                             "linear-gradient(to right, #008000, #008000)",
                     }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        "/dashboard"
+                    );
                 }
 
+                // If there's an error, display it using Toastify
                 if (error) {
                     Toastify({
                         text: error,
@@ -71,70 +98,55 @@
                         backgroundColor:
                             "linear-gradient(to right, #ff5f6d, #ffc371)",
                     }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState(
+                        {},
+                        document.title,
+                        "/dashboard"
+                    );
                 }
             });
         </script>
     </head>
     <body>
-        <!-- Admin navbar-->
-        {{ template "admin_navbar.html" . }}
+        <!-- Dashboard Navbar -->
+        {{ template "dashboard_navbar.html" . }}
 
-        <div class="container">
-            <!-- Manage Users -->
-            {{ template "user_list.html" . }}
+        <!-- Map and Device List table -->
+        {{ template "device_list.html" . }}
 
-            <!-- Manage Locations -->
-            <div>
-                <h2>Manage Locations</h2>
+        <!-- Notifications modal -->
+        {{ template "notifications.html" . }}
 
-                <!-- Manage Sites -->
-                {{ template "site_list.html" . }}
+        <!-- View Notes Modal-->
+        {{ template "notes_modal.html" . }}
 
-                <!-- Manage Buildings-->
-                {{ template "building_list.html" . }}
+        <!-- Add Device Modal -->
+        {{ template "add_device.html" . }}
 
-                <!-- Manage Rooms -->
-                {{ template "room_list.html" . }}
-            </div>
+        <!-- Add Inspection Device Modal -->
+        {{ template "add_inspection.html" . }}
 
-            <!-- Manage Device Types -->
-            {{ template "device_type_list.html" . }}
+        <!-- View Device Inspection modal -->
+        {{ template "device_inspection.html" . }}
 
-            <!-- Modals -->
-            {{ template "add_site.html" . }}
+        <!-- Delete device modal -->
+        {{ template "delete_modal.html" . }}
 
-            <!-- Notifications modal -->
-            {{ template "notifications.html" . }}
-        </div>
+        <!-- Footer -->
+        {{ template "footer.html" . }}
+
+        <!-- Leaflet js-->
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
         <!-- Custom JS-->
         <script>
-            // Image Preview
-            $("#siteMapImgInput").change(function () {
-                var file = this.files[0];
-                // Check if the file is an image
-                if (!file.type.startsWith("image/")) {
-                    $("#siteMapImgInput").val("");
-                    Toastify({
-                        text: "Please upload an image file.",
-                        duration: 6000,
-                        close: true,
-                        gravity: "top", // `top` or `bottom`
-                        position: "center", // `left`, `center` or `right`
-                        backgroundColor:
-                            "linear-gradient(to right, #ff5f6d, #ffc371)",
-                    }).showToast();
-                    return;
-                }
-
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $("#imagePreview").attr("src", e.target.result);
-                    $("#imagePreviewContainer").show();
-                };
-                reader.readAsDataURL(file);
-            });
+            var role = "{{.role}}";
         </script>
-        <script src="/static/navbar.js"></script>
-        <script src="/static/admin.js"></script>
+        <script src="/static/main.js"></script>
+        <script src="/static/dashboard.js"></script>
     </body>
 </html>

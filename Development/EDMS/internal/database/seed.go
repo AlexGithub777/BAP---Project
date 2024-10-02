@@ -45,15 +45,15 @@ func SeedData(db *sql.DB) {
 
 	// Insert Users
 	_, err = db.Exec(`
-		INSERT INTO UserT (username, password, role, email)
-		VALUES ('admin1', $1, 'admin', 'admin@email.com')`, adminHash)
+		INSERT INTO UserT (username, password, role, email, defaultadmin)
+		VALUES ('admin1', $1, 'Admin', 'admin@email.com', true)`, adminHash)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	_, err = db.Exec(`
 		INSERT INTO UserT (username, password, role, email)
-		VALUES ('user12', $1, 'user', 'user@email.com')`, userHash)
+		VALUES ('user12', $1, 'User', 'user@email.com')`, userHash)
 	if err != nil {
 		log.Fatal(err)
 	}

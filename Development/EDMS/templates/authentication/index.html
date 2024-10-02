@@ -3,7 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>EDMS Forgot Password</title>
+        <title>EDMS Login</title>
+        <!-- favicon-->
+        <link
+            rel="icon"
+            type="image/png"
+            href="/static/app_icon.png"
+            sizes="16x16"
+        />
         <!-- jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -20,10 +27,6 @@
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"
         ></script>
-
-        <!-- Custom CSS-->
-        <link rel="stylesheet" href="/static/login.css" />
-
         <!-- Toastify JS -->
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.js"
@@ -39,27 +42,34 @@
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
         />
-
         <script type="text/javascript">
             $(document).ready(function () {
-                // Get the error message from the server-side data
-                var message = "{{.message}}";
-                var error = "{{.error}}";
-                var email = "{{.email}}";
+                // Function to get query parameters by name
+                function getQueryParameter(param) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(param);
+                }
 
-                // If there's an error message, display it with Toastify
+                // Get the message and error parameters from the query string
+                var message = getQueryParameter("message") || "{{.message}}";
+                var error = getQueryParameter("error") || "{{.error}}";
+
+                // If there's a message, display it using Toastify
                 if (message) {
                     Toastify({
                         text: message,
-                        duration: 3000,
+                        duration: 6000,
                         close: true,
                         gravity: "top", // `top` or `bottom`
                         position: "center", // `left`, `center` or `right`
                         backgroundColor:
                             "linear-gradient(to right, #008000, #008000)",
                     }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState({}, document.title, "/");
                 }
 
+                // If there's an error, display it using Toastify
                 if (error) {
                     Toastify({
                         text: error,
@@ -70,20 +80,13 @@
                         backgroundColor:
                             "linear-gradient(to right, #ff5f6d, #ffc371)",
                     }).showToast();
-                }
-
-                if (email) {
-                    Toastify({
-                        text: email,
-                        duration: 3000,
-                        close: false,
-                        gravity: "top", // `top` or `bottom`
-                        position: "center", // `left`, `center` or `right`
-                        type: "info",
-                    }).showToast();
+                    // remove the message from the URL
+                    window.history.replaceState({}, document.title, "/");
                 }
             });
         </script>
+        <!-- Custom CSS-->
+        <link rel="stylesheet" href="/static/login.css" />
     </head>
     <body class="bg-dark">
         <section class="h-100">
@@ -103,49 +106,97 @@
                         <div class="card shadow-lg">
                             <div class="card-body p-5">
                                 <h1 class="fs-4 card-title fw-bold mb-4">
-                                    Forgot Password
+                                    Login
                                 </h1>
                                 <form
-                                    method="POST"
                                     class="needs-validation"
                                     novalidate=""
                                     autocomplete="off"
-                                    action="/forgot-password"
+                                    id="login-form"
+                                    action="/login"
+                                    method="POST"
                                 >
                                     <div class="mb-3">
                                         <label
                                             class="mb-2 text-muted"
-                                            for="email"
-                                            >E-Mail Address</label
+                                            for="username"
+                                            >Username</label
                                         >
                                         <input
-                                            id="email"
-                                            type="email"
+                                            id="username"
+                                            type="text"
                                             class="form-control"
-                                            name="email"
+                                            name="username"
                                             value=""
                                             required
+                                            minlength="6"
                                             autofocus
+                                            pattern="^[a-zA-Z0-9_]{6,}$"
                                         />
                                         <div class="invalid-feedback">
-                                            Email is invalid
+                                            Invalid username.
                                         </div>
                                     </div>
 
+                                    <div class="mb-3">
+                                        <div class="mb-2 w-100">
+                                            <label
+                                                class="text-muted"
+                                                for="password"
+                                                >Password</label
+                                            >
+                                            <a
+                                                href="/forgot-password"
+                                                class="float-end"
+                                            >
+                                                Forgot Password?
+                                            </a>
+                                        </div>
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            class="form-control"
+                                            name="password"
+                                            required
+                                        />
+                                    </div>
                                     <div class="d-flex align-items-center">
+                                        <div class="form-check">
+                                            <input
+                                                type="checkbox"
+                                                name="remember"
+                                                id="remember"
+                                                class="form-check-input"
+                                            />
+                                            <label
+                                                for="remember"
+                                                class="form-check-label"
+                                                >Remember Me</label
+                                            >
+                                        </div>
+
                                         <button
                                             type="submit"
                                             class="btn btn-primary ms-auto"
+                                            id="submitButton"
                                         >
-                                            Send Link
+                                            <span
+                                                class="spinner-border spinner-border-sm d-none"
+                                                aria-hidden="true"
+                                            ></span>
+                                            <span class="button-text"
+                                                >Login</span
+                                            >
                                         </button>
                                     </div>
                                 </form>
                             </div>
                             <div class="card-footer py-3 border-0">
                                 <div class="text-center">
-                                    Remember your password?
-                                    <a href="/" class="text-dark">Login</a>
+                                    Don't have an account?
+                                    <a href="/register" class="text-dark"
+                                        >Create One</a
+                                    >
                                 </div>
                             </div>
                         </div>

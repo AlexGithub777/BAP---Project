@@ -1,9 +1,9 @@
-<div id="addSiteModal" class="modal fade" role="dialog">
+<div id="editSiteModal" class="modal fade" role="dialog">
     <div class="modal-dialog modal-dialog-scrollable">
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Add Site</h4>
+                <h4 class="modal-title">Edit Site</h4>
                 <button
                     type="button"
                     class="btn-close"
@@ -16,20 +16,25 @@
                     class="form-control needs-validation"
                     enctype="multipart/form-data"
                     method="POST"
-                    id="addSiteForm"
-                    action="/api/site"
+                    id="editSiteForm"
+                    action=""
                     autocomplete="off"
                     novalidate
                 >
                     <div class="mb-3">
+                        <input
+                            type="hidden"
+                            id="editSiteID"
+                            name="editSiteID"
+                        />
                         <label for="siteName" class="form-label"
                             >Site Name</label
                         >
                         <input
                             type="text"
                             class="form-control"
-                            id="addSiteName"
-                            name="addSiteName"
+                            id="editSiteName"
+                            name="editSiteName"
                             placeholder="Enter Site Name"
                             pattern=".{1,}"
                             required
@@ -45,8 +50,8 @@
                         <input
                             type="text"
                             class="form-control"
-                            id="addSiteAddress"
-                            name="addSiteAddress"
+                            id="editSiteAddress"
+                            name="editSiteAddress"
                             placeholder="Enter Site Address"
                             pattern=".{1,}"
                             required
@@ -56,21 +61,42 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="siteMapImgInput" class="form-label"
+                        <label for="currentSiteMap" class="form-label"
                             >Site Map</label
+                        >
+                        <div id="currentSiteMapContainer" style="display: none">
+                            <img
+                                id="currentSiteMap"
+                                name="currentSiteMap"
+                                style="
+                                    max-width: 100%;
+                                    max-height: 100%;
+                                    object-fit: contain;
+                                "
+                                alt="Site Map"
+                            />
+                        </div>
+                    </div>
+                    <div id="editSiteImgInput" class="mb-3">
+                        <label for="siteMapImgInput" class="form-label"
+                            >New Site Map</label
                         >
                         <input
                             type="file"
                             class="form-control"
-                            id="siteMapImgInput"
+                            id="editSiteMapImgInput"
                             name="siteMapImgInput"
                             accept="image/*"
                         />
                     </div>
-                    <div id="imagePreviewContainer" style="display: none">
-                        <h3>Image Preview:</h3>
+                    <div
+                        id="editSiteImagePreviewContainer"
+                        style="display: none"
+                    >
+                        <h4>Image Preview:</h4>
                         <img
                             id="imagePreview"
+                            name="editSiteImage"
                             style="
                                 max-width: 100%;
                                 max-height: 100%;
@@ -89,8 +115,8 @@
                 >
                     Close
                 </button>
-                <button type="button" id="addSiteBtn" class="btn btn-primary">
-                    Add Site
+                <button type="button" id="editSiteBtn" class="btn btn-primary">
+                    Edit Site
                 </button>
             </div>
         </div>

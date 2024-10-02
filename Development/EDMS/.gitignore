@@ -55,3 +55,7 @@ seed_complete
 tmp
 
 tmp/*
+
+vendor
+
+.hintrc

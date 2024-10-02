@@ -262,7 +262,9 @@ document.getElementById("siteFilter").addEventListener("change", () => {
 initializeMap("map");
 getFilterOptions();
 
-console.log(role);
+let currentPage = 1;
+let rowsPerPage = 10;
+let allDevices = [];
 
 async function getAllDevices(buildingCode = "", siteId = "") {
     try {
@@ -279,20 +281,10 @@ async function getAllDevices(buildingCode = "", siteId = "") {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const devices = await response.json();
-        console.log("Devices:", devices);
+        allDevices = await response.json();
+        console.log("Devices:", allDevices);
 
-        const tbody = document.getElementById("emergency-device-body");
-        if (!tbody) {
-            console.error("Table body element not found");
-            return;
-        }
-
-        if (!Array.isArray(devices) || devices.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
-        } else {
-            tbody.innerHTML = devices.map(formatDeviceRow).join("");
-        }
+        updateTable();
     } catch (err) {
         console.error("Failed to fetch devices:", err);
         const tbody = document.getElementById("emergency-device-body");
@@ -301,6 +293,152 @@ async function getAllDevices(buildingCode = "", siteId = "") {
         }
     }
 }
+
+function updateTable() {
+    const tbody = document.getElementById("emergency-device-body");
+    if (!tbody) {
+        console.error("Table body element not found");
+        return;
+    }
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const pageDevices = allDevices.slice(startIndex, endIndex);
+
+    if (!Array.isArray(pageDevices) || pageDevices.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
+    } else {
+        tbody.innerHTML = pageDevices.map(formatDeviceRow).join("");
+    }
+
+    updatePaginationControls();
+}
+
+// JavaScript
+function updatePaginationControls() {
+    const totalPages = Math.ceil(allDevices.length / rowsPerPage);
+    const paginationEl = document.querySelector(".pagination");
+    const isMobile = window.innerWidth < 768; // Detect mobile devices
+
+    let paginationHTML = `
+        <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+            <a class="page-link" href="#" data-page="${
+                currentPage - 1
+            }" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+    `;
+
+    function addPageNumber(pageNum) {
+        paginationHTML += `
+            <li class="page-item ${
+                currentPage === pageNum ? "active" : ""
+            }" aria-current="page">
+                <a class="page-link" href="#" data-page="${pageNum}">${pageNum}</a>
+            </li>
+        `;
+    }
+
+    function addEllipsis() {
+        paginationHTML += `
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+        `;
+    }
+
+    if (isMobile) {
+        // Simplified pagination for mobile
+        if (totalPages <= 3) {
+            for (let i = 1; i <= totalPages; i++) {
+                addPageNumber(i);
+            }
+        } else {
+            addPageNumber(1);
+            if (currentPage !== 1 && currentPage !== totalPages) {
+                addPageNumber(currentPage);
+            }
+            addPageNumber(totalPages);
+        }
+    } else {
+        // Desktop pagination (keep your existing logic here)
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                addPageNumber(i);
+            }
+        } else {
+            addPageNumber(1);
+            if (currentPage > 3) addEllipsis();
+
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+
+            if (currentPage <= 3) {
+                end = 4;
+            } else if (currentPage >= totalPages - 2) {
+                start = totalPages - 3;
+            }
+
+            for (let i = start; i <= end; i++) {
+                addPageNumber(i);
+            }
+
+            if (currentPage < totalPages - 2) addEllipsis();
+            addPageNumber(totalPages);
+        }
+    }
+
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+            <a class="page-link" href="#" data-page="${
+                currentPage + 1
+            }" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    `;
+
+    paginationEl.innerHTML = paginationHTML;
+
+    function handlePaginationClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        let target = e.target.closest(".page-link");
+
+        if (target && target.hasAttribute("data-page")) {
+            const newPage = parseInt(target.getAttribute("data-page"), 10);
+
+            if (
+                newPage !== currentPage &&
+                newPage > 0 &&
+                newPage <= totalPages
+            ) {
+                currentPage = newPage;
+                updateTable();
+            }
+        }
+    }
+
+    // Remove existing event listeners
+    paginationEl.removeEventListener("click", handlePaginationClick);
+    paginationEl.removeEventListener("touchstart", handlePaginationClick);
+
+    // Add event listeners to the pagination container
+    paginationEl.addEventListener("click", handlePaginationClick);
+    paginationEl.addEventListener("touchstart", handlePaginationClick);
+}
+
+// Event listener for rows per page dropdown
+document.getElementById("rowsPerPage").addEventListener("change", (e) => {
+    rowsPerPage = parseInt(e.target.value);
+    currentPage = 1; // Reset to first page when changing rows per page
+    updateTable();
+});
+
+// Initial fetch without filtering
+getAllDevices();
 
 function formatDeviceRow(device) {
     if (!device) return "";
@@ -316,7 +454,13 @@ function formatDeviceRow(device) {
     const badgeClass = getBadgeClass(device.status.String);
     const buttons = getActionButtons(device);
 
-    const isAdmin = role === "admin";
+    // Declare isAdmin within the function
+    let isAdmin = false;
+
+    // Ensure role is defined and check for "Admin"
+    if (role === "Admin") {
+        isAdmin = true;
+    }
 
     return `
         <tr>
@@ -353,7 +497,7 @@ function formatDeviceRow(device) {
                 <span class="badge ${badgeClass}">${device.status.String}</span>
             </td>
             <td>
-                <div class="action-buttons">
+                <div class="btn-group">
                     ${buttons}
                 </div>
             </td>
@@ -381,18 +525,16 @@ function getBadgeClass(status) {
 
 function getActionButtons(device) {
     let buttons = `<button class="btn btn-primary" onclick="deviceNotes('${device.description.String}')">Notes</button>`;
-    if (role === "admin") {
+    if (role === "Admin") {
         buttons += `
             <button class="btn btn-secondary" onclick="viewDeviceInspection(${device.emergency_device_id})">Inspect</button>
             <button class="btn btn-warning" onclick="editDevice(${device.emergency_device_id})">Edit</button>
-            <button class="btn btn-danger" onclick="deleteDevice(${device.emergency_device_id})">Delete</button>
+            <button class="btn btn-danger" onclick="showDeleteModal(${device.emergency_device_id},'emergency-device', '<br>${device.emergency_device_type_name} - Serial Number: ${device.serial_number.String}')">Delete</button>
+            
         `;
     }
     return buttons;
 }
-
-// Initial fetch without filtering
-getAllDevices();
 
 function addDevice() {
     // Fetch the sites and populate the select options

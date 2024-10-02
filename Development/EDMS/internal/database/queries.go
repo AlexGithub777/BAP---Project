@@ -9,7 +9,7 @@ import (
 
 // GetAllUsers function
 func (db *DB) GetAllUsers() ([]models.User, error) {
-	query := `SELECT userid, username, email, role FROM userT`
+	query := `SELECT userid, username, email, role, defaultadmin FROM userT`
 	rows, err := db.Query(query)
 	if err != nil {
 		return nil, err
@@ -25,6 +25,7 @@ func (db *DB) GetAllUsers() ([]models.User, error) {
 			&user.Username,
 			&user.Email,
 			&user.Role,
+			&user.DefaultAdmin,
 		)
 		if err != nil {
 			return nil, err
@@ -58,10 +59,62 @@ func (db *DB) CreateUser(user *models.User) error {
 	return nil
 }
 
+// Update user function
+func (db *DB) UpdateUserWithPassword(user *models.User) error {
+	query := `
+        UPDATE userT
+        SET username = $1, email = $2, role = $3, password = $4
+        WHERE userid = $5
+        `
+	args := []interface{}{user.Username, user.Email, user.Role, user.Password, user.UserID}
+
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Update user function
+func (db *DB) UpdateUser(user *models.User) error {
+	query := `
+		UPDATE userT
+		SET username = $1, email = $2, role = $3
+		WHERE userid = $4
+		`
+
+	args := []interface{}{user.Username, user.Email, user.Role, user.UserID}
+
+	updateStmt, err := db.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(args...)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 // Get user by username function
 func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 	query := `
-		SELECT userid, username, password, email, role
+		SELECT userid, username, password, email, role, defaultadmin
 		FROM userT
 		WHERE username = $1
 		`
@@ -72,6 +125,7 @@ func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 		&user.Password,
 		&user.Email,
 		&user.Role,
+		&user.DefaultAdmin,
 	)
 
 	if err != nil {
@@ -79,6 +133,50 @@ func (db *DB) GetUserByUsername(username string) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+// Get user by ID function
+func (db *DB) GetUserByID(userid int) (*models.User, error) {
+	query := `
+		SELECT userid, username, password, email, role, defaultadmin
+		FROM userT
+		WHERE userid = $1
+		`
+
+	var user models.User
+	err := db.QueryRow(query, userid).Scan(
+		&user.UserID,
+		&user.Username,
+		&user.Password,
+		&user.Email,
+		&user.Role,
+		&user.DefaultAdmin,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// Delete user function
+func (db *DB) DeleteUser(userid int) error {
+	query := `DELETE FROM userT WHERE userid = $1`
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(userid)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Update password function
@@ -518,7 +616,81 @@ func (db *DB) AddSite(site *models.Site) error {
 	return nil
 }
 
+func (db *DB) UpdateSite(site *models.Site) error {
+	query := "UPDATE SiteT SET siteName = $1, siteAddress = $2, siteMapImagePath = $3 WHERE siteID = $4"
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(site.SiteName, site.SiteAddress, site.SiteMapImagePath, site.SiteID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) DeleteSite(siteID string) error {
+	query := "DELETE FROM SiteT WHERE siteID = $1"
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(siteID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) GetRoomsBySiteID(siteID string) ([]models.Room, error) {
+	query := `
+	SELECT r.roomid, r.roomcode, b.buildingcode, s.sitename
+	FROM roomT r
+	JOIN buildingT b ON r.buildingid = b.buildingid
+	JOIN siteT s ON b.siteid = s.siteid
+	WHERE s.siteid = $1
+	ORDER BY r.roomcode
+	`
+
+	rows, err := db.Query(query, siteID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var rooms []models.Room
+
+	// Scan the results
+	for rows.Next() {
+		var room models.Room
+		err := rows.Scan(
+			&room.RoomID,
+			&room.RoomCode,
+			&room.BuildingCode,
+			&room.SiteName,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		rooms = append(rooms, room)
+	}
+
+	return rooms, nil
+}
+
 func (db *DB) GetRoomByID(roomID string){
-	query := ""
+	
 
 }

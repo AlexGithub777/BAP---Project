@@ -16,12 +16,14 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
+
 // CustomClaims represents JWT custom claims
 type CustomClaims struct {
-	UserID   string `json:"user_id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+	UserID       string `json:"user_id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	Role         string `json:"role"`
+	DefaultAdmin bool   `json:"default_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -39,17 +41,13 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 	// Check if the email exists in the database
 	user, err := a.DB.GetUserByEmail(email)
 	if err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"error": "Email not found",
-		})
+		return c.Redirect(http.StatusSeeOther, "/forgot-password?error=Email%20not%20found")
 	}
 
 	// Generate a new password
 	newPassword, err := password.Generate(10, 8, 2, false, false)
 	if err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"error": "Could not generate password",
-		})
+		return c.Redirect(http.StatusSeeOther, "/forgot-password?error=Could%20not%20generate%20password")
 	}
 
 	// Hash the new password
@@ -60,22 +58,19 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 
 	// Update the user's password
 	if err := a.DB.UpdatePassword(user.UserID, string(hashedPassword)); err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"error": "Could not update password",
-		})
+		return c.Redirect(http.StatusSeeOther, "/forgot-password?error=Could%20not%20update%20password")
 	}
+
+	emailmessage := fmt.Sprintf("Could not send email but Your new password is: %s", newPassword)
 
 	// Send the new password to the user's email
 	if err := sendPasswordResetEmail(email, user.Username, newPassword); err != nil {
-		return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-			"email": "Could not send email, but password reset successful. Your new password is: " + newPassword,
-		})
+		return c.Redirect(http.StatusSeeOther, "/?message="+emailmessage)
 	}
+	message := fmt.Sprintf("Password reset successful. Check your %s for the new password.", email)
 
-	// Render the forgot password page with a success message
-	return c.Render(http.StatusOK, "forgot_password.html", map[string]interface{}{
-		"message": fmt.Sprintf("Password reset successful. Check your %s for the new password.", email),
-	})
+	// Render the login page with a success message
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // HandlePostRegister handles the register form submission
@@ -172,9 +167,7 @@ func (a *App) HandlePostRegister(c echo.Context) error {
 	// Generate a success message
 	// Maybe send a welcome email here
 	message := fmt.Sprintf("Registration successful. Please login with your username: %s", username)
-	return c.Render(http.StatusOK, "register.html", map[string]interface{}{
-		"message": message,
-	})
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // HandleGetLogin serves the home page
@@ -198,6 +191,7 @@ func (a *App) HandleGetLogin(c echo.Context) error {
 				c.Set("username", claims.Username)
 				c.Set("role", claims.Role)
 				c.Set("email", claims.Email)
+				c.Set("default_admin", claims.DefaultAdmin)
 
 				// User is already logged in, redirect to the dashboard
 				return c.Redirect(http.StatusSeeOther, "/dashboard")
@@ -251,7 +245,7 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 		Expires:  expiresAt,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false, // Set to true if using HTTPS
 		SameSite: http.SameSiteStrictMode,
 	}
 	c.SetCookie(cookie)
@@ -259,14 +253,16 @@ func (a *App) HandlePostLogin(c echo.Context) error {
 	c.Set("user", token)
 
 	// Return the token in the response as well
-	return c.Redirect(http.StatusSeeOther, "/dashboard")
+	return c.Redirect(http.StatusFound, "/dashboard")
 }
 
 // HandleGetLogout logs the user out
 func (a *App) HandleGetLogout(c echo.Context) error {
+	// Get message from query string
+	message := c.QueryParam("message")
 	// Check if request if a POST request
 	if c.Request().Method != http.MethodGet {
-		return c.Render(http.StatusMethodNotAllowed, "index.html", map[string]interface{}{
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
 			"error": "Method not allowed",
 		})
 	}
@@ -278,22 +274,28 @@ func (a *App) HandleGetLogout(c echo.Context) error {
 		Expires:  time.Now().Add(-time.Hour),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true, // Set to true if using HTTPS
+		Secure:   false, // Set to true if using HTTPS
 		SameSite: http.SameSiteStrictMode,
 	}
 	c.SetCookie(cookie)
 
+	// if message is empty, don't show it
+	if message == "" {
+		return c.Redirect(http.StatusSeeOther, "/")
+	}
+
 	// Redirect the user to the login page
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.Redirect(http.StatusSeeOther, "/?message="+message)
 }
 
 // GenerateToken generates a JWT token
 func GenerateToken(user *models.User, expiresAt time.Time) (string, error) {
 	claims := &CustomClaims{
-		UserID:   strconv.Itoa(user.UserID),
-		Email:    user.Email,
-		Username: user.Username,
-		Role:     user.Role,
+		UserID:       strconv.Itoa(user.UserID),
+		Email:        user.Email,
+		Username:     user.Username,
+		Role:         user.Role,
+		DefaultAdmin: user.DefaultAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},
