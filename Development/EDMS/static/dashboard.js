@@ -537,6 +537,10 @@ function getActionButtons(device) {
 }
 
 function addDevice() {
+    // Clear the form before showing the modal
+    document.getElementById("addDeviceForm").reset();
+    document.getElementById("addDeviceForm").classList.remove("was-validated");
+
     // Fetch the sites and populate the select options
     fetch("/api/site")
         .then((response) => response.json())
@@ -645,6 +649,7 @@ function addDevice() {
             // Add a default option and select it
             const defaultOption = document.createElement("option");
             defaultOption.text = "Select Device type";
+            defaultOption.value = "";
             defaultOption.selected = true;
             defaultOption.disabled = true;
             select.add(defaultOption);
@@ -680,8 +685,157 @@ function addDevice() {
         .catch((error) => console.error("Error:", error));
 
     // Show the modal after populating the select options
-    $("#addModal").modal("show");
+    $("#addDeviceModal").modal("show");
 }
+
+// Fetch the form and the submit button
+const form = document.querySelector("#addDeviceForm");
+const submitButton = document.querySelector("#addDeviceBtn");
+
+// Function to validate select elements
+function validateSelect(selectElement) {
+    if (selectElement.value === "") {
+        selectElement.setCustomValidity("Please make a selection");
+    } else {
+        selectElement.setCustomValidity("");
+    }
+}
+
+// Function to validate dates
+function validateDates() {
+    const manufactureDate = document.getElementById("manufactureDate");
+    const lastInspectionDate = document.getElementById("lastInspectionDate");
+    const currentDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+
+    let isValid = true;
+
+    // Validate manufacture date
+    if (manufactureDate.value && manufactureDate.value > currentDate) {
+        manufactureDate.setCustomValidity(
+            "Manufacture date cannot be in the future"
+        );
+        document.getElementById("manufactureDateFeedback").textContent =
+            "Manufacture date cannot be in the future";
+        isValid = false;
+    } else {
+        manufactureDate.setCustomValidity("");
+        document.getElementById("manufactureDateFeedback").textContent = "";
+    }
+
+    // Validate last inspection date
+    if (lastInspectionDate.value && lastInspectionDate.value > currentDate) {
+        lastInspectionDate.setCustomValidity(
+            "Last inspection date cannot be in the future"
+        );
+        document.getElementById("lastInspectionDateFeedback").textContent =
+            "Last inspection date cannot be in the future";
+        isValid = false;
+    } else if (
+        lastInspectionDate.value &&
+        lastInspectionDate.value === manufactureDate.value
+    ) {
+        // Show error if the dates are equal
+        lastInspectionDate.setCustomValidity(
+            "Last inspection date cannot be the same as manufacture date"
+        );
+        document.getElementById("lastInspectionDateFeedback").textContent =
+            "Last inspection date cannot be the same as manufacture date";
+        isValid = false;
+    } else if (
+        lastInspectionDate.value &&
+        manufactureDate.value &&
+        lastInspectionDate.value < manufactureDate.value
+    ) {
+        // Only show this error if both dates are entered and inspection date is before manufacture date
+        lastInspectionDate.setCustomValidity(
+            "Last inspection date cannot be before manufacture date"
+        );
+        document.getElementById("lastInspectionDateFeedback").textContent =
+            "Last inspection date cannot be before manufacture date";
+        isValid = false;
+    } else {
+        lastInspectionDate.setCustomValidity("");
+        document.getElementById("lastInspectionDateFeedback").textContent = "";
+    }
+
+    return isValid;
+}
+
+// Function to validate length for input and textarea elements
+function validateLength(element, maxLength) {
+    if (element.value.length > maxLength) {
+        element.setCustomValidity(
+            `This field is too long, maximum ${maxLength} characters.`
+        );
+    } else {
+        element.setCustomValidity("");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const description = document.getElementById("description");
+    const manufactureDate = document.getElementById("manufactureDate");
+    const lastInspectionDate = document.getElementById("lastInspectionDate");
+
+    description.addEventListener("input", function () {
+        validateLength(this, 255);
+    });
+
+    // Add event listeners to select elements
+    document
+        .querySelector("#addEmergencyDeviceType")
+        .addEventListener("change", function () {
+            validateSelect(this);
+        });
+    document
+        .querySelector("#addDeviceSite")
+        .addEventListener("change", function () {
+            validateSelect(this);
+        });
+    document
+        .querySelector("#addDeviceBuilding")
+        .addEventListener("change", function () {
+            validateSelect(this);
+        });
+    document
+        .querySelector("#addDeviceRoom")
+        .addEventListener("change", function () {
+            validateSelect(this);
+        });
+
+    // Add event listeners for date validation
+    manufactureDate.addEventListener("change", validateDates);
+    lastInspectionDate.addEventListener("change", validateDates);
+
+    // Add event listener to the submit button
+    submitButton.addEventListener(
+        "click",
+        function (event) {
+            // Validate all select elements before form submission
+            validateSelect(document.querySelector("#addEmergencyDeviceType"));
+            validateSelect(document.querySelector("#addDeviceSite"));
+            validateSelect(document.querySelector("#addDeviceBuilding"));
+            validateSelect(document.querySelector("#addDeviceRoom"));
+
+            // validate description length
+            validateLength(description, 255);
+
+            // Validate dates
+            const datesValid = validateDates();
+
+            if (!form.checkValidity() || !datesValid) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // If the form is valid, submit it
+                form.submit();
+            }
+
+            form.classList.add("was-validated");
+        },
+        false
+    );
+});
 
 function editDevice(deviceId) {
     console.log(`Edit device with ID: ${deviceId}`);
