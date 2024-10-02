@@ -24,6 +24,11 @@ func (a *App) handleError(c echo.Context, statusCode int, message string, err er
 	return c.JSON(statusCode, map[string]string{"error": message})
 }
 
+func (a *App) handleLogger(message string) {
+	a.Logger.Printf("\033[34m%s\033[0m", message)
+}
+
+
 // NewApp creates a new instance of App
 func NewApp(cfg config.Config) *App {
 	// Initialize Echo
