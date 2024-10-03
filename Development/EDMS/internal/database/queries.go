@@ -841,3 +841,36 @@ func (db *DB) AddEmergencyDevice(device *models.EmergencyDevice) error {
 
 	return nil
 }
+
+func (db *DB) UpdateEmergencyDevice(device *models.EmergencyDevice) error {
+	query := `
+	UPDATE emergency_deviceT
+	SET emergencydevicetypeid = $1, extinguishertypeid = $2, roomid = $3, serialnumber = $4, manufacturedate = $5, lastinspectiondate = $6, description = $7, size = $8, status = $9
+	WHERE emergencydeviceid = $10
+	`
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(
+		device.EmergencyDeviceTypeID,
+		device.ExtinguisherTypeID,
+		device.RoomID,
+		device.SerialNumber,
+		device.ManufactureDate,
+		device.LastInspectionDate,
+		device.Description,
+		device.Size,
+		device.Status,
+		device.EmergencyDeviceID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

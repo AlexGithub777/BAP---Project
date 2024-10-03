@@ -58,7 +58,7 @@ CREATE TABLE Emergency_DeviceT (
     ExtinguisherTypeID INT NULL,
     ManufactureDate DATE NULL,
     SerialNumber VARCHAR(50) NULL,
-    Description VARCHAR(80) NULL,
+    Description VARCHAR(255) NULL,
     Size VARCHAR(50) NULL,
     LastInspectionDate DATE NULL,
     Status VARCHAR(50) NULL,

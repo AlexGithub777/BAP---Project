@@ -25,3 +25,15 @@ type EmergencyDevice struct {
 	Size                    sql.NullString `json:"size"`                       // From emergency_deviceT table
 	Status                  sql.NullString `json:"status"`                     // From emergency_deviceT table
 }
+
+type EmergencyDeviceDto struct {
+	RoomID                string `json:"room_id"`
+	EmergencyDeviceTypeID string `json:"emergency_device_type"`
+	ExtinguisherTypeID    string `json:"extinguisher_type"`
+	SerialNumber          string `json:"serial_number"`
+	ManufactureDate       string `json:"manufacture_date"`
+	LastInspectionDate    string `json:"last_inspection_date"`
+	Size                  string `json:"size"`
+	Description           string `json:"description"`
+	Status                string `json:"status"`
+}

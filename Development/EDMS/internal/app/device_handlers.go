@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -99,6 +100,69 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 
 	// Redirect to dashboard with success message
 	return c.Redirect(http.StatusFound, "/dashboard?message=Device added successfully")
+}
+
+func (a *App) HandlePutDevice(c echo.Context) error {
+	// Check if request is not a PUT request
+	if c.Request().Method != http.MethodPut {
+		return c.Render(http.StatusMethodNotAllowed, "dashboard.html", map[string]interface{}{
+			"error": "Method not allowed",
+		})
+	}
+
+	// Parse the device ID from the URL parameter
+	deviceIDStr := c.Param("id")
+
+	// Parse form data from the request body
+	var device models.EmergencyDeviceDto
+	err := json.NewDecoder(c.Request().Body).Decode(&device)
+	if err != nil {
+		// handle error
+		a.handleLogger("Error decoding request body: " + err.Error())
+	}
+
+	// Convert the device ID to an integer
+	deviceID, err := strconv.Atoi(deviceIDStr)
+	if err != nil {
+		a.handleLogger("Error converting device ID to integer: " + err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid device ID",
+			"redirectURL": "/dashboard?error=Invalid device ID"})
+	}
+
+	// Log the incoming data
+	a.handleLogger("Device ID: " + deviceIDStr)
+	a.handleLogger("Room: " + device.RoomID)
+	a.handleLogger("Emergency Device Type: " + device.EmergencyDeviceTypeID)
+	a.handleLogger("Extinguisher Type: " + device.ExtinguisherTypeID)
+	a.handleLogger("Serial Number: " + device.SerialNumber)
+	a.handleLogger("Manufacture Date: " + device.ManufactureDate)
+	a.handleLogger("Last Inspection Date: " + device.LastInspectionDate)
+	a.handleLogger("Size: " + device.Size)
+	a.handleLogger("Description: " + device.Description)
+	a.handleLogger("Status: " + device.Status)
+
+	// Validate input
+	emergencyDevice, err := validateDevice(device.RoomID, device.EmergencyDeviceTypeID, device.ExtinguisherTypeID, device.SerialNumber, device.ManufactureDate, device.LastInspectionDate, device.Size, device.Description, device.Status)
+	if err != nil {
+		a.handleLogger("Error validating device: " + err.Error())
+		// Redirect to dashboard with error message
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Error validating device: " + err.Error(),
+			"redirectURL": "/dashboard?error=" + err.Error()})
+	}
+
+	// Add the device ID to the emergency device model
+	emergencyDevice.EmergencyDeviceID = deviceID
+
+	// Update the device in the database
+	err = a.DB.UpdateEmergencyDevice(emergencyDevice)
+	if err != nil {
+		a.handleLogger("Error updating device: " + err.Error())
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error updating device: " + err.Error(),
+			"redirectURL": "/dashboard?error=" + err.Error()})
+	}
+
+	// Redirect to dashboard with success message
+	return c.JSON(http.StatusOK, map[string]string{"message": "Device updated successfully", "redirectURL": "/dashboard?message=Device updated successfully"})
 }
 
 func validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, lastInspectionDateStr, size, description, status string) (*models.EmergencyDevice, error) {
