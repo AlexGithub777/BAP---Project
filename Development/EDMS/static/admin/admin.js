@@ -401,7 +401,7 @@ function editSite(siteId) {
             if (site.site_id == 1) {
                 $("#editSiteForm img[name=currentSiteMap]").attr(
                     "src",
-                    "/static/map.svg"
+                    "/static/site_maps/EIT_Taradale.svg"
                 );
                 $("#currentSiteMapContainer").show();
                 $("#editSiteImgInput").hide();

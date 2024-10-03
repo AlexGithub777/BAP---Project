@@ -12,7 +12,7 @@ function initializeMap(containerId, options = {}) {
 function createEitTaradaleMap() {
     const svgDimensions = { width: 561.568, height: 962.941 };
     const minCoordinates = { x: 128.009, y: 82.331 };
-    const imageUrl = "/static/map.svg";
+    const imageUrl = "/static/site_maps/EIT_Taradale.svg";
     const bounds = [
         [0, 0],
         [svgDimensions.height, svgDimensions.width],
@@ -30,7 +30,9 @@ function createEitTaradaleMap() {
 }
 
 function fetchBuildingsData() {
-    return fetch("static/buildings.json").then((response) => response.json());
+    return fetch("static/assets/buildings.json").then((response) =>
+        response.json()
+    );
 }
 
 function renderBuildings(data, svgDimensions, minCoordinates) {
@@ -148,21 +150,18 @@ function filterBySite() {
     const siteName =
         document.getElementById("siteFilter").selectedOptions[0].text;
     const siteId = document.getElementById("siteFilter").value;
-    console.log("Site Name:", siteName, "Site ID:", siteId);
 
     // Clear the table body
     clearTableBody();
 
     if (siteName === "All Sites") {
-        console.log("Filter by site: All Sites");
         hideMap();
         getAllDevices();
         return;
     }
 
     if (siteId === "1") {
-        // EIT Taradale should always also be id = 1, as its the first site inserted into the database (see seed.go)
-        console.log("Filter by site: EIT Taradale");
+        // Hard coded - EIT Taradale should always also be id = 1, as its the first site inserted into the database (see seed.go)
         // Clear the map layers
         map.eachLayer((layer) => {
             if (
@@ -196,24 +195,20 @@ function updateMapForSite(siteId) {
     fetch(`/api/site/${siteId}`)
         .then((response) => response.json())
         .then((data) => {
-            console.log("Site Data:", data);
             // Check if site has a map image
             if (!data.site_map_image_path.String) {
-                console.log("Site has no map image");
                 hideMap();
                 return;
             }
             showMap();
 
             const imageUrl = data.site_map_image_path.String;
-            console.log("Image URL:", imageUrl);
 
             const image = new Image();
             image.src = imageUrl;
             image.onload = function () {
                 const imgWidth = this.width;
                 const imgHeight = this.height;
-                console.log("Image dimensions:", imgWidth, "x", imgHeight);
 
                 const newBounds = [
                     [0, 0],
@@ -275,14 +270,12 @@ async function getAllDevices(buildingCode = "", siteId = "") {
         if (params.toString()) url += `?${params.toString()}`;
 
         const response = await fetch(url);
-        console.log("Response:", response);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         allDevices = await response.json();
-        console.log("Devices:", allDevices);
 
         updateTable();
     } catch (err) {
@@ -707,7 +700,6 @@ function editDevice(deviceId) {
                 .then((response) => response.json())
                 .then((data) => {
                     // Populate the form with the data
-                    console.log("Device data:", data);
                     document.getElementById(
                         "editEmergencyDeviceTypeInput"
                     ).value = data.emergency_device_type_id;
@@ -818,62 +810,82 @@ function validateSelect(selectElement) {
 
 // Function to validate dates
 function validateDates() {
-    const manufactureDate = document.querySelector(".manufactureDateInput");
-    const lastInspectionDate = document.querySelector(
-        ".lastInspectionDateInput"
-    );
     const currentDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
-
     let isValid = true;
 
-    // Validate manufacture date
-    if (manufactureDate.value && manufactureDate.value > currentDate) {
-        manufactureDate.setCustomValidity(
-            "Manufacture date cannot be in the future"
-        );
-        document.querySelector(".manufactureDateFeedback").textContent =
-            "Manufacture date cannot be in the future";
-        isValid = false;
-    } else {
-        manufactureDate.setCustomValidity("");
-        document.querySelector(".manufactureDateFeedback").textContent = "";
-    }
+    // Get all manufacture date and last inspection date inputs
+    const manufactureDateInputs = document.querySelectorAll(
+        ".manufactureDateInput"
+    );
+    const lastInspectionDateInputs = document.querySelectorAll(
+        ".lastInspectionDateInput"
+    );
 
-    // Validate last inspection date
-    if (lastInspectionDate.value && lastInspectionDate.value > currentDate) {
-        lastInspectionDate.setCustomValidity(
-            "Last inspection date cannot be in the future"
-        );
-        document.querySelector(".lastInspectionDateFeedback").textContent =
-            "Last inspection date cannot be in the future";
-        isValid = false;
-    } else if (
-        lastInspectionDate.value &&
-        lastInspectionDate.value === manufactureDate.value
-    ) {
-        // Show error if the dates are equal
-        lastInspectionDate.setCustomValidity(
-            "Last inspection date cannot be the same as manufacture date"
-        );
-        document.querySelector(".lastInspectionDateFeedback").textContent =
-            "Last inspection date cannot be the same as manufacture date";
-        isValid = false;
-    } else if (
-        lastInspectionDate.value &&
-        manufactureDate.value &&
-        lastInspectionDate.value < manufactureDate.value
-    ) {
-        // Only show this error if both dates are entered and inspection date is before manufacture date
-        lastInspectionDate.setCustomValidity(
-            "Last inspection date cannot be before manufacture date"
-        );
-        document.querySelector(".lastInspectionDateFeedback").textContent =
-            "Last inspection date cannot be before manufacture date";
-        isValid = false;
-    } else {
-        lastInspectionDate.setCustomValidity("");
-        document.querySelector(".lastInspectionDateFeedback").textContent = "";
-    }
+    manufactureDateInputs.forEach((manufactureDate, index) => {
+        const lastInspectionDate = lastInspectionDateInputs[index];
+
+        // Validate manufacture date
+        if (manufactureDate.value && manufactureDate.value > currentDate) {
+            manufactureDate.setCustomValidity(
+                "Manufacture date cannot be in the future"
+            );
+            document.querySelectorAll(".manufactureDateFeedback")[
+                index
+            ].textContent = "Manufacture date cannot be in the future";
+            isValid = false;
+        } else {
+            manufactureDate.setCustomValidity("");
+            document.querySelectorAll(".manufactureDateFeedback")[
+                index
+            ].textContent = "";
+        }
+
+        // Validate last inspection date
+        if (
+            lastInspectionDate.value &&
+            lastInspectionDate.value > currentDate
+        ) {
+            lastInspectionDate.setCustomValidity(
+                "Last inspection date cannot be in the future"
+            );
+            document.querySelectorAll(".lastInspectionDateFeedback")[
+                index
+            ].textContent = "Last inspection date cannot be in the future";
+            isValid = false;
+        } else if (
+            lastInspectionDate.value &&
+            lastInspectionDate.value === manufactureDate.value
+        ) {
+            // Show error if the dates are equal
+            lastInspectionDate.setCustomValidity(
+                "Last inspection date cannot be the same as manufacture date"
+            );
+            document.querySelectorAll(".lastInspectionDateFeedback")[
+                index
+            ].textContent =
+                "Last inspection date cannot be the same as manufacture date";
+            isValid = false;
+        } else if (
+            lastInspectionDate.value &&
+            manufactureDate.value &&
+            lastInspectionDate.value < manufactureDate.value
+        ) {
+            // Show error if last inspection date is before manufacture date
+            lastInspectionDate.setCustomValidity(
+                "Last inspection date cannot be before manufacture date"
+            );
+            document.querySelectorAll(".lastInspectionDateFeedback")[
+                index
+            ].textContent =
+                "Last inspection date cannot be before manufacture date";
+            isValid = false;
+        } else {
+            lastInspectionDate.setCustomValidity("");
+            document.querySelectorAll(".lastInspectionDateFeedback")[
+                index
+            ].textContent = "";
+        }
+    });
 
     return isValid;
 }
@@ -895,6 +907,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const lastInspectionDate = document.querySelector(
         ".lastInspectionDateInput"
     );
+    const editDescriptionInput = document.querySelector(
+        "#editDescriptionInput"
+    );
+    const editManufactureDateInput = document.querySelector(
+        "#editManufactureDateInput"
+    );
+    const editLastInspectionDateInput = document.querySelector(
+        "#editLastInspectionDateInput"
+    );
+
+    // Validate edit description length
+    editDescriptionInput.addEventListener("input", function () {
+        validateLength(this, 255);
+    });
+
+    // Validate edit manufacture date
+    editManufactureDateInput.addEventListener("change", validateDates);
+
+    // Validate edit last inspection date
+    editLastInspectionDateInput.addEventListener("change", validateDates);
 
     // Validate description length
     description.addEventListener("input", function () {
@@ -944,8 +976,10 @@ document.addEventListener("DOMContentLoaded", function () {
         addDeviceForm.classList.add("was-validated");
     });
 
-    // Add event listener to the add device button
+    // Add event listener to the edit device button
     editDeviceButton.addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent default form submission
+
         // Validate all select elements before form submission
         document
             .querySelectorAll(
@@ -961,15 +995,48 @@ document.addEventListener("DOMContentLoaded", function () {
         // Validate dates
         const datesValid = validateDates();
 
+        // Check if the form is valid
         if (!editDeviceForm.checkValidity() || !datesValid) {
-            event.preventDefault();
             event.stopPropagation();
+            editDeviceForm.classList.add("was-validated");
         } else {
-            // If the form is valid, submit it
-            editDeviceForm.submit();
+            // If the form is valid, prepare to send the PUT request
+            const formData = new FormData(editDeviceForm);
+            const jsonData = {};
+            for (const [key, value] of formData.entries()) {
+                jsonData[key] = value;
+            }
+            console.log(jsonData);
+            // Send the PUT request
+            fetch(
+                `/api/emergency-device/${
+                    document.getElementById("editDeviceID").value
+                }`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(jsonData),
+                }
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log("Success:", data);
+                    if (data.error) {
+                        window.location.href = data.redirectURL;
+                    } else if (data.message) {
+                        window.location.href = data.redirectURL;
+                    } else {
+                        console.error("Unexpected response:", data);
+                        // Handle unexpected responses (e.g., show an error message)
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    // Optionally display a user-friendly error message
+                });
         }
-
-        editDeviceForm.classList.add("was-validated");
     });
 });
 
