@@ -81,19 +81,12 @@ document
     .addEventListener("submit", function (event) {
         event.preventDefault();
 
-        // Create a FormData object
-        const formData = new FormData(this);
-
-        // Convert FormData to a plain object
-        const plainFormData = Object.fromEntries(formData.entries());
-
         fetch(this.action, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 // Add any other necessary headers here
             },
-            // add cur
         })
             .then((response) => response.json())
             .then((data) => {

@@ -8,7 +8,7 @@
         <link
             rel="icon"
             type="image/png"
-            href="/static/app_icon.png"
+            href="/static/assets/app_icon.png"
             sizes="16x16"
         />
         <!-- Toastify JS -->
@@ -55,7 +55,7 @@
             rel="stylesheet"
         />
         <!-- Custom CSS -->
-        <link rel="stylesheet" href="/static/main.css" />
+        <link rel="stylesheet" href="/static/main/main.css" />
         <script type="text/javascript">
             $(document).ready(function () {
                 // Function to get query parameters by name
@@ -124,6 +124,9 @@
         <!-- Add Device Modal -->
         {{ template "add_device.html" . }}
 
+        <!-- Edit Device Modal -->
+        {{ template "edit_device.html" . }}
+
         <!-- Add Inspection Device Modal -->
         {{ template "add_inspection.html" . }}
 
@@ -146,7 +149,7 @@
         <script>
             var role = "{{.role}}";
         </script>
-        <script src="/static/main.js"></script>
-        <script src="/static/dashboard.js"></script>
+        <script src="/static/main/main.js"></script>
+        <script src="/static/dashboard/dashboard.js"></script>
     </body>
 </html>

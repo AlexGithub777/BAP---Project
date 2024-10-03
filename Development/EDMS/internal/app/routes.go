@@ -77,13 +77,14 @@ func (a *App) initRoutes() {
 	//admin.PUT("/api/emergency-device-type/:id", a.HandlePutDeviceType)
 	//admin.DELETE("/api/emergency-device-type/:id", a.HandleDeleteDeviceType)
 	// Device management routes - Liam
-	//admin.POST("/api/emergency-device", a.HandlePostDevice)
-	//admin.PUT("/api/emergency-device/:id", a.HandlePutDevice)
+	admin.POST("/api/emergency-device", a.HandlePostDevice)
+	admin.PUT("/api/emergency-device/:id", a.HandlePutDevice)
 	//admin.DELETE("/api/emergency-device/:id", a.HandleDeleteDevice)
 
 	// Other protected API routes
 	api := protected.Group("/api")
 	api.GET("/emergency-device", a.HandleGetAllDevices)
+	api.GET("/emergency-device/:id", a.HandleGetDeviceByID)
 	api.GET("/emergency-device-type", a.HandleGetAllDeviceTypes)
 	api.GET("/extinguisher-type", a.HandleGetAllExtinguisherTypes)
 	api.GET("/room", a.HandleGetAllRooms)
