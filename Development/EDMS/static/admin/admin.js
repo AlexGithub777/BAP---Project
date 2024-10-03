@@ -220,19 +220,52 @@ fetch("/api/user")
             // Clear validation classes
             $("#editUserForm").removeClass("was-validated");
 
+            var editUserForm = document.getElementById("editUserForm");
+
             // Add event listener to the submit button
             $("#editUserBtn").click(function (event) {
                 // Check if the form is valid
                 if (!$("#editUserForm")[0].checkValidity()) {
-                    event.preventDefault();
                     event.stopPropagation();
+                    event.preventDefault();
                 } else {
-                    // If the form is valid, submit it
-                    $("#editUserForm").submit();
+                    // If the form is valid, prepare to send the PUT request
+                    const formData = new FormData(editUserForm);
+                    const jsonData = {};
+                    for (const [key, value] of formData.entries()) {
+                        jsonData[key] = value;
+                    }
+                    console.log("JSON data:", jsonData);
+                    fetch(
+                        `/api/user/${
+                            document.getElementById("editUserID").value
+                        }`,
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(jsonData),
+                        }
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log("Success:", data);
+                            if (data.error) {
+                                window.location.href = data.redirectURL;
+                            } else if (data.message) {
+                                window.location.href = data.redirectURL;
+                            } else {
+                                console.error("Unexpected response:", data);
+                                // Handle unexpected responses (e.g., show an error message)
+                                throw new Error("Unexpected response");
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Fetch error:", error);
+                            // Optionally display a user-friendly error message
+                        });
                 }
-
-                // Add the was-validated class to the form
-                $("#editUserForm").addClass("was-validated");
             });
         });
     });

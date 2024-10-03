@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	"github.com/labstack/echo/v4"
@@ -49,98 +48,133 @@ func (a *App) HandleGetUserByUsername(c echo.Context) error {
 }
 
 // func to HandleEditUser
-func (a *App) HandleEditUser(c echo.Context) error {
-	// Check if request if a POST request
-	if c.Request().Method != http.MethodPost {
+func (a *App) HandlePutUser(c echo.Context) error {
+	// Check if request is a PUT request
+	if c.Request().Method != http.MethodPut {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
 	}
 
-	// Parse the form
-	err := c.Request().ParseForm()
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Error parsing form")
+	// Parse the user ID from the URL parameter
+	userID := c.Param("id")
+
+	// Parse form data from the request body
+	var user models.UserDto
+	if err := c.Bind(&user); err != nil {
+		a.handleLogger("Invalid request payload")
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid request payload",
+			"redirectURL": "/admin?error=Invalid request payload",
+		})
 	}
 
-	// Get the form values
-	currentUserID := c.FormValue("currentUserID")
-	userID := c.FormValue("editUserID")
-	username := strings.TrimSpace(c.FormValue("editUserUsername"))
-	email := strings.TrimSpace(c.FormValue("editUserEmail"))
-	role := strings.TrimSpace(c.FormValue("editUserRole"))
-	defaultAdmin := c.FormValue("defaultAdmin")
+	user.UserID = userID
 
-	log.Printf("currentUserID: %s, userID: %s, username: %s, email: %s, role: %s", currentUserID, userID, username, email, role)
+	log.Printf("currentUserID: %s, userID: %s, username: %s, email: %s, role: %s, default admin: %s", user.CurrentUserID, user.UserID, user.Username, user.Email, user.Role, user.DefaultAdmin)
 
 	// Validate input
-	if username == "" || email == "" || role == "" {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=All fields are required")
+	if user.Username == "" || user.Email == "" || user.Role == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Username, email, and role are required",
+			"redirectURL": "/admin?error=Username, email, and role are required",
+		})
 	}
 
 	// Validate username
 	usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9_]{6,}$`)
-	if !usernameRegex.MatchString(username) {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Username must be at least 6 characters long and contain only letters, numbers, and underscores")
+	if !usernameRegex.MatchString(user.Username) {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Username must be at least 6 characters long and contain only letters, numbers, and underscores",
+			"redirectURL": "/admin?error=Username must be at least 6 characters long and contain only letters, numbers, and underscores",
+		})
 	}
 
 	// Validate email
-	if !regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`).MatchString(email) {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid email address")
+	if !regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`).MatchString(user.Email) {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid email address",
+			"redirectURL": "/admin?error=Invalid email address",
+		})
 	}
 
 	// Validate role
-	if role != "Admin" && role != "User" {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid role")
+	if user.Role != "Admin" && user.Role != "User" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid role",
+			"redirectURL": "/admin?error=Invalid role",
+		})
 	}
 
 	// Convert the user ID to an integer
 	userIDInt, err := strconv.Atoi(userID)
 	if err != nil {
-		return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+		a.handleLogger("Invalid user ID")
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid user ID",
+			"redirectURL": "/admin?error=Invalid user ID",
+		})
+
 	}
 
-	// check if updated username is unique
-	existingUser, err := a.DB.GetUserByUsername(username)
+	// check if updated user.Username is unique
+	existingUser, err := a.DB.GetUserByUsername(user.Username)
 	if err == nil {
 		if existingUser.UserID != userIDInt {
-			return c.Redirect(http.StatusSeeOther, "/admin?error=Username already exists")
+			return c.JSON(http.StatusOK, map[string]string{
+				"error":       "Username already exists",
+				"redirectURL": "/admin?error=Username already exists",
+			})
 		}
 	} else if err != sql.ErrNoRows {
-		return a.handleError(c, http.StatusInternalServerError, "Error fetching user", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching user",
+			"redirectURL": "/admin?error=Error fetching user",
+		})
 	}
 
 	// check if updated email is unique
-	existingUser, err = a.DB.GetUserByEmail(email)
+	existingUser, err = a.DB.GetUserByEmail(user.Email)
 	if err == nil {
 		if existingUser.UserID != userIDInt {
-			return c.Redirect(http.StatusSeeOther, "/admin?error=Email already exists")
+			return c.JSON(http.StatusOK, map[string]string{
+				"error":       "Email already exists",
+				"redirectURL": "/admin?error=Email already exists",
+			})
 		}
 	} else if err != sql.ErrNoRows {
-		return a.handleError(c, http.StatusInternalServerError, "Error fetching user", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching user",
+			"redirectURL": "/admin?error=Error fetching user",
+		})
 	}
 
 	// Check if the user is trying to edit their own account
-	if currentUserID == userID {
+	if user.CurrentUserID == userID {
 		// Check if the user is trying to change their role
-		if defaultAdmin == "true" && role != "Admin" {
-			return c.Redirect(http.StatusSeeOther, "/admin?error=Cannot change role on default admin account.")
+		if user.DefaultAdmin == "true" && user.Role != "Admin" {
+			return c.JSON(http.StatusOK, map[string]string{
+				"error": "Cannot change role of default admin",
+			})
 		}
 
 		// parse tthe password
-		password := c.FormValue("editUserPassword")
-		confirmedPassword := c.FormValue("editUserConfirmPassword")
+		password := user.Password
+		confirmedPassword := user.ConfirmPassword
 
 		if password == "" {
 			// update the user without changing the password
 			userIDInt, err := strconv.Atoi(userID)
 			if err != nil {
-				return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"error":       "Invalid user ID",
+					"redirectURL": "/admin?error=Invalid user ID",
+				})
 			}
 
 			user := &models.User{
 				UserID:   userIDInt,
-				Username: username,
-				Email:    email,
-				Role:     role,
+				Username: user.Username,
+				Email:    user.Email,
+				Role:     user.Role,
 			}
 
 			// Update the user in the database
@@ -148,15 +182,24 @@ func (a *App) HandleEditUser(c echo.Context) error {
 			// Check for errors
 			// iF there is an error, return an error message
 			if err != nil {
-				return a.handleError(c, http.StatusInternalServerError, "Error updating user", err)
+				return c.JSON(http.StatusInternalServerError, map[string]string{
+					"error":       "Error updating user",
+					"redirectURL": "/admin?error=Error updating user",
+				})
 			}
 
 			// Log the user out
-			return c.Redirect(http.StatusSeeOther, "/logout?message=User details updated successfully. Please log in again")
+			return c.JSON(http.StatusOK, map[string]string{
+				"message":     "User details updated successfully. Please log in again",
+				"redirectURL": "/logout?message=User details updated successfully. Please log in again",
+			})
 		} else {
 			// Validate password
 			if password != confirmedPassword {
-				return c.Redirect(http.StatusSeeOther, "/admin?error=Passwords do not match")
+				return c.JSON(http.StatusOK, map[string]string{
+					"error":       "Passwords do not match",
+					"redirectURL": "/admin?error=Passwords do not match",
+				})
 			}
 
 			passwordLengthRegex := regexp.MustCompile(`.{8,}`)
@@ -165,67 +208,94 @@ func (a *App) HandleEditUser(c echo.Context) error {
 			passwordCapitalLetterRegex := regexp.MustCompile(`[A-Z]`)
 
 			if !passwordLengthRegex.MatchString(password) || !passwordDigitRegex.MatchString(password) || !passwordSpecialCharRegex.MatchString(password) || !passwordCapitalLetterRegex.MatchString(password) {
-				return c.Redirect(http.StatusSeeOther, "/admin?error=Password must be at least 8 characters long and contain at least one digit, one special character, and one capital letter")
+				return c.JSON(http.StatusOK, map[string]string{
+					"error":       "Password must be at least 8 characters long and contain at least one digit, special character, and capital letter",
+					"redirectURL": "/admin?error=Password must be at least 8 characters long and contain at least one digit, special character, and capital letter",
+				})
 			}
 
 			// Hash the password
 			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 			if err != nil {
-				return a.handleError(c, http.StatusInternalServerError, "Error hashing password", err)
+				return c.JSON(http.StatusInternalServerError, map[string]string{
+					"error":       "Error hashing password",
+					"redirectURL": "/admin?error=Error hashing password",
+				})
 			}
 
 			// make a user model
 			userIDInt, err := strconv.Atoi(userID)
 			if err != nil {
-				return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"error":       "Invalid user ID",
+					"redirectURL": "/admin?error=Invalid user ID",
+				})
 			}
 
 			user := &models.User{
 				UserID:   userIDInt,
-				Username: username,
-				Email:    email,
+				Username: user.Username,
+				Email:    user.Email,
 				Password: string(hashedPassword),
-				Role:     role,
+				Role:     user.Role,
 			}
 
 			// Update the user in the database
 			err = a.DB.UpdateUserWithPassword(user)
 			if err != nil {
-				return a.handleError(c, http.StatusInternalServerError, "Error updating user", err)
+				return c.JSON(http.StatusInternalServerError, map[string]string{
+					"error":       "Error updating user",
+					"redirectURL": "/admin?error=Error updating user",
+				})
 
 			}
 			// Log the user out
-			return c.Redirect(http.StatusSeeOther, "/logout?message=User details updated successfully. Please log in again")
+			return c.JSON(http.StatusOK, map[string]string{
+				"message":     "User details updated successfully. Please log in again",
+				"redirectURL": "/logout?message=User details updated successfully. Please log in again",
+			})
 		}
 
 	} else {
 		userIDInt, err := strconv.Atoi(userID)
 		if err != nil {
-			return a.handleError(c, http.StatusBadRequest, "Invalid user ID", err)
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error":       "Invalid user ID",
+				"redirectURL": "/admin?error=Invalid user ID",
+			})
 		}
 
 		// Check if tyring to update the default admin
-		if defaultAdmin == "true" {
-			return c.Redirect(http.StatusSeeOther, "/admin?error=Cannot update the default admin")
+		if user.DefaultAdmin == "true" {
+			return c.JSON(http.StatusOK, map[string]string{
+				"error":       "Cannot change role of default admin",
+				"redirectURL": "/admin?error=Cannot change role of default admin",
+			})
 		}
 
 		user := &models.User{
 			UserID:   userIDInt,
-			Username: username,
-			Email:    email,
-			Role:     role,
+			Username: user.Username,
+			Email:    user.Email,
+			Role:     user.Role,
 		}
 
 		// Update the user in the database
 		err = a.DB.UpdateUser(user)
 		if err != nil {
-			return a.handleError(c, http.StatusInternalServerError, "Error updating user", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error":       "Error updating user",
+				"redirectURL": "/admin?error=Error updating user",
+			})
 		}
 	}
 
 	// Redirect to the admin page with a success message
-	return c.Redirect(http.StatusFound, "/admin?message=User updated successfully")
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":     "User details updated successfully",
+		"redirectURL": "/admin?message=User details updated successfully",
+	})
 }
 
 // func to HandleDeleteUser

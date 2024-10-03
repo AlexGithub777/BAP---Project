@@ -119,6 +119,7 @@ func (a *App) HandlePutDevice(c echo.Context) error {
 	if err != nil {
 		// handle error
 		a.handleLogger("Error decoding request body: " + err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Error decoding request body: " + err.Error()})
 	}
 
 	// Convert the device ID to an integer
