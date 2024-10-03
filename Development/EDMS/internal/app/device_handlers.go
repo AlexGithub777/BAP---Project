@@ -30,6 +30,31 @@ func (a *App) HandleGetAllDevices(c echo.Context) error {
 	return c.JSON(http.StatusOK, emergencyDevices)
 }
 
+// HandleGetDeviceByID fetches a single emergency device by ID from the database and returns the result as JSON
+func (a *App) HandleGetDeviceByID(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
+	}
+
+	// Get the device ID from the URL
+	deviceIDStr := c.Param("id")
+	deviceID, err := strconv.Atoi(deviceIDStr)
+	if err != nil {
+		return a.handleError(c, http.StatusBadRequest, "Invalid device ID", err)
+	}
+
+	// Fetch the device from the database
+	device, err := a.DB.GetDeviceByID(deviceID)
+
+	if err != nil {
+		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
+	}
+
+	// Return the result as JSON
+	return c.JSON(http.StatusOK, device)
+}
+
 func (a *App) HandlePostDevice(c echo.Context) error {
 	// Check if request if a GET request
 	if c.Request().Method != http.MethodPost {

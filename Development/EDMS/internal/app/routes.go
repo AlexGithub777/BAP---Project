@@ -84,6 +84,7 @@ func (a *App) initRoutes() {
 	// Other protected API routes
 	api := protected.Group("/api")
 	api.GET("/emergency-device", a.HandleGetAllDevices)
+	api.GET("/emergency-device/:id", a.HandleGetDeviceByID)
 	api.GET("/emergency-device-type", a.HandleGetAllDeviceTypes)
 	api.GET("/extinguisher-type", a.HandleGetAllExtinguisherTypes)
 	api.GET("/room", a.HandleGetAllRooms)

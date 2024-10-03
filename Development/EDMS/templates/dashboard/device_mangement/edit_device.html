@@ -1,9 +1,9 @@
-<div id="addDeviceModal" class="modal fade" role="dialog">
+<div id="editDeviceModal" class="modal fade" role="dialog">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Add Device</h4>
+                <h4 class="modal-title">Edit Device</h4>
                 <button
                     type="button"
                     class="btn-close"
@@ -15,12 +15,17 @@
                 <form
                     class="form-control needs-validation"
                     method="POST"
-                    action="/api/emergency-device"
-                    id="addDeviceForm"
+                    action=""
+                    id="editDeviceForm"
                     autocomplete="off"
                     novalidate
                 >
                     <div class="mb-3">
+                        <input
+                            type="hidden"
+                            id="editDeviceID"
+                            name="editDeviceID"
+                        />
                         <label for="deviceType" class="form-label"
                             >Device Type</label
                         >
@@ -28,6 +33,7 @@
                             class="form-control form-select emergencyDeviceTypeInput"
                             aria-label="Select emergency device type"
                             name="emergency_device_type"
+                            id="editEmergencyDeviceTypeInput"
                             required
                         >
                             <!-- Options will be populated here -->
@@ -44,17 +50,20 @@
                             class="form-control form-select extinguisherTypeInput"
                             aria-label="Select extinguisher type"
                             name="extinguisher_type"
+                            id="editExtinguisherTypeInput"
                         >
                             <!-- Options will be populated here -->
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="addDeviceSite" class="form-label"
+                        <label for="deviceSiteInput" class="form-label"
                             >Site</label
                         >
                         <select
-                            class="form-control form-select siteInput"
+                            class="form-control form-select editSiteInput"
                             aria-label="Select site"
+                            name="site_id"
+                            id="editSiteInput"
                             required
                         >
                             <!-- Options will be populated here -->
@@ -64,12 +73,14 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="addDeviceBuilding" class="form-label"
+                        <label for="deviceBuildingInput" class="form-label"
                             >Building</label
                         >
                         <select
-                            class="form-control form-select buildingInput"
+                            class="form-control form-select editBuildingInput"
                             aria-label="Select building"
+                            name="building_id"
+                            id="editBuildingInput"
                             required
                         >
                             <!-- Options will be populated here -->
@@ -80,11 +91,14 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="roomInput" class="form-label">Room</label>
+                        <label for="deviceRoomInput" class="form-label"
+                            >Room</label
+                        >
                         <select
                             class="form-control form-select roomInput"
                             name="room_id"
                             aria-label="Select room"
+                            id="editRoomInput"
                             required
                         >
                             <!-- Options will be populated here -->
@@ -101,7 +115,7 @@
                         <input
                             type="text"
                             class="form-control"
-                            id="serialNumber"
+                            id="editSerialNumberInput"
                             placeholder="Enter serial number"
                             name="serial_number"
                             pattern=".{0,50}"
@@ -116,7 +130,7 @@
                         >
                         <textarea
                             class="form-control descriptionInput"
-                            id="description"
+                            id="editDescriptionInput"
                             name="description"
                             rows="3"
                             placeholder="Enter description"
@@ -132,7 +146,7 @@
                         <input
                             type="date"
                             class="form-control manufactureDateInput"
-                            id="manufactureDate"
+                            id="editManufactureDateInput"
                             name="manufacture_date"
                         />
                         <div class="invalid-feedback manufactureDateFeedback">
@@ -146,7 +160,7 @@
                         <input
                             type="date"
                             class="form-control lastInspectionDateInput"
-                            id="lastInspectionDate"
+                            id="editLastInspectionDateInput"
                             name="last_inspection_date"
                         />
                         <div
@@ -160,7 +174,7 @@
                         <input
                             type="text"
                             class="form-control"
-                            id="size"
+                            id="editSizeInput"
                             name="size"
                             placeholder="Enter size"
                             pattern=".{0,50}"
@@ -173,7 +187,7 @@
                         <label for="status" class="form-label">Status</label>
                         <select
                             class="form-control form-select"
-                            id="status"
+                            id="editStatusInput"
                             name="status"
                             aria-label="Select status"
                             required
@@ -199,8 +213,12 @@
                 >
                     Close
                 </button>
-                <button type="button" id="addDeviceBtn" class="btn btn-primary">
-                    Add Device
+                <button
+                    type="button"
+                    id="editDeviceBtn"
+                    class="btn btn-primary"
+                >
+                    Edit Device
                 </button>
             </div>
         </div>

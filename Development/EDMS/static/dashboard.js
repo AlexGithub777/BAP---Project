@@ -536,50 +536,227 @@ function getActionButtons(device) {
     return buttons;
 }
 
+// Function to populate dropdowns with specific property mapping
+function populateDropdown(
+    selector,
+    url,
+    defaultText = "Select an option",
+    valueProperty,
+    textProperty
+) {
+    const selects = document.querySelectorAll(selector);
+
+    return fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+            selects.forEach((select) => {
+                // Clear previous options
+                select.innerHTML = "";
+
+                // Add default option
+                const defaultOption = document.createElement("option");
+                defaultOption.text = defaultText;
+                defaultOption.value = "";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                select.add(defaultOption);
+
+                // Add data options
+                data.forEach((item) => {
+                    const option = document.createElement("option");
+                    option.text = item[textProperty];
+                    option.value = item[valueProperty];
+                    select.add(option);
+                });
+            });
+            return data; // Return the data for further processing if needed
+        })
+        .catch((error) => console.error("Error:", error));
+}
+
+// Function to clear building and room options
+function clearBuildingAndRoom() {
+    const buildingSelects = document.querySelectorAll(".buildingInput");
+    const roomSelects = document.querySelectorAll(".roomInput");
+    buildingSelects.forEach((select) => {
+        select.innerHTML =
+            "<option value='' selected disabled>Select a Building</option>";
+    });
+    roomSelects.forEach((select) => {
+        select.innerHTML =
+            "<option value='' selected disabled>Select a Room</option>";
+    });
+}
+
 function addDevice() {
     // Clear the form before showing the modal
     document.getElementById("addDeviceForm").reset();
     document.getElementById("addDeviceForm").classList.remove("was-validated");
 
-    // Fetch the sites and populate the select options
-    fetch("/api/site")
+    // Populate dropdowns
+    populateDropdown(
+        ".emergencyDeviceTypeInput",
+        "/api/emergency-device-type",
+        "Select Device Type",
+        "emergency_device_type_id",
+        "emergency_device_type_name"
+    );
+    populateDropdown(
+        ".extinguisherTypeInput",
+        "/api/extinguisher-type",
+        "Select Extinguisher Type",
+        "extinguisher_type_id",
+        "extinguisher_type_name"
+    );
+    populateDropdown(
+        ".siteInput",
+        "/api/site",
+        "Select a Site",
+        "site_id",
+        "site_name"
+    );
+
+    // Event listener for site change
+    document.querySelector(".siteInput").addEventListener("change", (event) => {
+        const selectedSiteId = event.target.value;
+        clearBuildingAndRoom();
+
+        if (selectedSiteId) {
+            fetchAndPopulateBuildings(selectedSiteId);
+        }
+    });
+
+    // Event listener for building change
+    document
+        .querySelector(".buildingInput")
+        .addEventListener("change", (event) => {
+            const selectedBuildingId = event.target.value;
+
+            if (selectedBuildingId) {
+                fetchAndPopulateRooms(selectedBuildingId);
+            }
+        });
+
+    // Show the modal after populating the select options
+    $("#addDeviceModal").modal("show");
+}
+
+function editDevice(deviceId) {
+    // Clear the form before showing the modal
+    document.getElementById("editDeviceForm").reset();
+    document.getElementById("editDeviceForm").classList.remove("was-validated");
+    document.getElementById("editDeviceID").value = deviceId;
+
+    // Fetch the dropdown data
+    const emergencyDeviceTypePromise = populateDropdown(
+        ".emergencyDeviceTypeInput",
+        "/api/emergency-device-type",
+        "Select Device Type",
+        "emergency_device_type_id",
+        "emergency_device_type_name"
+    );
+
+    const extinguisherTypePromise = populateDropdown(
+        ".extinguisherTypeInput",
+        "/api/extinguisher-type",
+        "Select Extinguisher Type",
+        "extinguisher_type_id",
+        "extinguisher_type_name"
+    );
+
+    const sitePromise = populateDropdown(
+        ".editSiteInput",
+        "/api/site",
+        "Select a Site",
+        "site_id",
+        "site_name"
+    );
+
+    // Wait for all dropdowns to be populated before proceeding
+    Promise.all([
+        emergencyDeviceTypePromise,
+        extinguisherTypePromise,
+        sitePromise,
+    ])
+        .then(() => {
+            // Event listener for site change
+            document
+                .querySelector(".editSiteInput")
+                .addEventListener("change", (event) => {
+                    const selectedSiteId = event.target.value;
+                    clearBuildingAndRoom();
+
+                    if (selectedSiteId) {
+                        fetchAndPopulateBuildings(selectedSiteId);
+                    }
+                });
+
+            // Event listener for building change
+            document
+                .querySelector(".editBuildingInput")
+                .addEventListener("change", (event) => {
+                    const selectedBuildingId = event.target.value;
+
+                    if (selectedBuildingId) {
+                        fetchAndPopulateRooms(selectedBuildingId);
+                    }
+                });
+
+            // Fetch the device data
+            fetch(`/api/emergency-device/${deviceId}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    // Populate the form with the data
+                    console.log("Device data:", data);
+                    document.getElementById(
+                        "editEmergencyDeviceTypeInput"
+                    ).value = data.emergency_device_type_id;
+                    document.getElementById("editExtinguisherTypeInput").value =
+                        data.extinguisher_type_id.Int64;
+                    document.getElementById("editSerialNumberInput").value =
+                        data.serial_number.String;
+                    document.getElementById("editManufactureDateInput").value =
+                        data.manufacture_date.Time.split("T")[0];
+                    document.getElementById("editSizeInput").value =
+                        data.size.String;
+                    document.getElementById("editDescriptionInput").value =
+                        data.description.String;
+                    document.getElementById("editSiteInput").value =
+                        data.site_id;
+                    document.getElementById(
+                        "editLastInspectionDateInput"
+                    ).value = data.last_inspection_date.Time.split("T")[0];
+                    document.getElementById("editStatusInput").value =
+                        data.status.String;
+
+                    // Populate the building and room dropdowns
+                    fetchAndPopulateBuildings(data.site_id)
+                        .then(() => fetchAndPopulateRooms(data.building_id))
+                        .then(() => {
+                            // Set the building and room values
+                            document.getElementById("editBuildingInput").value =
+                                data.building_id;
+                            document.getElementById("editRoomInput").value =
+                                data.room_id;
+                        });
+
+                    // Now that the data is populated, show the modal
+                    $("#editDeviceModal").modal("show");
+                });
+        })
+        .catch((error) => {
+            console.error("Error loading dropdown data:", error);
+        });
+}
+
+function fetchAndPopulateBuildings(siteId) {
+    return fetch(`/api/building?siteId=${siteId}`)
         .then((response) => response.json())
         .then((data) => {
-            const select = document.getElementById("addDeviceSite");
-            // Clear previous options
-            select.innerHTML = "";
-            // Add a default option and select it
-            const defaultOption = document.createElement("option");
-            defaultOption.text = "Select a Site";
-            defaultOption.value = "";
-            defaultOption.selected = true;
-            defaultOption.disabled = true;
-            select.add(defaultOption);
-            data.forEach((item) => {
-                const option = document.createElement("option");
-                option.text = item.site_name;
-                option.value = item.site_id;
-                select.add(option);
-            });
-        })
-        .catch((error) => console.error("Error:", error));
-
-    // Function to clear building and room options
-    function clearBuildingAndRoom() {
-        const buildingSelect = document.getElementById("addDeviceBuilding");
-        const roomSelect = document.getElementById("addDeviceRoom");
-        buildingSelect.innerHTML =
-            "<option value='' selected disabled>Select a Building</option>";
-        roomSelect.innerHTML =
-            "<option value='' selected disabled>Select a Room</option>";
-    }
-
-    // Function to fetch and populate buildings
-    function fetchAndPopulateBuildings(siteId) {
-        fetch(`/api/building?siteId=${siteId}`)
-            .then((response) => response.json())
-            .then((data) => {
-                const select = document.getElementById("addDeviceBuilding");
+            const selects = document.querySelectorAll(
+                ".buildingInput, .editBuildingInput"
+            );
+            selects.forEach((select) => {
                 select.innerHTML =
                     "<option value='' selected disabled>Select a Building</option>";
                 data.forEach((item) => {
@@ -594,16 +771,21 @@ function addDevice() {
                     select.value = data[0].building_id;
                     select.dispatchEvent(new Event("change"));
                 }
-            })
-            .catch((error) => console.error("Error:", error));
-    }
+            });
+            return data;
+        })
+        .catch((error) => console.error("Error:", error));
+}
 
-    // Function to fetch and populate rooms
-    function fetchAndPopulateRooms(buildingId) {
-        fetch(`/api/room?buildingId=${buildingId}`)
-            .then((response) => response.json())
-            .then((data) => {
-                const select = document.getElementById("addDeviceRoom");
+function fetchAndPopulateRooms(buildingId) {
+    return fetch(`/api/room?buildingId=${buildingId}`)
+        .then((response) => response.json())
+        .then((data) => {
+            const selects = document.querySelectorAll(
+                ".roomInput",
+                ".editRoomInput"
+            );
+            selects.forEach((select) => {
                 select.innerHTML =
                     "<option value='' selected disabled>Select a Room</option>";
                 data.forEach((item) => {
@@ -612,85 +794,18 @@ function addDevice() {
                     option.value = item.room_id;
                     select.add(option);
                 });
-            })
-            .catch((error) => console.error("Error:", error));
-    }
-
-    // Event listener for site change
-    document
-        .getElementById("addDeviceSite")
-        .addEventListener("change", (event) => {
-            const selectedSiteId = event.target.value;
-            clearBuildingAndRoom();
-
-            if (selectedSiteId) {
-                fetchAndPopulateBuildings(selectedSiteId);
-            }
-        });
-
-    // Event listener for building change
-    document
-        .getElementById("addDeviceBuilding")
-        .addEventListener("change", (event) => {
-            const selectedBuildingId = event.target.value;
-
-            if (selectedBuildingId) {
-                fetchAndPopulateRooms(selectedBuildingId);
-            }
-        });
-
-    // Fetch the device types and populate the select options
-    fetch("/api/emergency-device-type")
-        .then((response) => response.json())
-        .then((data) => {
-            const select = document.getElementById("addEmergencyDeviceType");
-            // Clear previous options
-            select.innerHTML = "";
-            // Add a default option and select it
-            const defaultOption = document.createElement("option");
-            defaultOption.text = "Select Device type";
-            defaultOption.value = "";
-            defaultOption.selected = true;
-            defaultOption.disabled = true;
-            select.add(defaultOption);
-            data.forEach((item) => {
-                const option = document.createElement("option");
-                option.text = item.emergency_device_type_name; // Set the text of the option
-                option.value = item.emergency_device_type_id; // Set the value of the option
-                select.add(option);
             });
+            return data;
         })
         .catch((error) => console.error("Error:", error));
-
-    // Fetch the extinguisher types and populate the select options
-    fetch("/api/extinguisher-type")
-        .then((response) => response.json())
-        .then((data) => {
-            const select = document.getElementById("addExtinguisherType");
-            // Clear previous options
-            select.innerHTML = "";
-            // Add a default option and select it
-            const defaultOption = document.createElement("option");
-            defaultOption.text = "Select Extinguisher Type";
-            defaultOption.selected = true;
-            defaultOption.disabled = true;
-            select.add(defaultOption);
-            data.forEach((item) => {
-                const option = document.createElement("option");
-                option.text = item.extinguisher_type_name; // Set the text of the option
-                option.value = item.extinguisher_type_id; // Set the value of the option
-                select.add(option);
-            });
-        })
-        .catch((error) => console.error("Error:", error));
-
-    // Show the modal after populating the select options
-    $("#addDeviceModal").modal("show");
 }
 
-// Fetch the form and the submit button
-const form = document.querySelector("#addDeviceForm");
-const submitButton = document.querySelector("#addDeviceBtn");
+/// Fetch the form and the submit button
+const addDeviceForm = document.querySelector("#addDeviceForm");
+const addDeviceButton = document.querySelector("#addDeviceBtn");
+/// Fetch the form and the submit button
+const editDeviceForm = document.querySelector("#editDeviceForm");
+const editDeviceButton = document.querySelector("#editDeviceBtn");
 
 // Function to validate select elements
 function validateSelect(selectElement) {
@@ -703,8 +818,10 @@ function validateSelect(selectElement) {
 
 // Function to validate dates
 function validateDates() {
-    const manufactureDate = document.getElementById("manufactureDate");
-    const lastInspectionDate = document.getElementById("lastInspectionDate");
+    const manufactureDate = document.querySelector(".manufactureDateInput");
+    const lastInspectionDate = document.querySelector(
+        ".lastInspectionDateInput"
+    );
     const currentDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
 
     let isValid = true;
@@ -714,12 +831,12 @@ function validateDates() {
         manufactureDate.setCustomValidity(
             "Manufacture date cannot be in the future"
         );
-        document.getElementById("manufactureDateFeedback").textContent =
+        document.querySelector(".manufactureDateFeedback").textContent =
             "Manufacture date cannot be in the future";
         isValid = false;
     } else {
         manufactureDate.setCustomValidity("");
-        document.getElementById("manufactureDateFeedback").textContent = "";
+        document.querySelector(".manufactureDateFeedback").textContent = "";
     }
 
     // Validate last inspection date
@@ -727,7 +844,7 @@ function validateDates() {
         lastInspectionDate.setCustomValidity(
             "Last inspection date cannot be in the future"
         );
-        document.getElementById("lastInspectionDateFeedback").textContent =
+        document.querySelector(".lastInspectionDateFeedback").textContent =
             "Last inspection date cannot be in the future";
         isValid = false;
     } else if (
@@ -738,7 +855,7 @@ function validateDates() {
         lastInspectionDate.setCustomValidity(
             "Last inspection date cannot be the same as manufacture date"
         );
-        document.getElementById("lastInspectionDateFeedback").textContent =
+        document.querySelector(".lastInspectionDateFeedback").textContent =
             "Last inspection date cannot be the same as manufacture date";
         isValid = false;
     } else if (
@@ -750,12 +867,12 @@ function validateDates() {
         lastInspectionDate.setCustomValidity(
             "Last inspection date cannot be before manufacture date"
         );
-        document.getElementById("lastInspectionDateFeedback").textContent =
+        document.querySelector(".lastInspectionDateFeedback").textContent =
             "Last inspection date cannot be before manufacture date";
         isValid = false;
     } else {
         lastInspectionDate.setCustomValidity("");
-        document.getElementById("lastInspectionDateFeedback").textContent = "";
+        document.querySelector(".lastInspectionDateFeedback").textContent = "";
     }
 
     return isValid;
@@ -773,74 +890,88 @@ function validateLength(element, maxLength) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const description = document.getElementById("description");
-    const manufactureDate = document.getElementById("manufactureDate");
-    const lastInspectionDate = document.getElementById("lastInspectionDate");
+    const description = document.querySelector(".descriptionInput");
+    const manufactureDate = document.querySelector(".manufactureDateInput");
+    const lastInspectionDate = document.querySelector(
+        ".lastInspectionDateInput"
+    );
 
+    // Validate description length
     description.addEventListener("input", function () {
         validateLength(this, 255);
     });
 
     // Add event listeners to select elements
     document
-        .querySelector("#addEmergencyDeviceType")
-        .addEventListener("change", function () {
-            validateSelect(this);
-        });
-    document
-        .querySelector("#addDeviceSite")
-        .addEventListener("change", function () {
-            validateSelect(this);
-        });
-    document
-        .querySelector("#addDeviceBuilding")
-        .addEventListener("change", function () {
-            validateSelect(this);
-        });
-    document
-        .querySelector("#addDeviceRoom")
-        .addEventListener("change", function () {
-            validateSelect(this);
+        .querySelectorAll(
+            ".emergencyDeviceTypeInput, .siteInput, .buildingInput, .roomInput"
+        )
+        .forEach((select) => {
+            select.addEventListener("change", function () {
+                validateSelect(this);
+            });
         });
 
     // Add event listeners for date validation
     manufactureDate.addEventListener("change", validateDates);
     lastInspectionDate.addEventListener("change", validateDates);
 
-    // Add event listener to the submit button
-    submitButton.addEventListener(
-        "click",
-        function (event) {
-            // Validate all select elements before form submission
-            validateSelect(document.querySelector("#addEmergencyDeviceType"));
-            validateSelect(document.querySelector("#addDeviceSite"));
-            validateSelect(document.querySelector("#addDeviceBuilding"));
-            validateSelect(document.querySelector("#addDeviceRoom"));
+    // Add event listener to the add device button
+    addDeviceButton.addEventListener("click", function (event) {
+        // Validate all select elements before form submission
+        document
+            .querySelectorAll(
+                ".emergencyDeviceTypeInput, .siteInput, .buildingInput, .roomInput"
+            )
+            .forEach((select) => {
+                validateSelect(select);
+            });
 
-            // validate description length
-            validateLength(description, 255);
+        // Validate description length
+        validateLength(description, 255);
 
-            // Validate dates
-            const datesValid = validateDates();
+        // Validate dates
+        const datesValid = validateDates();
 
-            if (!form.checkValidity() || !datesValid) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // If the form is valid, submit it
-                form.submit();
-            }
+        if (!addDeviceForm.checkValidity() || !datesValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            // If the form is valid, submit it
+            addDeviceForm.submit();
+        }
 
-            form.classList.add("was-validated");
-        },
-        false
-    );
+        addDeviceForm.classList.add("was-validated");
+    });
+
+    // Add event listener to the add device button
+    editDeviceButton.addEventListener("click", function (event) {
+        // Validate all select elements before form submission
+        document
+            .querySelectorAll(
+                ".emergencyDeviceTypeInput, .editSiteInput, .editBuildingInput, .roomInput"
+            )
+            .forEach((select) => {
+                validateSelect(select);
+            });
+
+        // Validate description length
+        validateLength(description, 255);
+
+        // Validate dates
+        const datesValid = validateDates();
+
+        if (!editDeviceForm.checkValidity() || !datesValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            // If the form is valid, submit it
+            editDeviceForm.submit();
+        }
+
+        editDeviceForm.classList.add("was-validated");
+    });
 });
-
-function editDevice(deviceId) {
-    console.log(`Edit device with ID: ${deviceId}`);
-    // Add your edit logic here
-}
 
 function deleteDevice(deviceId) {
     console.log(`Delete device with ID: ${deviceId}`);
