@@ -874,3 +874,21 @@ func (db *DB) UpdateEmergencyDevice(device *models.EmergencyDevice) error {
 
 	return nil
 }
+
+func (db *DB) DeleteEmergencyDevice(deviceID int) error {
+	query := "DELETE FROM Emergency_DeviceT WHERE EmergencyDeviceID = $1"
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(deviceID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
