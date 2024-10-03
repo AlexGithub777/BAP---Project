@@ -193,12 +193,12 @@ fetch("/api/user")
 
             // Fill in the form with the user data
             $("#editUserForm")[0].reset();
-            $("#editUserForm input[name=currentUserID]").val(current_user_id);
-            $("#editUserForm input[name=editUserID]").val(id);
-            $("#editUserForm input[name=editUserUsername]").val(username);
-            $("#editUserForm input[name=editUserEmail]").val(email);
-            $("#editUserForm select[name=editUserRole]").val(role);
-            $("#editUserForm input[name=defaultAdmin]").val(default_admin);
+            $("#editUserForm input[name=current_user_id]").val(current_user_id);
+            $("#editUserForm input[name=user_id]").val(id);
+            $("#editUserForm input[name=username]").val(username);
+            $("#editUserForm input[name=email]").val(email);
+            $("#editUserForm select[name=role]").val(role);
+            $("#editUserForm input[name=default-admin]").val(default_admin);
 
             // Set the form action to the update endpoint for this user
             $("#editUserForm").attr("action", `/api/user/${id}`);

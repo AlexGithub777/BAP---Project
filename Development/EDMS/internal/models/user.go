@@ -1,6 +1,5 @@
 package models
 
-// UserT represents the users in the system
 type User struct {
 	UserID        int    `json:"user_id"`
 	Username      string `json:"username"`
@@ -12,12 +11,12 @@ type User struct {
 }
 
 type UserDto struct {
-	CurrentUserID   string `json:"currentUserID"`
-	UserID          string `json:"editUserID"`
-	Username        string `json:"editUserUsername"`
-	Email           string `json:"editUserEmail"`
-	Role            string `json:"editUserRole"`
-	Password        string `json:"editUserPassword"`
-	ConfirmPassword string `json:"editUserConfirmPassword"`
-	DefaultAdmin    string `json:"defaultAdmin"`
+	CurrentUserID   string `json:"current_user_id"`
+	UserID          string `json:"user_id"`
+	Username        string `json:"username"`
+	Email           string `json:"email"`
+	Role            string `json:"role"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+	DefaultAdmin    string `json:"default_admin"`
 }

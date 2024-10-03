@@ -2,7 +2,6 @@ package app
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -115,11 +114,12 @@ func (a *App) HandlePutDevice(c echo.Context) error {
 
 	// Parse form data from the request body
 	var device models.EmergencyDeviceDto
-	err := json.NewDecoder(c.Request().Body).Decode(&device)
-	if err != nil {
-		// handle error
-		a.handleLogger("Error decoding request body: " + err.Error())
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Error decoding request body: " + err.Error()})
+	if err := c.Bind(&device); err != nil {
+		a.handleLogger("Error binding request body: " + err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid request body",
+			"redirectURL": "/dashboard?error=Invalid request body",
+		})
 	}
 
 	// Convert the device ID to an integer
