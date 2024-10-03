@@ -283,123 +283,35 @@ func parseDate(dateStr string) (sql.NullTime, error) {
 	return sql.NullTime{Time: parsedDate, Valid: true}, nil
 }
 
-/*
-func (a *App) HandleAddDevice(c echo.Context) error {
-    // Parse form data
-    roomStr := c.FormValue("room")
-    emergencyDeviceTypeIDStr := c.FormValue("emergency_device_type_id")
-    serialNumber := c.FormValue("serial_number")
-    manufactureDateStr := c.FormValue("manufacture_date")
-    lastInspectionDateStr := c.FormValue("last_inspection_date")
-    size := c.FormValue("size")
-    description := c.FormValue("description")
-    status := c.FormValue("status")
+func (a *App) HandleDeleteDevice(c echo.Context) error {
+	// Check if request is not a DELETE request
+	if c.Request().Method != http.MethodDelete {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Method not allowed"})
+	}
 
-    // Validate input
-    if roomStr == "" || emergencyDeviceTypeIDStr == "" || serialNumber == "" ||
-        manufactureDateStr == "" || size == "" || status == "" {
-        return a.handleError(c, http.StatusBadRequest, "All fields are required", nil)
-    }
+	// Parse the device ID from the URL parameter
+	deviceIDStr := c.Param("id")
 
-    // Convert room ID and emergency device type ID to integers
-    roomID, err := strconv.Atoi(roomStr)
-    if err != nil {
-        log.Printf("Error converting room to integer: %v", err)
-        return a.handleError(c, http.StatusBadRequest, "Invalid room ID", err)
-    }
+	// Convert the device ID to an integer
+	deviceID, err := strconv.Atoi(deviceIDStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid device ID",
+			"redirectURL": "/dashboard?error=Invalid device ID",
+		})
+	}
 
-    emergencyDeviceTypeID, err := strconv.Atoi(emergencyDeviceTypeIDStr)
-    if err != nil {
-        log.Printf("Error converting emergency device type ID to integer: %v", err)
-        return a.handleError(c, http.StatusBadRequest, "Invalid emergency device type ID", err)
-    }
+	// Delete the device from the database
+	err = a.DB.DeleteEmergencyDevice(deviceID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error deleting device",
+			"redirectURL": "/dashboard?error=Error deleting device: " + err.Error(),
+		})
+	}
 
-    // Parse date strings into time.Time format
-    manufactureDate, err := time.Parse("2006-01-02", manufactureDateStr)
-    if err != nil {
-        log.Printf("Error parsing manufacture date: %v", err)
-        return a.handleError(c, http.StatusBadRequest, "Invalid manufacture date format", err)
-    }
-
-    // Optional: Parse last inspection date if provided
-    var lastInspectionDate sql.NullTime
-    if lastInspectionDateStr != "" {
-        parsedDate, err := time.Parse("2006-01-02", lastInspectionDateStr)
-        if err != nil {
-            return a.handleError(c, http.StatusBadRequest, "Invalid last inspection date format", err)
-        }
-        lastInspectionDate = sql.NullTime{Time: parsedDate, Valid: true}
-    }
-
-    // Insert new emergency device
-    var emergencyDeviceID int
-    err = a.DB.QueryRow(`
-        INSERT INTO emergency_devices (
-            emergency_device_type_id,
-            room_id,
-            manufacture_date,
-            serial_number,
-            description,
-            size,
-            last_inspection_date,
-            status
-        ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8
-        ) RETURNING emergency_device_id
-    `,
-        emergencyDeviceTypeID,
-        roomID,
-        manufactureDate,
-        serialNumber,
-        description,
-        size,
-        lastInspectionDate,
-        status).Scan(&emergencyDeviceID)
-    if err != nil {
-        return a.handleError(c, http.StatusInternalServerError, "Error creating emergency device", err)
-    }
-
-    // Create the new EmergencyDevice model
-    newDevice := models.EmergencyDevice{
-        EmergencyDeviceID:    emergencyDeviceID,
-        EmergencyDeviceTypeID: emergencyDeviceTypeID,
-        RoomID:               roomID,
-        ManufactureDate:      manufactureDate,
-        SerialNumber:         serialNumber,
-        Description:          description,
-        Size:                 size,
-        LastInspectionDate:   &lastInspectionDate.Time, // only set if valid
-        Status:               status,
-    }
-
-    // Build HTML for the new row
-    newRowHTML := fmt.Sprintf(`
-        <tr>
-            <td>%d</td>
-            <td>%d</td>
-            <td>%d</td>
-            <td>%s</td>
-            <td>%s</td>
-            <td>%s</td>
-            <td>%s</td>
-            <td>%s</td>
-            <td>%s</td>
-        </tr>`,
-        newDevice.EmergencyDeviceID,
-        newDevice.EmergencyDeviceTypeID,
-        newDevice.RoomID,
-        newDevice.SerialNumber,
-        newDevice.ManufactureDate.Format("02-01-2006"),
-        newDevice.Size,
-        newDevice.Description,
-        newDevice.LastInspectionDate.Format("02-01-2006"), // ensure this is set correctly
-        newDevice.Status,
-    )
-
-    // Return success message and the new row HTML
-    return c.JSON(http.StatusOK, map[string]string{
-        "message": "Emergency device created successfully.",
-        "rowHTML": newRowHTML,
-    })
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":     "Device deleted successfully",
+		"redirectURL": "/dashboard?message=Device deleted successfully",
+	})
 }
-*/
