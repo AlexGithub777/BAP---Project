@@ -1030,6 +1030,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     } else {
                         console.error("Unexpected response:", data);
                         // Handle unexpected responses (e.g., show an error message)
+                        throw new Error("Unexpected response");
                     }
                 })
                 .catch((error) => {

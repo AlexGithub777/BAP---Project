@@ -193,12 +193,12 @@ fetch("/api/user")
 
             // Fill in the form with the user data
             $("#editUserForm")[0].reset();
-            $("#editUserForm input[name=currentUserID]").val(current_user_id);
-            $("#editUserForm input[name=editUserID]").val(id);
-            $("#editUserForm input[name=editUserUsername]").val(username);
-            $("#editUserForm input[name=editUserEmail]").val(email);
-            $("#editUserForm select[name=editUserRole]").val(role);
-            $("#editUserForm input[name=defaultAdmin]").val(default_admin);
+            $("#editUserForm input[name=current_user_id]").val(current_user_id);
+            $("#editUserForm input[name=user_id]").val(id);
+            $("#editUserForm input[name=username]").val(username);
+            $("#editUserForm input[name=email]").val(email);
+            $("#editUserForm select[name=role]").val(role);
+            $("#editUserForm input[name=default-admin]").val(default_admin);
 
             // Set the form action to the update endpoint for this user
             $("#editUserForm").attr("action", `/api/user/${id}`);
@@ -220,19 +220,52 @@ fetch("/api/user")
             // Clear validation classes
             $("#editUserForm").removeClass("was-validated");
 
+            var editUserForm = document.getElementById("editUserForm");
+
             // Add event listener to the submit button
             $("#editUserBtn").click(function (event) {
                 // Check if the form is valid
-                if (!$("#editUserForm")[0].checkValidity()) {
-                    event.preventDefault();
+                if (!editUserForm.checkValidity()) {
                     event.stopPropagation();
+                    editUserForm.classList.add("was-validated");
                 } else {
-                    // If the form is valid, submit it
-                    $("#editUserForm").submit();
+                    // If the form is valid, prepare to send the PUT request
+                    const formData = new FormData(editUserForm);
+                    const jsonData = {};
+                    for (const [key, value] of formData.entries()) {
+                        jsonData[key] = value;
+                    }
+                    console.log("JSON data:", jsonData);
+                    fetch(
+                        `/api/user/${
+                            document.getElementById("editUserID").value
+                        }`,
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(jsonData),
+                        }
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log("Success:", data);
+                            if (data.error) {
+                                window.location.href = data.redirectURL;
+                            } else if (data.message) {
+                                window.location.href = data.redirectURL;
+                            } else {
+                                console.error("Unexpected response:", data);
+                                // Handle unexpected responses (e.g., show an error message)
+                                throw new Error("Unexpected response");
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Fetch error:", error);
+                            // Optionally display a user-friendly error message
+                        });
                 }
-
-                // Add the was-validated class to the form
-                $("#editUserForm").addClass("was-validated");
             });
         });
     });
@@ -418,31 +451,6 @@ function editSite(siteId) {
     // Fetch the form and the submit button
     var form = document.querySelector("#addSiteForm");
     var submitButton = document.querySelector("#addSiteBtn");
-
-    // Add event listener to the submit button
-    submitButton.addEventListener(
-        "click",
-        function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // If the form is valid, submit it
-                form.submit();
-            }
-
-            form.classList.add("was-validated");
-        },
-        false
-    );
-})();
-
-(function () {
-    "use strict";
-
-    // Fetch the form and the submit button
-    var form = document.querySelector("#editSiteForm");
-    var submitButton = document.querySelector("#editSiteBtn");
 
     // Add event listener to the submit button
     submitButton.addEventListener(
