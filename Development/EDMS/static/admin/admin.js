@@ -225,9 +225,9 @@ fetch("/api/user")
             // Add event listener to the submit button
             $("#editUserBtn").click(function (event) {
                 // Check if the form is valid
-                if (!$("#editUserForm")[0].checkValidity()) {
+                if (!editUserForm.checkValidity()) {
                     event.stopPropagation();
-                    event.preventDefault();
+                    editUserForm.classList.add("was-validated");
                 } else {
                     // If the form is valid, prepare to send the PUT request
                     const formData = new FormData(editUserForm);
@@ -451,31 +451,6 @@ function editSite(siteId) {
     // Fetch the form and the submit button
     var form = document.querySelector("#addSiteForm");
     var submitButton = document.querySelector("#addSiteBtn");
-
-    // Add event listener to the submit button
-    submitButton.addEventListener(
-        "click",
-        function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // If the form is valid, submit it
-                form.submit();
-            }
-
-            form.classList.add("was-validated");
-        },
-        false
-    );
-})();
-
-(function () {
-    "use strict";
-
-    // Fetch the form and the submit button
-    var form = document.querySelector("#editSiteForm");
-    var submitButton = document.querySelector("#editSiteBtn");
 
     // Add event listener to the submit button
     submitButton.addEventListener(
