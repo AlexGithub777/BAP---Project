@@ -188,6 +188,7 @@ fetch("/api/user")
             const default_admin = await fetch(`/api/user/${username}`)
                 .then((response) => response.json())
                 .then((user) => {
+                    console.log("User data:", user);
                     return user.default_admin.toString();
                 });
 
@@ -198,15 +199,13 @@ fetch("/api/user")
             $("#editUserForm input[name=username]").val(username);
             $("#editUserForm input[name=email]").val(email);
             $("#editUserForm select[name=role]").val(role);
-            $("#editUserForm input[name=default-admin]").val(default_admin);
+            $("#editUserForm input[name=default_admin]").val(default_admin);
 
             // Set the form action to the update endpoint for this user
             $("#editUserForm").attr("action", `/api/user/${id}`);
 
             // Get the user ID of the user being updated
-            const updatedUserId = $(
-                "#editUserForm input[name=editUserID]"
-            ).val();
+            const updatedUserId = $("#editUserForm input[name=user_id]").val();
 
             // If the current user ID is equal to the user being updated, display the password field
             if (current_user_id === updatedUserId) {
@@ -214,6 +213,9 @@ fetch("/api/user")
             } else {
                 $("#passwordField").hide();
             }
+
+            console.log("Updated user ID:", updatedUserId);
+            console.log("Current user ID:", current_user_id);
 
             // Show the modal
             $("#editUserModal").modal("show");
