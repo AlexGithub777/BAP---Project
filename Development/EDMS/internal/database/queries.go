@@ -475,17 +475,16 @@ func (db *DB) GetAllBuildings(siteId string) ([]models.Building, error) {
 	return buildings, nil
 }
 
-func (db *DB) GetBuildingById(buildingCode string) (*models.Building, error) {
+func (db *DB) GetBuildingById(buildingID string) (*models.Building, error) {
 	query := `
-	SELECT siteid, sitename, buildingcode
+	SELECT buildingid, siteid, buildingcode
 	FROM buildingT
 	WHERE buildingid = $1
 	`
 	var building models.Building
-	err := db.QueryRow(query, buildingCode).Scan(
+	err := db.QueryRow(query, buildingID).Scan(
 		&building.BuildingID,
 		&building.SiteID,
-		&building.SiteName,
 		&building.BuildingCode,
 	)
 
@@ -497,7 +496,7 @@ func (db *DB) GetBuildingById(buildingCode string) (*models.Building, error) {
 }
 
 func (db *DB) AddBuilding(building *models.Building) error {
-	query := "INSERT INTO buildingT (siteId, siteName, buildingCode) VALUES ($1, $2, $3)"
+	query := "INSERT INTO buildingT (siteId, buildingCode) VALUES ($1, $2)"
 	insertStmt, err := db.Prepare(query)
 	if err != nil {
 		return err
@@ -505,7 +504,7 @@ func (db *DB) AddBuilding(building *models.Building) error {
 
 	defer insertStmt.Close()
 
-	_, err = insertStmt.Exec(building.SiteID, building.SiteName, building.BuildingCode)
+	_, err = insertStmt.Exec(building.SiteID, building.BuildingCode)
 
 	if err != nil {
 		return err
@@ -515,7 +514,7 @@ func (db *DB) AddBuilding(building *models.Building) error {
 }
 
 func (db *DB) UpdateBuilding(building *models.Building) error {
-	query := "UPDATE BuildingT SET siteId = $1, siteName = $2, buildingCode = $3 WHERE buildingID = $4"
+	query := "UPDATE BuildingT SET siteId = $1, buildingCode = $2 WHERE buildingID = $3"
 	updateStmt, err := db.Prepare(query)
 	if err != nil {
 		return err
@@ -523,7 +522,7 @@ func (db *DB) UpdateBuilding(building *models.Building) error {
 
 	defer updateStmt.Close()
 
-	_, err = updateStmt.Exec(building.SiteName, building.SiteID, building.BuildingCode, building.SiteID)
+	_, err = updateStmt.Exec(building.SiteID, building.BuildingCode, building.BuildingID)
 
 	if err != nil {
 		return err
@@ -550,15 +549,15 @@ func (db *DB) DeleteBuilding(buildingID string) error {
 	return nil
 }
 
-func (db *DB) GetRoomsByBuildingID(siteID string) ([]models.Room, error) {
+func (db *DB) GetRoomsByBuildingID(buildingID string) ([]models.Room, error) {
 	query := `
-	SELECT r.roomid, r.roomcode, b.buildingcode, s.sitename
+	SELECT r.roomid
 	FROM roomT r
 	WHERE r.buildingid = $1
 	ORDER BY r.roomcode
 	`
 
-	rows, err := db.Query(query, siteID)
+	rows, err := db.Query(query, buildingID)
 	if err != nil {
 		return nil, err
 	}
@@ -572,9 +571,6 @@ func (db *DB) GetRoomsByBuildingID(siteID string) ([]models.Room, error) {
 		var room models.Room
 		err := rows.Scan(
 			&room.RoomID,
-			&room.RoomCode,
-			&room.BuildingCode,
-			&room.SiteName,
 		)
 		if err != nil {
 			return nil, err

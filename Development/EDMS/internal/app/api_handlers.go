@@ -326,40 +326,28 @@ func (a *App) HandlePostBuilding(c echo.Context) error {
 	}
 
 	// Get the form values
-	siteId := strings.TrimSpace(c.FormValue("addSiteId"))             // Trim whitespace
-	siteName := strings.TrimSpace(c.FormValue("addSiteName"))         // Trim whitespace
+	siteId := strings.TrimSpace(c.FormValue("addSiteId"))             // Trim whitespace 	// Trim whitespace
 	buildingCode := strings.TrimSpace(c.FormValue("addBuildingCode")) // Trim whitespace
 
 	// Validate input
-	if siteId == "" || siteName == "" || buildingCode == "" {
+	if siteId == "" || buildingCode == "" {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=All fields are required")
-	}
-
-	// Validate site name & address length (site name should be less than 100 characters) (address should be less than 255 characters)
-	if len(siteName) > 100 {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name should be less than 100 characters and address should be less than 255 characters")
-	}
-
-	// Additional validation for siteName (allow only alphanumeric, spaces, hyphens, and underscores)
-	if !regexp.MustCompile(`^[a-zA-Z0-9\s_-]+$`).MatchString(siteName) {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Site name can only contain letters, numbers, spaces, hyphens, and underscores")
 	}
 
 	// Save site information and file path in the database
 	siteIdNum, err := strconv.Atoi(siteId)
 	building := &models.Building{
 		SiteID:       siteIdNum,
-		SiteName:     siteName,
 		BuildingCode: buildingCode,
 	}
 
 	err = a.DB.AddBuilding(building)
 	if err != nil {
-		return a.handleError(c, http.StatusInternalServerError, "Error saving site", err)
+		return a.handleError(c, http.StatusInternalServerError, "Error saving building", err)
 	}
 
 	// Redirect to the admin page with a success message
-	return c.Redirect(http.StatusFound, "/admin?message=Site added successfully")
+	return c.Redirect(http.StatusFound, "/admin?message=Building added successfully")
 }
 
 func (a *App) HandleEditBuilding(c echo.Context) error {
@@ -375,36 +363,26 @@ func (a *App) HandleEditBuilding(c echo.Context) error {
 	}
 
 	// Get the form values
+	//buildingID := c.FormValue("editBuildingID")
+	buildingID := c.Param("id")
 	siteID := c.FormValue("editSiteID")
-	siteName := strings.TrimSpace(c.FormValue("editSiteName"))         // Trim whitespace
 	buildingCode := strings.TrimSpace(c.FormValue("editBuildingCode")) // Trim whitespace
 
-	// Validate input
-	if siteName == "" || buildingCode == "" {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=All fields are required")
-	}
-
-	// Get the existing building by ID
-	existingBuilding, err := a.DB.GetBuildingById(buildingCode)
-	if err != nil {
-		return a.handleError(c, http.StatusInternalServerError, "Error fetching site", err)
-	}
-
+	buildingIdNum, err := strconv.Atoi(buildingID)
 	siteIdNum, err := strconv.Atoi(siteID)
 	building := &models.Building{
-		BuildingID:   existingBuilding.BuildingID,
+		BuildingID:   buildingIdNum,
 		SiteID:       siteIdNum,
-		SiteName:     siteName,
 		BuildingCode: buildingCode,
 	}
 
 	err = a.DB.UpdateBuilding(building)
 	if err != nil {
-		return a.handleError(c, http.StatusInternalServerError, "Error saving site", err)
+		return a.handleError(c, http.StatusInternalServerError, "Error saving building", err)
 	}
 
 	// Respond to the client
-	return c.Redirect(http.StatusFound, "/admin?message=Site updated successfully")
+	return c.Redirect(http.StatusFound, "/admin?message=Building updated successfully")
 }
 
 func (a *App) HandleDeleteBuilding(c echo.Context) error {
@@ -419,12 +397,12 @@ func (a *App) HandleDeleteBuilding(c echo.Context) error {
 	// Get the site ID from the URL
 	buildingID := c.Param("id")
 
-	// Get the site by ID
+	// Get the building by ID
 	building, err := a.DB.GetBuildingById(buildingID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error":       "Error fetching site",
-			"redirectURL": "/admin?error=Error fetching site",
+			"error":       "Error fetching building",
+			"redirectURL": "/admin?error=Error fetching building",
 		})
 	}
 
@@ -445,7 +423,7 @@ func (a *App) HandleDeleteBuilding(c echo.Context) error {
 		})
 	}
 
-	// Check if the site has any rooms
+	// Check if the building has any rooms
 	rooms, err := a.DB.GetRoomsByBuildingID(buildingID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -463,7 +441,7 @@ func (a *App) HandleDeleteBuilding(c echo.Context) error {
 	}
 
 	// Delete the building from the database
-	err = a.DB.DeleteSite(buildingID)
+	err = a.DB.DeleteBuilding(buildingID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error":       "Error deleting site",
