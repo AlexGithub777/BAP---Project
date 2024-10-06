@@ -384,7 +384,21 @@ fetch("/api/emergency-device-type")
         $(".edit-device-type-button").click((event) => {
             const id = $(event.target).data("id");
             console.log("Edit button clicked for device type with ID:", id);
+            document.getElementById("editDeviceTypeID").value = id;
+            //Fetch device type by id and autofill form
+            fetch(`/api/emergency-device-type/${id}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    //Populate the form with the data
+                    document.getElementById("editDeviceTypeName").value =
+                        data.emergency_device_type_name;
+                })
+                .catch((error) => {
+                    console.error("Fetch error: ", error);
+                });
+
             // Handle edit
+            $("#editDeviceTypeModal").modal("show");
         });
     });
 

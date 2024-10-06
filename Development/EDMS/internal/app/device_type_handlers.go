@@ -54,6 +54,29 @@ func (a *App) HandlePostDeviceType(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/admin?message=Device Type added sucsessfully")
 }
 
+func (a *App) HandleGetAllDeviceTypeByID(c echo.Context) error {
+	//Check if request is not a get request
+	if c.Request().Method != http.MethodGet {
+        return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Method not allowed"})
+    }
+	deviceTypeIDStr := c.Param("id")
+	deviceTypeID, err := strconv.Atoi(deviceTypeIDStr)
+	if err != nil {
+		a.handleLogger("Invalid Device Type ID")
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Invalid Device Type ID"})
+	}
+
+	//Fetch the device type from the database
+	deviceType, err := a.DB.GetEmergencyDeviceTypeByID(deviceTypeID)
+	if err != nil {
+		a.handleLogger("Error fetching Device Type")
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Error fetching Device Type"})
+	}
+
+	//return the result as JSON
+	return c.JSON(http.StatusOK, deviceType)
+}
+
 func (a *App) HandleDeleteDeviceType(c echo.Context) error {
 	//Check if request is not a delete request
     if c.Request().Method != http.MethodDelete {

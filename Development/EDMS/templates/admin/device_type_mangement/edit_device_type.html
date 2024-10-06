@@ -1,8 +1,8 @@
-<div id="addDeviceTypeModal" class="modal fade">
+<div id="editDeviceTypeModal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Device Type</h5>
+                <h5 class="modal-title">Edit Device Type</h5>
                 <button
                     type="button"
                     class="btn-close"
@@ -14,19 +14,24 @@
                 <form
                     class="form-control needs-validation"
                     method="POST"
-                    action="/api/emergency-device-type"
+                    action=""
                     autocomplete="off"
                     novalidate
                     id="addDeviceTypeForm"
                 >
+                    <input
+                        type="hidden"
+                        id="editDeviceTypeID"
+                        name="device_type_id"
+                    />
                     <div class="mb-3">
-                        <label for="addDeviceTypeName" class="form-label"
+                        <label for="editDeviceTypeName" class="form-label"
                             >Device Type:</label
                         >
                         <input
                             type="text"
                             class="form-control"
-                            id="addDeviceTypeName"
+                            id="editDeviceTypeName"
                             name="device_type_name"
                             pattern="^[a-zA-Z0-9_ ]{1,50}$"
                             required
@@ -49,10 +54,10 @@
                 </button>
                 <button
                     type="button"
-                    id="addDeviceTypeBtn"
+                    id="editDeviceTypeBtn"
                     class="btn btn-primary"
                 >
-                    Add Device Type
+                    Edit Device Type
                 </button>
             </div>
         </div>
