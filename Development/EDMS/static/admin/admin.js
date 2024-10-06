@@ -472,6 +472,32 @@ function editSite(siteId) {
     );
 })();
 
+// Validate and submit the form for Device Type Name
+(function () {
+    "use strict";
+
+    // Fetch the form and the submit button
+    var form = document.querySelector("#addDeviceTypeForm");
+    var submitButton = document.querySelector("#addDeviceTypeBtn");
+
+    // Add event listener to the submit button
+    submitButton.addEventListener(
+        "click",
+        function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // If the form is valid, submit it
+                form.submit();
+            }
+
+            form.classList.add("was-validated");
+        },
+        false
+    );
+})();
+
 /*
 (function () {
     "use strict";
