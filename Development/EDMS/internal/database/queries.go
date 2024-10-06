@@ -791,6 +791,135 @@ func (db *DB) GetEmergencyDeviceTypeByID(emergencyDeviceTypeID int) (*models.Eme
 	return &deviceType, nil
 }
 
+func (db *DB) GetDeviceTypeByName(emergencyDeviceTypeName string) (*models.EmergencyDeviceType, error) {
+	query := `
+	SELECT emergencydevicetypeid, emergencydevicetypename
+	FROM emergency_device_typeT
+	WHERE emergencydevicetypename = $1
+	`
+
+	var deviceType models.EmergencyDeviceType
+	err := db.QueryRow(query, emergencyDeviceTypeName).Scan(
+		&deviceType.EmergencyDeviceTypeID,
+		&deviceType.EmergencyDeviceTypeName,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &deviceType, nil
+}
+
+func (db *DB) AddEmergencyDeviceType(emergencyDeviceTypeName string) error {
+	query := `
+	INSERT INTO emergency_device_typeT (emergencydevicetypename)
+	VALUES ($1)
+	`
+	insertStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer insertStmt.Close()
+
+	_, err = insertStmt.Exec(
+		emergencyDeviceTypeName,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) DeleteEmergencyDeviceType(emergencyDeviceTypeID int) error {
+	query := "DELETE FROM Emergency_Device_TypeT WHERE EmergencyDeviceTypeID = $1"
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(emergencyDeviceTypeID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil	
+}
+
+func (db *DB) GetDevicesByTypeID(emergencyDeviceTypeID int) ([]models.EmergencyDevice, error) {
+    query := `
+    SELECT
+        ed.emergencydeviceid,
+        ed.emergencydevicetypeid,
+        edt.emergencydevicetypename,
+        et.extinguishertypename,
+        ed.extinguishertypeid,
+        ed.roomid,
+        r.roomcode,
+        b.buildingid,
+        b.buildingcode,
+        s.siteid,
+        s.sitename,
+        ed.serialnumber,
+        ed.manufacturedate,
+        ed.lastinspectiondate,
+        ed.description,
+        ed.size,
+        ed.status
+    FROM emergency_deviceT ed
+    JOIN emergency_device_typeT edt ON ed.emergencydevicetypeid = edt.emergencydevicetypeid
+    LEFT JOIN Extinguisher_TypeT et ON ed.extinguishertypeid = et.extinguishertypeid
+    JOIN roomT r ON ed.roomid = r.roomid
+    JOIN buildingT b ON r.buildingid = b.buildingid
+    JOIN siteT s ON b.siteid = s.siteid
+    WHERE ed.emergencydevicetypeid = $1
+    `
+    rows, err := db.Query(query, emergencyDeviceTypeID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var devices []models.EmergencyDevice
+    for rows.Next() {
+        var device models.EmergencyDevice
+        err := rows.Scan(
+            &device.EmergencyDeviceID,
+            &device.EmergencyDeviceTypeID,
+            &device.EmergencyDeviceTypeName,
+            &device.ExtinguisherTypeName,
+            &device.ExtinguisherTypeID,
+            &device.RoomID,
+            &device.RoomCode,
+            &device.BuildingID,
+            &device.BuildingCode,
+            &device.SiteID,
+            &device.SiteName,
+            &device.SerialNumber,
+            &device.ManufactureDate,
+            &device.LastInspectionDate,
+            &device.Description,
+            &device.Size,
+            &device.Status,
+        )
+        if err != nil {
+            return nil, err
+        }
+        devices = append(devices, device)
+    }
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return devices, nil
+}
+
 func (db *DB) GetExtinguisherTypeByID(extinguisherTypeID int) (*models.ExtinguisherType, error) {
 	query := `
 	SELECT extinguishertypeid, extinguishertypename

@@ -33,9 +33,9 @@
                             class="form-control"
                             id="addDeviceTypeName"
                             name="device_type_name"
+                            pattern="^[a-zA-Z0-9_ ]{1,50}$"
+                            required
                         />
-                        <!--pattern="^[a-zA-Z0-9_ ]{1,50}$"
-                            required-->
                         <div class="invalid-feedback">
                             Device Type Name must be between 1 and 50 characters
                             long, and contain only letters, numbers, and
