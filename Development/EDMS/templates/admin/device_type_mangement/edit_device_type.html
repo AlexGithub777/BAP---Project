@@ -14,15 +14,14 @@
                 <form
                     class="form-control needs-validation"
                     method="POST"
-                    action=""
                     autocomplete="off"
                     novalidate
-                    id="addDeviceTypeForm"
+                    id="editDeviceTypeForm"
                 >
                     <input
                         type="hidden"
                         id="editDeviceTypeID"
-                        name="device_type_id"
+                        name="emergency_device_type_id"
                     />
                     <div class="mb-3">
                         <label for="editDeviceTypeName" class="form-label"
@@ -32,7 +31,7 @@
                             type="text"
                             class="form-control"
                             id="editDeviceTypeName"
-                            name="device_type_name"
+                            name="emergency_device_type_name"
                             pattern="^[a-zA-Z0-9_ ]{1,50}$"
                             required
                         />

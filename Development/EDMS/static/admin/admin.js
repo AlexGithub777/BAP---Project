@@ -385,6 +385,7 @@ fetch("/api/emergency-device-type")
             const id = $(event.target).data("id");
             console.log("Edit button clicked for device type with ID:", id);
             document.getElementById("editDeviceTypeID").value = id;
+
             //Fetch device type by id and autofill form
             fetch(`/api/emergency-device-type/${id}`)
                 .then((response) => response.json())
@@ -399,6 +400,66 @@ fetch("/api/emergency-device-type")
 
             // Handle edit
             $("#editDeviceTypeModal").modal("show");
+
+            // Clear validation classes
+            $("#editDeviceTypeForm").removeClass("was-validated");
+
+            var editDeviceTypeForm =
+                document.getElementById("editDeviceTypeForm");
+
+            // Function to handle form submission
+            function handleSubmit(event) {
+                event.preventDefault(); // Prevent actual form submission
+
+                // Check if the form is valid
+                if (!editDeviceTypeForm.checkValidity()) {
+                    event.stopPropagation();
+                    editDeviceTypeForm.classList.add("was-validated");
+                } else {
+                    // If the form is valid, prepare to send the PUT request
+                    const formData = new FormData(editDeviceTypeForm);
+                    const jsonData = {};
+                    for (const [key, value] of formData.entries()) {
+                        jsonData[key] = value;
+                    }
+                    console.log("JSON data:", jsonData);
+                    fetch(
+                        `/api/emergency-device-type/${
+                            document.getElementById("editDeviceTypeID").value
+                        }`,
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(jsonData),
+                        }
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log("Success:", data);
+                            if (data.error) {
+                                window.location.href = data.redirectURL;
+                            } else if (data.message) {
+                                window.location.href = data.redirectURL;
+                            } else {
+                                console.error("Unexpected response:", data);
+                                // Handle unexpected responses (e.g., show an error message)
+                                throw new Error("Unexpected response");
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Fetch error:", error);
+                            // Optionally display a user-friendly error message
+                        });
+                }
+            }
+
+            // Add event listener to the form for submit event (triggered by Enter key)
+            $(editDeviceTypeForm).off("submit").on("submit", handleSubmit);
+
+            // Add event listener to the submit button
+            $("#editDeviceTypeBtn").off("click").on("click", handleSubmit);
         });
     });
 

@@ -834,6 +834,32 @@ func (db *DB) AddEmergencyDeviceType(emergencyDeviceTypeName string) error {
 	return nil
 }
 
+func (db *DB) UpdateEmergencyDeviceType(emergencyDeviceType *models.EmergencyDeviceType) error {
+	query := `
+	UPDATE emergency_device_typeT
+	SET emergencydevicetypename = $1
+	WHERE emergencydevicetypeid = $2
+	`
+
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(
+		emergencyDeviceType.EmergencyDeviceTypeName,
+		emergencyDeviceType.EmergencyDeviceTypeID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *DB) DeleteEmergencyDeviceType(emergencyDeviceTypeID int) error {
 	query := "DELETE FROM Emergency_Device_TypeT WHERE EmergencyDeviceTypeID = $1"
 	deleteStmt, err := db.Prepare(query)
@@ -849,11 +875,11 @@ func (db *DB) DeleteEmergencyDeviceType(emergencyDeviceTypeID int) error {
 		return err
 	}
 
-	return nil	
+	return nil
 }
 
 func (db *DB) GetDevicesByTypeID(emergencyDeviceTypeID int) ([]models.EmergencyDevice, error) {
-    query := `
+	query := `
     SELECT
         ed.emergencydeviceid,
         ed.emergencydevicetypeid,
@@ -880,44 +906,44 @@ func (db *DB) GetDevicesByTypeID(emergencyDeviceTypeID int) ([]models.EmergencyD
     JOIN siteT s ON b.siteid = s.siteid
     WHERE ed.emergencydevicetypeid = $1
     `
-    rows, err := db.Query(query, emergencyDeviceTypeID)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	rows, err := db.Query(query, emergencyDeviceTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    var devices []models.EmergencyDevice
-    for rows.Next() {
-        var device models.EmergencyDevice
-        err := rows.Scan(
-            &device.EmergencyDeviceID,
-            &device.EmergencyDeviceTypeID,
-            &device.EmergencyDeviceTypeName,
-            &device.ExtinguisherTypeName,
-            &device.ExtinguisherTypeID,
-            &device.RoomID,
-            &device.RoomCode,
-            &device.BuildingID,
-            &device.BuildingCode,
-            &device.SiteID,
-            &device.SiteName,
-            &device.SerialNumber,
-            &device.ManufactureDate,
-            &device.LastInspectionDate,
-            &device.Description,
-            &device.Size,
-            &device.Status,
-        )
-        if err != nil {
-            return nil, err
-        }
-        devices = append(devices, device)
-    }
-    if err = rows.Err(); err != nil {
-        return nil, err
-    }
+	var devices []models.EmergencyDevice
+	for rows.Next() {
+		var device models.EmergencyDevice
+		err := rows.Scan(
+			&device.EmergencyDeviceID,
+			&device.EmergencyDeviceTypeID,
+			&device.EmergencyDeviceTypeName,
+			&device.ExtinguisherTypeName,
+			&device.ExtinguisherTypeID,
+			&device.RoomID,
+			&device.RoomCode,
+			&device.BuildingID,
+			&device.BuildingCode,
+			&device.SiteID,
+			&device.SiteName,
+			&device.SerialNumber,
+			&device.ManufactureDate,
+			&device.LastInspectionDate,
+			&device.Description,
+			&device.Size,
+			&device.Status,
+		)
+		if err != nil {
+			return nil, err
+		}
+		devices = append(devices, device)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 
-    return devices, nil
+	return devices, nil
 }
 
 func (db *DB) GetExtinguisherTypeByID(extinguisherTypeID int) (*models.ExtinguisherType, error) {
