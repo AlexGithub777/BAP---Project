@@ -72,9 +72,12 @@ DB_PORT=5432
 ADMIN_PASSWORD=you_password
 JWT_SECRET="your_jwt_secret"
 ```
+
 Ensure password meets the requirements (8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character)
 
 ### 7. Run Database Migrations
+
+Ensure powershell is running as Administrator before running Goose scripts.
 
 To initialize the database tables, run the `goose_up.ps1` script:
 
@@ -108,7 +111,7 @@ air
 Once the application is running, the terminal should display a link:
 
 ```bash
-http://localhost:3000
+http://[your_local_ip]:3000
 ```
 
 `Ctrl + Click` or open this link in your browser to access the application. You can create an account and log in.
