@@ -576,6 +576,113 @@ func (db *DB) GetAllBuildings(siteId string) ([]models.Building, error) {
 	return buildings, nil
 }
 
+func (db *DB) GetBuildingById(buildingID string) (*models.Building, error) {
+	query := `
+	SELECT buildingid, siteid, buildingcode
+	FROM buildingT
+	WHERE buildingid = $1
+	`
+	var building models.Building
+	err := db.QueryRow(query, buildingID).Scan(
+		&building.BuildingID,
+		&building.SiteID,
+		&building.BuildingCode,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &building, nil
+}
+
+func (db *DB) AddBuilding(building *models.Building) error {
+	query := "INSERT INTO buildingT (siteId, buildingCode) VALUES ($1, $2)"
+	insertStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer insertStmt.Close()
+
+	_, err = insertStmt.Exec(building.SiteID, building.BuildingCode)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) UpdateBuilding(building *models.Building) error {
+	query := "UPDATE BuildingT SET siteId = $1, buildingCode = $2 WHERE buildingID = $3"
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(building.SiteID, building.BuildingCode, building.BuildingID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) DeleteBuilding(buildingID string) error {
+	query := "DELETE FROM BuildingT WHERE buildingID = $1"
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(buildingID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) GetRoomsByBuildingID(buildingID string) ([]models.Room, error) {
+	query := `
+	SELECT r.roomid
+	FROM roomT r
+	WHERE r.buildingid = $1
+	ORDER BY r.roomcode
+	`
+
+	rows, err := db.Query(query, buildingID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var rooms []models.Room
+
+	// Scan the results
+	for rows.Next() {
+		var room models.Room
+		err := rows.Scan(
+			&room.RoomID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		rooms = append(rooms, room)
+	}
+
+	return rooms, nil
+}
+
 func (db *DB) GetAllSites() ([]models.Site, error) {
 	query := `
 	SELECT siteid, sitename, siteaddress
