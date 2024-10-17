@@ -50,8 +50,13 @@ seed_complete
 
 # Map files
 /static/site_maps/*
+!/static/site_maps/EIT_Taradale.svg
 
 # Log files
 tmp
 
 tmp/*
+
+vendor
+
+.hintrc

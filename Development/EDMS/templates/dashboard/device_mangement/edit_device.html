@@ -1,0 +1,226 @@
+<div id="editDeviceModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Device</h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    class="form-control needs-validation"
+                    method="POST"
+                    action=""
+                    id="editDeviceForm"
+                    autocomplete="off"
+                    novalidate
+                >
+                    <div class="mb-3">
+                        <input
+                            type="hidden"
+                            id="editDeviceID"
+                            name="editDeviceID"
+                        />
+                        <label for="deviceType" class="form-label"
+                            >Device Type</label
+                        >
+                        <select
+                            class="form-control form-select emergencyDeviceTypeInput"
+                            aria-label="Select emergency device type"
+                            name="emergency_device_type"
+                            id="editEmergencyDeviceTypeInput"
+                            required
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a device type.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="extinguisherType" class="form-label"
+                            >Extinguisher Type</label
+                        >
+                        <select
+                            class="form-control form-select extinguisherTypeInput"
+                            aria-label="Select extinguisher type"
+                            name="extinguisher_type"
+                            id="editExtinguisherTypeInput"
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="deviceSiteInput" class="form-label"
+                            >Site</label
+                        >
+                        <select
+                            class="form-control form-select editSiteInput"
+                            aria-label="Select site"
+                            name="site_id"
+                            id="editSiteInput"
+                            required
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a site.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="deviceBuildingInput" class="form-label"
+                            >Building</label
+                        >
+                        <select
+                            class="form-control form-select editBuildingInput"
+                            aria-label="Select building"
+                            name="building_id"
+                            id="editBuildingInput"
+                            required
+                        >
+                            <!-- Options will be populated here -->
+                            <option disabled selected>Select a Building</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a building.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="deviceRoomInput" class="form-label"
+                            >Room</label
+                        >
+                        <select
+                            class="form-control form-select roomInput"
+                            name="room_id"
+                            aria-label="Select room"
+                            id="editRoomInput"
+                            required
+                        >
+                            <!-- Options will be populated here -->
+                            <option disabled selected>Select a Room</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a room.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serialNumber" class="form-label"
+                            >Serial Number</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editSerialNumberInput"
+                            placeholder="Enter serial number"
+                            name="serial_number"
+                            pattern=".{0,50}"
+                        />
+                        <div class="invalid-feedback">
+                            Serial number is too long, maximum 50 characters.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label"
+                            >Description</label
+                        >
+                        <textarea
+                            class="form-control descriptionInput"
+                            id="editDescriptionInput"
+                            name="description"
+                            rows="3"
+                            placeholder="Enter description"
+                        ></textarea>
+                        <div class="invalid-feedback">
+                            Description is too long, maximum 255 characters.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="manufactureDate" class="form-label"
+                            >Manufacture Date</label
+                        >
+                        <input
+                            type="date"
+                            class="form-control manufactureDateInput"
+                            id="editManufactureDateInput"
+                            name="manufacture_date"
+                        />
+                        <div class="invalid-feedback manufactureDateFeedback">
+                            Please provide a valid manufacture date.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastInspectionDate" class="form-label"
+                            >Last Inspection Date</label
+                        >
+                        <input
+                            type="date"
+                            class="form-control lastInspectionDateInput"
+                            id="editLastInspectionDateInput"
+                            name="last_inspection_date"
+                        />
+                        <div
+                            class="invalid-feedback lastInspectionDateFeedback"
+                        >
+                            Please provide a valid last inspection date.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="size" class="form-label">Size</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editSizeInput"
+                            name="size"
+                            placeholder="Enter size"
+                            pattern=".{0,50}"
+                        />
+                        <div class="invalid-feedback">
+                            Size is too long, maximum 50 characters.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select
+                            class="form-control form-select"
+                            id="editStatusInput"
+                            name="status"
+                            aria-label="Select status"
+                            required
+                        >
+                            <option selected value="Active">Active</option>
+                            <option value="Expired">Expired</option>
+                            <option value="Inspection Due">
+                                Inspection Due
+                            </option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a status.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button
+                    type="button"
+                    id="editDeviceBtn"
+                    class="btn btn-primary"
+                >
+                    Edit Device
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

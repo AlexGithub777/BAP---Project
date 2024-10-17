@@ -20,9 +20,14 @@ type App struct {
 
 // handleError is a method of App for handling errors
 func (a *App) handleError(c echo.Context, statusCode int, message string, err error) error {
-	a.Logger.Printf("Error: %v", err) // Use the logger in the App struct
+	a.Logger.Printf("\033[31mError: %v\033[0m", err) // Use the logger in the App struct
 	return c.JSON(statusCode, map[string]string{"error": message})
 }
+
+func (a *App) handleLogger(message string) {
+	a.Logger.Printf("\033[34m%s\033[0m", message)
+}
+
 
 // NewApp creates a new instance of App
 func NewApp(cfg config.Config) *App {
@@ -30,7 +35,13 @@ func NewApp(cfg config.Config) *App {
 	router := echo.New()
 
 	// Set up renderer
-	router.Renderer = utils.NewTemplateRenderer()
+	renderer, err := utils.NewTemplateRenderer()
+	if err != nil {
+		// Handle the error, e.g.:
+		panic(err)
+	}
+
+	router.Renderer = renderer
 
 	// Serve static files
 	router.Static("/static", "static")
@@ -56,7 +67,7 @@ func NewApp(cfg config.Config) *App {
 	}
 
 	// Initialize Logger
-	logger := log.New(os.Stdout, "APP: ", log.LstdFlags)
+	logger := log.New(os.Stdout, "\033[34mAPP: \033[0m", log.LstdFlags)
 
 	app := &App{
 		DB:     db,

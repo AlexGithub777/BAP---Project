@@ -1,0 +1,64 @@
+<div id="editDeviceTypeModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Device Type</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    class="form-control needs-validation"
+                    method="POST"
+                    autocomplete="off"
+                    novalidate
+                    id="editDeviceTypeForm"
+                >
+                    <input
+                        type="hidden"
+                        id="editDeviceTypeID"
+                        name="emergency_device_type_id"
+                    />
+                    <div class="mb-3">
+                        <label for="editDeviceTypeName" class="form-label"
+                            >Device Type:</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editDeviceTypeName"
+                            name="emergency_device_type_name"
+                            pattern="^[a-zA-Z0-9_ ]{1,50}$"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Device Type Name must be between 1 and 50 characters
+                            long, and contain only letters, numbers, and
+                            underscores.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button
+                    type="button"
+                    id="editDeviceTypeBtn"
+                    class="btn btn-primary"
+                >
+                    Edit Device Type
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,118 @@
+/* Map container styling */
+#map {
+    height: 50vh;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #e9ecef; /* Added background color for visibility */
+}
+
+/* Device list container */
+
+#map {
+    border-radius: 8px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+@media (max-width: 767px) {
+    .pagination {
+        justify-content: center;
+    }
+
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 14px;
+    }
+
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        padding: 0.5rem 0.5rem;
+    }
+}
+
+@media screen and (max-width: 1009px) {
+    body table thead {
+        display: none;
+    }
+
+    body table tr {
+        margin-bottom: 10px;
+        display: block;
+        border-bottom: 2px solid #ddd;
+    }
+
+    body table td {
+        display: block;
+        text-align: right;
+        font-size: 13px;
+        border-bottom: 1px dotted #ccc;
+    }
+
+    body table td::before {
+        content: attr(data-label);
+        float: left;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    body table td:last-child {
+        border-bottom: 0;
+    }
+
+    body .action-buttons {
+        display: block;
+        justify-content: right;
+    }
+}
+
+@media screen and (min-width: 1010px) {
+    body table td,
+    body table th {
+        display: table-cell;
+        text-align: left;
+    }
+
+    body .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        text-align: left;
+        gap: 2px;
+        flex-wrap: nowrap;
+    }
+}
+
+/* nAVBAR CSS for Mobile Devices */
+@media (max-width: 990px) {
+    .navbar {
+        flex-direction: column;
+    }
+
+    .navbar .navbar-brand {
+        margin-bottom: 1em;
+    }
+
+    .navbar .navbar-nav {
+        flex-direction: column !important;
+        justify-content: start;
+    }
+
+    .navbar .navbar-nav .nav-item {
+        margin: 0.5em 0;
+    }
+
+    .navbar .navbar-nav .nav-item .nav-link {
+        padding: 0.5em 1em;
+    }
+
+    #brand-name {
+        display: none;
+    }
+}

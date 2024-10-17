@@ -58,9 +58,8 @@ func (a *App) initRoutes() {
 	// User management routes - Alex
 	admin.GET("/api/user", a.HandleGetAllUsers)
 	admin.GET("/api/user/:username", a.HandleGetUserByUsername)
-	admin.POST("/api/user/:id", a.HandleEditUser)
-	//admin.PUT("/api/user/:id", a.HandlePutUser)
-	//admin.DELETE("/api/user/:id", a.HandleDeleteUser)
+	admin.PUT("/api/user/:id", a.HandlePutUser)
+	admin.DELETE("/api/user/:id", a.HandleDeleteUser)
 	// Site management routes - Alex
 	admin.POST("/api/site", a.HandlePostSite)
 	admin.POST("/api/site/:id", a.HandleEditSite)
@@ -74,17 +73,19 @@ func (a *App) initRoutes() {
 	//admin.PUT("/api/room/:id", a.HandlePutRoom)
 	//admin.DELETE("/api/room/:id", a.HandleDeleteRoom)
 	// Device type management routes - James
-	//admin.POST("/api/emergency-device-type", a.HandlePostDeviceType)
-	//admin.PUT("/api/emergency-device-type/:id", a.HandlePutDeviceType)
-	//admin.DELETE("/api/emergency-device-type/:id", a.HandleDeleteDeviceType)
+	admin.POST("/api/emergency-device-type", a.HandlePostDeviceType)
+	admin.GET("/api/emergency-device-type/:id", a.HandleGetAllDeviceTypeByID)
+	admin.PUT("/api/emergency-device-type/:id", a.HandlePutDeviceType)
+	admin.DELETE("/api/emergency-device-type/:id", a.HandleDeleteDeviceType)
 	// Device management routes - Liam
-	//admin.POST("/api/emergency-device", a.HandlePostDevice)
-	//admin.PUT("/api/emergency-device/:id", a.HandlePutDevice)
-	//admin.DELETE("/api/emergency-device/:id", a.HandleDeleteDevice)
+	admin.POST("/api/emergency-device", a.HandlePostDevice)
+	admin.PUT("/api/emergency-device/:id", a.HandlePutDevice)
+	admin.DELETE("/api/emergency-device/:id", a.HandleDeleteDevice)
 
 	// Other protected API routes
 	api := protected.Group("/api")
 	api.GET("/emergency-device", a.HandleGetAllDevices)
+	api.GET("/emergency-device/:id", a.HandleGetDeviceByID)
 	api.GET("/emergency-device-type", a.HandleGetAllDeviceTypes)
 	api.GET("/extinguisher-type", a.HandleGetAllExtinguisherTypes)
 	api.GET("/room", a.HandleGetAllRooms)

@@ -10,6 +10,7 @@ import (
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/app"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/utils"
 )
 
 func main() {
@@ -20,13 +21,13 @@ func main() {
 	application := app.NewApp(cfg)
 
 	// Get the local IP that has Internet connectivity
-	//ip := utils.GetLocalIP().String()
+	ip := utils.GetLocalIP().String()
 
-	log.Printf("Starting HTTP service on http://localhost:3000")
+	log.Printf("Starting HTTP service on http://%s:3000", ip)
 
 	// HTTP listener is in a goroutine as its blocking
 	go func() {
-		if err := application.Router.Start("localhost" + ":3000"); err != nil && err != http.ErrServerClosed {
+		if err := application.Router.Start(ip + ":3000"); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Error starting the server: %v", err)
 		}
 	}()

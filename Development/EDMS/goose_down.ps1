@@ -20,4 +20,20 @@ if (-not (Get-Command $GOOSE_CMD -ErrorAction SilentlyContinue)) {
 Write-Output "Running goose down..."
 & $GOOSE_CMD -dir $MIGRATION_DIR postgres "user=$env:DB_USER password=$env:DB_PASSWORD dbname=$env:DB_NAME host=$env:DB_HOST port=$env:DB_PORT sslmode=disable" down
 
+# Check if Goose down command was successful
+if ($LASTEXITCODE -eq 0) {
+    Write-Output "Goose down command executed successfully."
+
+    # Delete file named "seedcomplete" from "./internal" directory
+    $filePath = Join-Path -Path "./internal" -ChildPath "seed_complete"
+    if (Test-Path $filePath) {
+        Remove-Item -Path $filePath -Force
+        Write-Output "File 'seed_complete' deleted successfully."
+    } else {
+        Write-Output "File 'seed_complete' does not exist."
+    }
+} else {
+    Write-Output "Goose down command failed."
+}
+
 Write-Output "Done."
