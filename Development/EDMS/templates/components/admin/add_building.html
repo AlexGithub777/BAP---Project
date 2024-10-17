@@ -1,0 +1,74 @@
+<div id="addBuildingModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Building</h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    class="form-control needs-validation"
+                    enctype="multipart/form-data"
+                    method="POST"
+                    id="addBuildingForm"
+                    action="/api/building"
+                    autocomplete="off"
+                    novalidate
+                >
+                    <div class="mb-3">
+                        <label for="siteId" class="form-label"
+                            >Site ID</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="addSiteId"
+                            name="addSiteId"
+                            placeholder="Enter Site ID"
+                            pattern=".{1,}"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Please enter a site name.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="buildingCode" class="form-label"
+                            >Building Code</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="addBuildingCode"
+                            name="addBuildingCode"
+                            placeholder="Enter Building Code"
+                            pattern=".{1,}"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Please enter a building code.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button type="button" id="addBuildingBtn" class="btn btn-primary">
+                    Add Building
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
