@@ -14,7 +14,6 @@
             <div class="modal-body">
                 <form
                     class="form-control needs-validation"
-                    enctype="multipart/form-data"
                     method="POST"
                     id="addBuildingForm"
                     action="/api/building"
@@ -22,20 +21,19 @@
                     novalidate
                 >
                     <div class="mb-3">
-                        <label for="siteId" class="form-label"
-                            >Site ID</label
+                        <label for="addBuildingSite" class="form-label"
+                            >Site</label
                         >
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="addSiteId"
-                            name="addSiteId"
-                            placeholder="Enter Site ID"
-                            pattern=".{1,}"
+                        <select
+                            class="form-control form-select siteInput"
+                            aria-label="Select site"
+                            name="addBuildingSite"
                             required
-                        />
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
                         <div class="invalid-feedback">
-                            Please enter a site name.
+                            Please select a site.
                         </div>
                     </div>
                     <div class="mb-3">
@@ -48,11 +46,11 @@
                             id="addBuildingCode"
                             name="addBuildingCode"
                             placeholder="Enter Building Code"
-                            pattern=".{1,}"
+                            pattern=".{1,100}"
                             required
                         />
                         <div class="invalid-feedback">
-                            Please enter a building code.
+                            Please enter a building code (1-100 characters).
                         </div>
                     </div>
                 </form>
@@ -65,7 +63,11 @@
                 >
                     Close
                 </button>
-                <button type="button" id="addBuildingBtn" class="btn btn-primary">
+                <button
+                    type="button"
+                    id="addBuildingBtn"
+                    class="btn btn-primary"
+                >
                     Add Building
                 </button>
             </div>

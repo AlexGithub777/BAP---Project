@@ -573,34 +573,22 @@ function editSite(siteId) {
     );
 })();
 
-/*
-(function () {
-    "use strict";
+function AddBuilding() {
+    // Clear the form before showing it
+    document.getElementById("addBuildingForm").reset();
+    document
+        .getElementById("addBuildingForm")
+        .classList.remove("was-validated");
 
-    // Fetch the form and the submit button
-    var form = document.querySelector("#editUserForm");
-    var submitButton = document.querySelector("#editUserBtn");
-
-    // Add event listener to the submit button
-    submitButton.addEventListener(
-        "click",
-        function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // If the form is valid, submit it
-                form.submit();
-            }
-
-            form.classList.add("was-validated");
-        },
-        false
+    // populate the site select dropdown
+    populateDropdown(
+        ".siteInput",
+        "/api/site",
+        "Select a Site",
+        "site_id",
+        "site_name"
     );
-})();
-*/
-// Function to add a new building to the database
-function addBuilding() {
+
     // Show the modal
     $("#addBuildingModal").modal("show");
 }
@@ -617,9 +605,13 @@ function editBuilding(buildingId) {
         .then((response) => response.json())
         .then((building) => {
             // Fill in the form with the site data
-            $("#editBuildingForm input[name=editBuildingID]").val(building.building_id);
+            $("#editBuildingForm input[name=editBuildingID]").val(
+                building.building_id
+            );
             $("#editBuildingForm input[name=editSiteID]").val(building.site_id);
-            $("#editBuildingForm input[name=editBuildingCode]").val(building.building_code);
+            $("#editBuildingForm input[name=editBuildingCode]").val(
+                building.building_code
+            );
 
             // Set the form action to the update endpoint for this site
             $("#editSiteForm").attr("action", `/api/site/${site.site_id}`);

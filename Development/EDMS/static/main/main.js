@@ -24,6 +24,44 @@ function formatEntityType(entityType) {
         .join(" ");
 }
 
+// Function to populate dropdowns with specific property mapping
+function populateDropdown(
+    selector,
+    url,
+    defaultText = "Select an option",
+    valueProperty,
+    textProperty
+) {
+    const selects = document.querySelectorAll(selector);
+
+    return fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+            selects.forEach((select) => {
+                // Clear previous options
+                select.innerHTML = "";
+
+                // Add default option
+                const defaultOption = document.createElement("option");
+                defaultOption.text = defaultText;
+                defaultOption.value = "";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                select.add(defaultOption);
+
+                // Add data options
+                data.forEach((item) => {
+                    const option = document.createElement("option");
+                    option.text = item[textProperty];
+                    option.value = item[valueProperty];
+                    select.add(option);
+                });
+            });
+            return data; // Return the data for further processing if needed
+        })
+        .catch((error) => console.error("Error:", error));
+}
+
 function showDeleteModal(id, entityType, entityName, currentUserId) {
     const deleteModal = document.getElementById("deleteModal");
     const deleteForm = document.getElementById("deleteForm");
