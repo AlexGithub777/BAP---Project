@@ -1104,7 +1104,7 @@ async function searchDevices() {
 
     // Then filter it
     allDevices = allDevices.filter((device) => {
-        return (
+        const baseSearch =
             device.emergency_device_type_name
                 .toLowerCase()
                 .includes(searchValue) ||
@@ -1116,14 +1116,45 @@ async function searchDevices() {
             device.manufacture_date.Time.toLowerCase().includes(searchValue) ||
             device.expire_date.Time.toLowerCase().includes(searchValue) ||
             device.size.String.toLowerCase().includes(searchValue) ||
-            device.status.String.toLowerCase().includes(searchValue)
-        );
+            device.status.String.toLowerCase().includes(searchValue) ||
+            device.description.String.toLowerCase().includes(searchValue);
+
+        // Add admin-only search fields if user is admin
+        if (role === "Admin") {
+            // Format the dates for searching
+            const lastInspectionFormatted = new Date(
+                device.last_inspection_date.Time
+            )
+                .toLocaleDateString("en-NZ", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                })
+                .toLowerCase();
+
+            const nextInspectionFormatted = new Date(
+                device.next_inspection_date.Time
+            )
+                .toLocaleDateString("en-NZ", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                })
+                .toLowerCase();
+
+            return (
+                baseSearch ||
+                lastInspectionFormatted.includes(searchValue) ||
+                nextInspectionFormatted.includes(searchValue)
+            );
+        }
+
+        return baseSearch;
     });
 
     updateTable();
 }
 
-// Since the function is now async, modify the event listener
 document.getElementById("searchInput").addEventListener("input", () => {
     searchDevices();
 });
