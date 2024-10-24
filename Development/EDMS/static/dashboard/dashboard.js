@@ -1094,3 +1094,36 @@ function toggleMap() {
         deviceList.classList.add("col-xxl-12");
     }
 }
+
+async function searchDevices() {
+    const searchInput = document.getElementById("searchInput");
+    const searchValue = searchInput.value.toLowerCase();
+
+    // First reload the full data
+    await getAllDevices();
+
+    // Then filter it
+    allDevices = allDevices.filter((device) => {
+        return (
+            device.emergency_device_type_name
+                .toLowerCase()
+                .includes(searchValue) ||
+            device.extinguisher_type_name.String.toLowerCase().includes(
+                searchValue
+            ) ||
+            device.room_code.toLowerCase().includes(searchValue) ||
+            device.serial_number.String.toLowerCase().includes(searchValue) ||
+            device.manufacture_date.Time.toLowerCase().includes(searchValue) ||
+            device.expire_date.Time.toLowerCase().includes(searchValue) ||
+            device.size.String.toLowerCase().includes(searchValue) ||
+            device.status.String.toLowerCase().includes(searchValue)
+        );
+    });
+
+    updateTable();
+}
+
+// Since the function is now async, modify the event listener
+document.getElementById("searchInput").addEventListener("input", () => {
+    searchDevices();
+});
