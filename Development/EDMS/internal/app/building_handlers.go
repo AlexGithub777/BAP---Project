@@ -31,14 +31,8 @@ func (a *App) HandlePostBuilding(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
 	}
 
-	// Parse the form, limiting upload size to 10MB
-	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Error parsing form")
-	}
-
-	// Get the form values
-	siteId := strings.TrimSpace(c.FormValue("addSiteId"))             // Trim whitespace 	// Trim whitespace
+	// Parse the form data
+	siteId := c.FormValue("addBuildingSite")
 	buildingCode := strings.TrimSpace(c.FormValue("addBuildingCode")) // Trim whitespace
 
 	// Validate input
@@ -46,8 +40,23 @@ func (a *App) HandlePostBuilding(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=All fields are required")
 	}
 
+	// Validate site ID
+	_, err := a.DB.GetSiteByID(siteId)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Invalid site ID")
+	}
+
+	// Validate building code length doesnt exceed 100 characters
+	if len(buildingCode) > 100 {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Building code too long, must be less than 100 characters")
+	}
+
 	// Save site information and file path in the database
 	siteIdNum, err := strconv.Atoi(siteId)
+	if err != nil {
+		return a.handleError(c, http.StatusInternalServerError, "Error converting site ID", err)
+	}
+
 	building := &models.Building{
 		SiteID:       siteIdNum,
 		BuildingCode: buildingCode,
