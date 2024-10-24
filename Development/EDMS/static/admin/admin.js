@@ -593,67 +593,37 @@ function AddBuilding() {
     $("#addBuildingModal").modal("show");
 }
 
-// Function to edit a building in the database
-function editBuilding(buildingId) {
-    // Clear the form
-    $("#editBuildingForm")[0].reset();
-    $("#currentSiteMapContainer").hide();
-    $("#editSiteImagePreviewContainer").hide();
-
-    // Fetch the building data from the server
-    fetch(`/api/building/${buildingId}`)
-        .then((response) => response.json())
-        .then((building) => {
-            // Fill in the form with the site data
-            $("#editBuildingForm input[name=editBuildingID]").val(
-                building.building_id
-            );
-            $("#editBuildingForm input[name=editSiteID]").val(building.site_id);
-            $("#editBuildingForm input[name=editBuildingCode]").val(
-                building.building_code
-            );
-
-            // Set the form action to the update endpoint for this site
-            $("#editSiteForm").attr("action", `/api/site/${site.site_id}`);
-
-            // Set the form method to POST
-            $("#editSiteForm").attr("method", "POST");
-
-            // Check if the site is the main site
-            // If it is, hide the image input
-            if (site.site_id != 1) {
-                $("#editSiteImgInput").show();
-            }
-
-            // Check if the image path is valid
-            if (site.site_map_image_path.Valid) {
-                // Set the image source to the image path
-                $("#editSiteForm img[name=currentSiteMap]").attr(
-                    "src",
-                    site.site_map_image_path.String
-                );
-                $("#currentSiteMapContainer").show();
-            }
-            if (site.site_id == 1) {
-                $("#editSiteForm img[name=currentSiteMap]").attr(
-                    "src",
-                    "/static/map.svg"
-                );
-                $("#currentSiteMapContainer").show();
-                $("#editSiteImgInput").hide();
-            }
-        });
-    // Show the modal
-
-    $("#editSiteModal").modal("show");
-}
-
 (function () {
     "use strict";
 
     // Fetch the form and the submit button
     var form = document.querySelector("#addBuildingForm");
     var submitButton = document.querySelector("#addBuildingBtn");
+
+    // Add event listener to the submit button
+    submitButton.addEventListener(
+        "click",
+        function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // If the form is valid, submit it
+                form.submit();
+            }
+
+            form.classList.add("was-validated");
+        },
+        false
+    );
+})();
+
+(function () {
+    "use strict";
+
+    // Fetch the form and the submit button
+    var form = document.querySelector("#editSiteForm");
+    var submitButton = document.querySelector("#editSiteBtn");
 
     // Add event listener to the submit button
     submitButton.addEventListener(
