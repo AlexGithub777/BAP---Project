@@ -323,7 +323,88 @@ fetch("/api/building")
         $(".edit-building-button").click((event) => {
             const id = $(event.target).data("id");
             console.log("Edit button clicked for building with ID:", id);
+
+            populateDropdown(
+                ".siteInput",
+                "/api/site",
+                "Select a Site",
+                "site_id",
+                "site_name"
+            );
+
             // Handle edit
+            // Fetch the building data from the server
+            fetch(`/api/building/${id}`)
+                .then((response) => response.json())
+                .then((building) => {
+                    // Populate the form with the data
+                    document.getElementById("editBuildingID").value =
+                        building.building_id;
+                    document.getElementById("editBuildingCode").value =
+                        building.building_code;
+                    document.getElementById("editBuildingSite").value =
+                        building.site_id;
+                })
+                .catch((error) => {
+                    console.error("Fetch error: ", error);
+                });
+
+            // Clear validation classes
+            $("#editBuildingForm").removeClass("was-validated");
+
+            // Show the modal
+            $("#editBuildingModal").modal("show");
+
+            // Set the form action to the update endpoint for this building
+            $("#editBuildingForm").attr("action", `/api/building/${id}`);
+
+            var editBuildingForm = document.getElementById("editBuildingForm");
+
+            // Add event listener to the submit button
+            $("#editBuildingBtn").click(function (event) {
+                // Check if the form is valid
+                if (!editBuildingForm.checkValidity()) {
+                    event.stopPropagation();
+                    editBuildingForm.classList.add("was-validated");
+                } else {
+                    // If the form is valid, prepare to send the PUT request
+                    const formData = new FormData(editBuildingForm);
+                    const jsonData = {};
+                    for (const [key, value] of formData.entries()) {
+                        jsonData[key] = value;
+                    }
+                    console.log("JSON data:", jsonData);
+                    fetch(
+                        `/api/building/${
+                            document.getElementById("editBuildingID").value
+                        }`,
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(jsonData),
+                        }
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log("Success:", data);
+                            if (data.error) {
+                                window.location.href = data.redirectURL;
+                            } else if (data.message) {
+                                window.location.href = data.redirectURL;
+                            } else {
+                                console.error("Unexpected response:", data);
+                                // Handle unexpected responses (e.g., show an error message)
+                                throw new Error("Unexpected response");
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Fetch error:", error);
+                            // Optionally display a user-friendly error message
+                        });
+                }
+            });
         });
     });
 

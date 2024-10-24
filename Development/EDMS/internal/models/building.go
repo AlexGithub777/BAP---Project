@@ -7,3 +7,10 @@ type Building struct {
 	BuildingCode string `json:"building_code"`
 	SiteName     string `json:"site_name"`
 }
+
+type BuildingDto struct {
+	BuildingID   string `json:"building_id"`
+	SiteID       string `json:"site_id"`
+	BuildingCode string `json:"building_code"`
+	SiteName     string `json:"site_name"`
+}

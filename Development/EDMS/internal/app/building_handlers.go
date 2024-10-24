@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,6 +24,22 @@ func (a *App) HandleGetAllBuildings(c echo.Context) error {
 
 	// Return the results as JSON
 	return c.JSON(http.StatusOK, buildings)
+}
+
+func (a *App) HandleGetBuildingByID(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Method not allowed")
+	}
+
+	buildingId := c.Param("id")
+	building, err := a.DB.GetBuildingById(buildingId)
+	if err != nil {
+		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
+	}
+
+	// Return the results as JSON
+	return c.JSON(http.StatusOK, building)
 }
 
 func (a *App) HandlePostBuilding(c echo.Context) error {
@@ -72,38 +89,89 @@ func (a *App) HandlePostBuilding(c echo.Context) error {
 }
 
 func (a *App) HandleEditBuilding(c echo.Context) error {
-	// Check if request if a GET request
-	if c.Request().Method != http.MethodPost {
+	// Check if request is a PUT request
+	if c.Request().Method != http.MethodPut {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Method not allowed")
 	}
 
-	// Parse the form, limiting upload size to 10MB
-	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Error parsing form")
-	}
-
-	// Get the form values
-	//buildingID := c.FormValue("editBuildingID")
+	// Parse the id from the URL parameter
 	buildingID := c.Param("id")
-	siteID := c.FormValue("editSiteID")
-	buildingCode := strings.TrimSpace(c.FormValue("editBuildingCode")) // Trim whitespace
 
-	buildingIdNum, err := strconv.Atoi(buildingID)
-	siteIdNum, err := strconv.Atoi(siteID)
-	building := &models.Building{
-		BuildingID:   buildingIdNum,
-		SiteID:       siteIdNum,
-		BuildingCode: buildingCode,
+	// Parse the form data
+	var building models.BuildingDto
+	if err := c.Bind(&building); err != nil {
+		a.handleLogger("Error parsing form data")
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Error parsing form data",
+			"redirectURL": "/admin?error=Error parsing form data",
+		})
 	}
 
-	err = a.DB.UpdateBuilding(building)
+	building.BuildingID = buildingID
+
+	log.Printf("Building ID: %s, Building Code: %s, Site ID: %s", buildingID, building.BuildingCode, building.SiteID)
+
+	// Validate input
+	if building.SiteID == "" || building.BuildingCode == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "All fields are required",
+			"redirectURL": "/admin?error=All fields are required",
+		})
+	}
+
+	// Validate site ID
+	_, err := a.DB.GetSiteByID(building.SiteID)
 	if err != nil {
-		return a.handleError(c, http.StatusInternalServerError, "Error saving building", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid site ID",
+			"redirectURL": "/admin?error=Invalid site ID",
+		})
+	}
+
+	// Validate building code length doesnt exceed 100 characters
+	if len(building.BuildingCode) > 100 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Building code too long, must be less than 100 characters",
+			"redirectURL": "/admin?error=Building code too long, must be less than 100 characters",
+		})
+	}
+
+	// Save site information and file path in the database
+	siteIdNum, err := strconv.Atoi(building.SiteID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error converting site ID",
+			"redirectURL": "/admin?error=Error converting site ID",
+		})
+	}
+
+	buildingIDNum, err := strconv.Atoi(buildingID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error converting building ID",
+			"redirectURL": "/admin?error=Error converting building ID",
+		})
+	}
+
+	buildingModel := &models.Building{
+		BuildingID:   buildingIDNum,
+		SiteID:       siteIdNum,
+		BuildingCode: building.BuildingCode,
+	}
+
+	err = a.DB.UpdateBuilding(buildingModel)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error updating building",
+			"redirectURL": "/admin?error=Error updating building",
+		})
 	}
 
 	// Respond to the client
-	return c.Redirect(http.StatusFound, "/admin?message=Building updated successfully")
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":     "Building updated successfully",
+		"redirectURL": "/admin?message=Building updated successfully",
+	})
 }
 
 func (a *App) HandleDeleteBuilding(c echo.Context) error {
