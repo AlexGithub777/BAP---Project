@@ -1096,13 +1096,23 @@ function toggleMap() {
 }
 
 async function searchDevices() {
+    const siteFilter = document.getElementById("siteFilter");
     const searchInput = document.getElementById("searchInput");
     const searchValue = searchInput.value.toLowerCase();
 
-    // First reload the full data
-    await getAllDevices();
+    console.log("siteFilter:", siteFilter.value);
 
-    // Then filter it
+    // If site filter is "All Sites", reload all devices
+    if (
+        document.getElementById("siteFilter").selectedOptions[0].text ===
+        "All Sites"
+    ) {
+        await getAllDevices();
+    } else {
+        // Reload devices for the selected site
+        await getAllDevices("", siteFilter.value);
+    }
+
     allDevices = allDevices.filter((device) => {
         const baseSearch =
             device.emergency_device_type_name
