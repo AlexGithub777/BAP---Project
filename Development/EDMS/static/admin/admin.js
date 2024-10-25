@@ -432,10 +432,248 @@ fetch("/api/room")
         // Add the rows to the rooms table
         $("#rooms-table tbody").html(roomRows.join(""));
 
-        // Add event listeners to the edit and delete buttons
         $(".edit-room-button").click((event) => {
             const id = $(event.target).data("id");
             console.log("Edit button clicked for room with ID:", id);
+
+            // Clear custom validation and invalid classes from building select
+            const buildingInput = document.getElementById(
+                "editRoomBuildingCode"
+            );
+            buildingInput.setCustomValidity("");
+            buildingInput.classList.remove("is-invalid");
+
+            // Clear the form and validation states
+            document.getElementById("editRoomForm").reset();
+            $("#editRoomForm").removeClass("was-validated");
+
+            // First fetch the room data
+            fetch(`/api/room/${id}`)
+                .then((response) => response.json())
+                .then((room) => {
+                    console.log("Room data:", room);
+
+                    // Populate sites dropdown
+                    fetch("/api/site")
+                        .then((response) => response.json())
+                        .then((sites) => {
+                            const siteSelect = $("#editRoomSite");
+                            const siteOptions = sites.map(
+                                (site) =>
+                                    `<option value="${site.site_id}" 
+                                 ${
+                                     site.site_id === room.site_id
+                                         ? "selected"
+                                         : ""
+                                 }>
+                                 ${site.site_name}
+                                 </option>`
+                            );
+                            siteSelect.html(
+                                `<option value="">Select a Site</option>` +
+                                    siteOptions.join("")
+                            );
+
+                            // After setting site, load buildings for that site
+                            return fetch(
+                                `/api/building?siteId=${room.site_id}`
+                            );
+                        })
+                        .then((response) => response.json())
+                        .then((buildings) => {
+                            const buildingSelect = $(".buildingInput");
+
+                            if (!buildings || buildings.length === 0) {
+                                buildingSelect.html(
+                                    `<option value="" disabled selected>No buildings for site</option>`
+                                );
+                                buildingSelect.prop("disabled", true);
+                            } else {
+                                buildingSelect.prop("disabled", false);
+                                const buildingOptions = buildings.map(
+                                    (building) =>
+                                        `<option value="${
+                                            building.building_id
+                                        }" 
+                                     ${
+                                         building.building_id ===
+                                         room.building_id
+                                             ? "selected"
+                                             : ""
+                                     }>
+                                     ${building.building_code}
+                                     </option>`
+                                );
+                                buildingSelect.html(
+                                    `<option value="">Select a Building</option>` +
+                                        buildingOptions.join("")
+                                );
+                            }
+
+                            // Set other form fields after dropdowns are populated
+                            document.getElementById("editRoomID").value =
+                                room.room_id;
+                            document.getElementById("editRoomCode").value =
+                                room.room_code;
+                        });
+                })
+                .catch((error) => {
+                    console.error("Fetch error: ", error);
+                });
+
+            // Show the modal
+            $("#editRoomModal").modal("show");
+
+            // Clear validation classes
+            $("#editRoomForm").removeClass("was-validated");
+
+            // Event handler for site changes
+            $(".siteInput")
+                .off("change")
+                .on("change", function () {
+                    const siteId = $(this).val();
+                    const buildingSelect = $(".buildingInput");
+
+                    if (!siteId) {
+                        buildingSelect.html(
+                            `<option value="">Select a Building</option>`
+                        );
+                        buildingSelect.prop("disabled", true);
+                        return;
+                    }
+
+                    fetch(`/api/building?siteId=${siteId}`)
+                        .then((response) => response.json())
+                        .then((buildings) => {
+                            if (!buildings || buildings.length === 0) {
+                                buildingSelect.html(
+                                    `<option value="" disabled selected>No buildings for site</option>`
+                                );
+                                buildingSelect.prop("disabled", true);
+                            } else {
+                                buildingSelect.prop("disabled", false);
+                                const buildingOptions = buildings.map(
+                                    (building) =>
+                                        `<option value="${building.building_id}">
+                                 ${building.building_code}
+                                 </option>`
+                                );
+                                buildingSelect.html(
+                                    `<option value="">Select a Building</option>` +
+                                        buildingOptions.join("")
+                                );
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error loading buildings:", error);
+                            buildingSelect.html(
+                                `<option value="" disabled selected>Error loading buildings</option>`
+                            );
+                            buildingSelect.prop("disabled", true);
+                        });
+                });
+
+            var editRoomForm = document.getElementById("editRoomForm");
+
+            // Add change event listener to building select
+            buildingInput.addEventListener("change", function () {
+                // Clear validation state when user selects a valid building
+                if (this.value !== "0" && this.value !== "") {
+                    this.setCustomValidity("");
+                    this.classList.remove("is-invalid");
+                    editRoomForm.classList.remove("was-validated");
+                }
+            });
+
+            // Add change event listener to site select to reset building validation
+            document
+                .querySelector(".siteInput")
+                .addEventListener("change", function () {
+                    // Reset building validation state when site changes
+                    buildingInput.setCustomValidity("");
+                    buildingInput.classList.remove("is-invalid");
+                    editRoomForm.classList.remove("was-validated");
+                });
+
+            // Event handler for edit room button
+            $("#editRoomBtn").click(function (event) {
+                // check if the form is valid
+                event.preventDefault();
+                event.stopPropagation();
+
+                // Get the building select element
+                var isDisabled = buildingInput.disabled;
+                var hasNoOptions = buildingInput.options.length <= 1; // Only has default option
+
+                // Clear previous validation state
+                buildingInput.setCustomValidity("");
+
+                if (isDisabled || hasNoOptions) {
+                    buildingInput.setCustomValidity(
+                        "No buildings available for selected site"
+                    );
+                    buildingInput.classList.add("is-invalid");
+                    var invalidFeedback = buildingInput.nextElementSibling;
+                    invalidFeedback.textContent =
+                        "No buildings available for selected site";
+                } else if (
+                    buildingInput.value === "0" ||
+                    buildingInput.value === ""
+                ) {
+                    buildingInput.setCustomValidity(
+                        "Room must be assigned to a building"
+                    );
+                    buildingInput.classList.add("is-invalid");
+                    var invalidFeedback = buildingInput.nextElementSibling;
+                    invalidFeedback.textContent =
+                        "Room must be assigned to a building";
+                }
+
+                editRoomForm.classList.add("was-validated");
+
+                // If form is valid (including our custom validation), p it
+                if (
+                    editRoomForm.checkValidity() &&
+                    buildingInput.validity.valid
+                ) {
+                    // If the form is valid, prepare to send the PUT request
+                    const formData = new FormData(editRoomForm);
+                    const jsonData = {};
+                    for (const [key, value] of formData.entries()) {
+                        jsonData[key] = value;
+                    }
+                    console.log("JSON data:", jsonData);
+                    fetch(
+                        `/api/room/${
+                            document.getElementById("editRoomID").value
+                        }`,
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(jsonData),
+                        }
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log("Success:", data);
+                            if (data.error) {
+                                window.location.href = data.redirectURL;
+                            } else if (data.message) {
+                                window.location.href = data.redirectURL;
+                            } else {
+                                console.error("Unexpected response:", data);
+                                // Handle unexpected responses (e.g., show an error message)
+                                throw new Error("Unexpected response");
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Fetch error:", error);
+                            // Optionally display a user-friendly error message
+                        });
+                }
+            });
         });
     });
 
@@ -670,6 +908,12 @@ function AddRoom() {
     document.getElementById("addRoomForm").reset();
     document.getElementById("addRoomForm").classList.remove("was-validated");
 
+    // Clear custom validation and invalid classes from building select
+    const buildingInput = document.getElementById("addRoomBuildingCode");
+    buildingInput.setCustomValidity("");
+    buildingInput.disabled = false;
+    buildingInput.classList.remove("is-invalid");
+
     console.log("Add Room");
 
     // Clear the building options
@@ -712,7 +956,12 @@ function AddRoom() {
                     $(".buildingInput").html(
                         `<option value="0" disabled selected>No buildings for site</option>`
                     );
+
+                    // Disable the building dropdown
+                    $(".buildingInput").prop("disabled", true);
                 } else {
+                    // Enable the building dropdown
+                    $(".buildingInput").prop("disabled", false);
                     // Create a dropdown option for each building
                     const buildingOptions = buildings.map(
                         (building) =>
@@ -734,6 +983,78 @@ function AddRoom() {
 
     var form = document.querySelector("#addRoomForm");
     var submitButton = document.querySelector("#addRoomBtn");
+    var buildingInput = document.querySelector(".buildingInput");
+
+    // Add change event listener to building select
+    buildingInput.addEventListener("change", function () {
+        // Clear validation state when user selects a valid building
+        if (this.value !== "0" && this.value !== "") {
+            this.setCustomValidity("");
+            this.classList.remove("is-invalid");
+            form.classList.remove("was-validated");
+        }
+    });
+
+    // Add change event listener to site select to reset building validation
+    document
+        .querySelector(".siteInput")
+        .addEventListener("change", function () {
+            // Reset building validation state when site changes
+            buildingInput.setCustomValidity("");
+            buildingInput.classList.remove("is-invalid");
+            form.classList.remove("was-validated");
+        });
+
+    submitButton.addEventListener(
+        "click",
+        function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Get the building select element
+            var isDisabled = buildingInput.disabled;
+            var hasNoOptions = buildingInput.options.length <= 1; // Only has default option
+
+            // Clear previous validation state
+            buildingInput.setCustomValidity("");
+
+            if (isDisabled || hasNoOptions) {
+                buildingInput.setCustomValidity(
+                    "No buildings available for selected site"
+                );
+                buildingInput.classList.add("is-invalid");
+                var invalidFeedback = buildingInput.nextElementSibling;
+                invalidFeedback.textContent =
+                    "No buildings available for selected site";
+            } else if (
+                buildingInput.value === "0" ||
+                buildingInput.value === ""
+            ) {
+                buildingInput.setCustomValidity(
+                    "Room must be assigned to a building"
+                );
+                buildingInput.classList.add("is-invalid");
+                var invalidFeedback = buildingInput.nextElementSibling;
+                invalidFeedback.textContent =
+                    "Room must be assigned to a building";
+            }
+
+            form.classList.add("was-validated");
+
+            // If form is valid (including our custom validation), submit it
+            if (form.checkValidity() && buildingInput.validity.valid) {
+                form.submit();
+            }
+        },
+        false
+    );
+})();
+
+(function () {
+    "use strict";
+
+    var form = document.querySelector("#editRoomForm");
+    var submitButton = document.querySelector("#editRoomBtn");
     var buildingInput = document.querySelector(".buildingInput");
 
     // Add change event listener to building select

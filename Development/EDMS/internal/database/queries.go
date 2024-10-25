@@ -925,7 +925,7 @@ func (db *DB) GetRoomsBySiteID(siteID string) ([]models.Room, error) {
 
 func (db *DB) GetRoomByID(roomID int) (*models.Room, error) {
 	query := `
-	SELECT r.roomid, r.roomcode, b.buildingcode, s.sitename
+	SELECT r.roomid, r.roomcode, b.buildingid ,b.buildingcode, s.sitename, s.siteid
 	FROM roomT r
 	JOIN buildingT b ON r.buildingid = b.buildingid
 	JOIN siteT s ON b.siteid = s.siteid
@@ -936,8 +936,10 @@ func (db *DB) GetRoomByID(roomID int) (*models.Room, error) {
 	err := db.QueryRow(query, roomID).Scan(
 		&room.RoomID,
 		&room.RoomCode,
+		&room.BuildingID,
 		&room.BuildingCode,
 		&room.SiteName,
+		&room.SiteID,
 	)
 
 	if err != nil {
@@ -957,6 +959,24 @@ func (db *DB) AddRoom(room *models.Room) error {
 	defer insertStmt.Close()
 
 	_, err = insertStmt.Exec(room.BuildingID, room.RoomCode)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) UpdateRoom(room *models.Room) error {
+	query := "UPDATE RoomT SET buildingId = $1, roomCode = $2 WHERE roomID = $3"
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(room.BuildingID, room.RoomCode, room.RoomID)
 
 	if err != nil {
 		return err
