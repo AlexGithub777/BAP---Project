@@ -878,6 +878,24 @@ func (db *DB) GetRoomByID(roomID int) (*models.Room, error) {
 	return &room, nil
 }
 
+func (db *DB) AddRoom(room *models.Room) error {
+	query := "INSERT INTO RoomT (buildingId, roomCode) VALUES ($1, $2)"
+	insertStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer insertStmt.Close()
+
+	_, err = insertStmt.Exec(room.BuildingID, room.RoomCode)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *DB) GetEmergencyDeviceTypeByID(emergencyDeviceTypeID int) (*models.EmergencyDeviceType, error) {
 	query := `
 	SELECT emergencydevicetypeid, emergencydevicetypename

@@ -69,7 +69,7 @@ func (a *App) initRoutes() {
 	admin.PUT("/api/building/:id", a.HandleEditBuilding)
 	admin.DELETE("/api/building/:id", a.HandleDeleteBuilding)
 	// Room management routes
-	//admin.POST("/api/room", a.HandlePostRoom)
+	admin.POST("/api/room", a.HandlePostRoom)
 	//admin.PUT("/api/room/:id", a.HandlePutRoom)
 	//admin.DELETE("/api/room/:id", a.HandleDeleteRoom)
 	// Device type management routes - James
