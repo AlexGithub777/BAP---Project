@@ -432,12 +432,154 @@ fetch("/api/room")
         // Add the rows to the rooms table
         $("#rooms-table tbody").html(roomRows.join(""));
 
-        // Add event listeners to the edit and delete buttons
+        // Event handler for edit button click
         $(".edit-room-button").click((event) => {
             const id = $(event.target).data("id");
             console.log("Edit button clicked for room with ID:", id);
+
+            // Clear validation classes
+            $("#editRoomForm").removeClass("was-validated");
+
+            // First fetch the room data
+            fetch(`/api/room/${id}`)
+                .then((response) => response.json())
+                .then((room) => {
+                    console.log("Room data:", room);
+
+                    // Populate sites dropdown first
+                    return fetch("/api/site")
+                        .then((response) => response.json())
+                        .then((sites) => {
+                            const siteSelect = $("#editRoomSite");
+                            const siteOptions = sites.map(
+                                (site) =>
+                                    `<option value="${site.site_id}" 
+                             ${site.site_id === room.site_id ? "selected" : ""}>
+                             ${site.site_name}
+                             </option>`
+                            );
+                            siteSelect.html(
+                                `<option value="">Select a Site</option>` +
+                                    siteOptions.join("")
+                            );
+
+                            // After populating sites, load buildings for the room's site
+                            loadBuildingsForSite(
+                                room.site_id,
+                                room.building_id
+                            );
+
+                            // Populate other form fields
+                            document.getElementById("editRoomID").value =
+                                room.room_id;
+                            document.getElementById("editRoomCode").value =
+                                room.room_code;
+                        });
+                })
+                .catch((error) => {
+                    console.error("Fetch error: ", error);
+                });
+
+            // Show the modal
+            $("#editRoomModal").modal("show");
+
+            // Set the form action
+            $("#editRoomForm").attr("action", `/api/room/${id}`);
         });
-    });
+
+        // Event listener for site dropdown changes
+        $(document).on("change", ".siteInput", function () {
+            const selectedSiteId = $(this).val();
+            if (selectedSiteId) {
+                loadBuildingsForSite(selectedSiteId);
+            } else {
+                $(".buildingInput").html(
+                    `<option value="">Select a Building</option>`
+                );
+                $(".buildingInput").prop("disabled", true);
+            }
+        });
+
+        // Event listener for form submission
+        $("#editRoomBtn").click(function (event) {
+            event.preventDefault();
+            const editRoomForm = document.getElementById("editRoomForm");
+
+            if (!editRoomForm.checkValidity()) {
+                event.stopPropagation();
+                editRoomForm.classList.add("was-validated");
+                return;
+            }
+
+            const formData = new FormData(editRoomForm);
+            const jsonData = Object.fromEntries(formData.entries());
+
+            fetch(`/api/room/${document.getElementById("editRoomID").value}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(jsonData),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log("Success:", data);
+                    if (data.error || data.message) {
+                        window.location.href = data.redirectURL;
+                    } else {
+                        console.error("Unexpected response:", data);
+                        throw new Error("Unexpected response");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                });
+        });
+    })();
+
+// Function to populate building dropdown based on site ID
+function loadBuildingsForSite(siteId, selectedBuildingId = null) {
+    fetch(`/api/building?siteId=${siteId}`)
+        .then((response) => response.json())
+        .then((buildings) => {
+            const buildingSelect = $(".buildingInput");
+            console.log("Buildings for site:", buildings);
+
+            if (!buildings || buildings.length === 0) {
+                buildingSelect.html(
+                    `<option value="" disabled selected>No buildings for site</option>`
+                );
+                buildingSelect.prop("disabled", true);
+            } else {
+                buildingSelect.prop("disabled", false);
+                const buildingOptions = buildings.map(
+                    (building) =>
+                        `<option value="${building.building_id}" 
+                     ${
+                         selectedBuildingId &&
+                         building.building_id === selectedBuildingId
+                             ? "selected"
+                             : ""
+                     }>
+                     ${building.building_code}
+                     </option>`
+                );
+
+                buildingSelect.html(
+                    `<option value="">Select a Building</option>` +
+                        buildingOptions.join("")
+                );
+            }
+        })
+        .catch((error) => {
+            console.error("Error loading buildings:", error);
+            const buildingSelect = $(".buildingInput");
+            buildingSelect.html(
+                `<option value="" disabled selected>Error loading buildings</option>`
+            );
+            buildingSelect.prop("disabled", true);
+        });
+}
 
 // Fetch device types from the server
 fetch("/api/emergency-device-type")

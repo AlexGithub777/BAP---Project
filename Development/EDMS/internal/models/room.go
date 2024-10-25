@@ -7,4 +7,5 @@ type Room struct {
 	RoomCode     string `json:"room_code"`
 	BuildingCode string `json:"building_code"`
 	SiteName     string `json:"site_name"`
+	SiteID       int    `json:"site_id"`
 }

@@ -1,9 +1,9 @@
-<div id="addRoomModal" class="modal fade">
+<div id="editRoomModal" class="modal fade">
     <div class="modal-dialog">
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Add Room</h4>
+                <h4 class="modal-title">Edit Room</h4>
                 <button
                     type="button"
                     class="btn-close"
@@ -15,18 +15,19 @@
                 <form
                     class="form-control needs-validation"
                     method="POST"
-                    id="addRoomForm"
-                    action="/api/room"
+                    id="editRoomForm"
+                    action=""
                     autocomplete="off"
                     novalidate
                 >
                     <div class="mb-3">
+                        <input type="hidden" id="editRoomID" name="room_id" />
                         <label for="addRoomSite" class="form-label">Site</label>
                         <select
                             class="form-control form-select siteInput"
                             aria-label="Select site"
-                            name="addRoomSite"
-                            id="addRoomSite"
+                            name="site_id"
+                            id="editRoomSite"
                             required
                         >
                             <!-- Options will be populated here -->
@@ -42,8 +43,8 @@
                         <select
                             class="form-control form-select buildingInput"
                             aria-label="Select building"
-                            id="addRoomBuildingCode"
-                            name="addRoomBuildingCode"
+                            id="editRoomBuildingCode"
+                            name="building_id"
                             required
                         >
                             <option value="">Select a building...</option>
@@ -60,8 +61,8 @@
                         <input
                             type="text"
                             class="form-control"
-                            id="addRoomCode"
-                            name="addRoomCode"
+                            id="editRoomCode"
+                            name="room_code"
                             pattern=".{1,100}"
                             required
                         />
@@ -79,8 +80,8 @@
                 >
                     Close
                 </button>
-                <button type="button" id="addRoomBtn" class="btn btn-primary">
-                    Add Room
+                <button type="button" id="editRoomBtn" class="btn btn-primary">
+                    Edit Room
                 </button>
             </div>
         </div>

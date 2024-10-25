@@ -925,7 +925,7 @@ func (db *DB) GetRoomsBySiteID(siteID string) ([]models.Room, error) {
 
 func (db *DB) GetRoomByID(roomID int) (*models.Room, error) {
 	query := `
-	SELECT r.roomid, r.roomcode, b.buildingcode, s.sitename
+	SELECT r.roomid, r.roomcode, b.buildingid,b.buildingcode, s.sitename, s.siteid
 	FROM roomT r
 	JOIN buildingT b ON r.buildingid = b.buildingid
 	JOIN siteT s ON b.siteid = s.siteid
@@ -936,8 +936,10 @@ func (db *DB) GetRoomByID(roomID int) (*models.Room, error) {
 	err := db.QueryRow(query, roomID).Scan(
 		&room.RoomID,
 		&room.RoomCode,
+		&room.BuildingID,
 		&room.BuildingCode,
 		&room.SiteName,
+		&room.SiteID,
 	)
 
 	if err != nil {

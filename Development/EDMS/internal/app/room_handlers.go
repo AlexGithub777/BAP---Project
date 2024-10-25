@@ -25,6 +25,44 @@ func (a *App) HandleGetAllRooms(c echo.Context) error {
 	return c.JSON(http.StatusOK, rooms)
 }
 
+func (a *App) HandleGetRoomByID(c echo.Context) error {
+	// Check if request if a POST request
+	if c.Request().Method != http.MethodGet {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{
+			"error":       "Method not allowed",
+			"redirectURL": "/dashboard?error=Method not allowed",
+		})
+	}
+
+	roomId := c.Param("id")
+	if roomId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Room ID is required",
+			"redirectURL": "/dashboard?error=Room ID is required",
+		})
+	}
+
+	roomIdInt, err := strconv.Atoi(roomId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid room ID",
+			"redirectURL": "/dashboard?error=Invalid room ID",
+		})
+	}
+
+	room, err := a.DB.GetRoomByID(roomIdInt)
+	if err != nil {
+		a.handleError(c, http.StatusNotFound, "Room not found", err)
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error":       "Room not found",
+			"redirectURL": "/dashboard?error=Room not found",
+		})
+	}
+
+	// Return the results as JSON
+	return c.JSON(http.StatusOK, room)
+}
+
 func (a *App) HandlePostRoom(c echo.Context) error {
 	//Check if request is not a post request
 	if c.Request().Method != http.MethodPost {

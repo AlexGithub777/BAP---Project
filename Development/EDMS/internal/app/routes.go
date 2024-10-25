@@ -89,6 +89,7 @@ func (a *App) initRoutes() {
 	api.GET("/emergency-device-type", a.HandleGetAllDeviceTypes)
 	api.GET("/extinguisher-type", a.HandleGetAllExtinguisherTypes)
 	api.GET("/room", a.HandleGetAllRooms)
+	api.GET("/room/:id", a.HandleGetRoomByID)
 	api.GET("/building", a.HandleGetAllBuildings)
 	api.GET("/building/:id", a.HandleGetBuildingByID)
 	api.GET("/site", a.HandleGetAllSites)
