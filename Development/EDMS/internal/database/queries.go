@@ -419,6 +419,75 @@ func (db *DB) GetDeviceByID(deviceID int) (*models.EmergencyDevice, error) {
 	return &device, nil
 }
 
+func (db *DB) GetDevicesByRoomID(roomID int) ([]models.EmergencyDevice, error) {
+	query := `
+	SELECT
+		ed.emergencydeviceid,
+		ed.emergencydevicetypeid,
+		edt.emergencydevicetypename,
+		et.extinguishertypename,
+		ed.extinguishertypeid,
+		ed.roomid,
+		r.roomcode,
+		b.buildingid,
+		b.buildingcode,
+		s.siteid,
+		s.sitename,
+		ed.serialnumber,
+		ed.manufacturedate,
+		ed.lastinspectiondate,
+		ed.description,
+		ed.size,
+		ed.status
+	FROM emergency_deviceT ed
+	JOIN emergency_device_typeT edt ON ed.emergencydevicetypeid = edt.emergencydevicetypeid
+	LEFT JOIN Extinguisher_TypeT et ON ed.extinguishertypeid = et.extinguishertypeid
+	JOIN roomT r ON ed.roomid = r.roomid
+	JOIN buildingT b ON r.buildingid = b.buildingid
+	JOIN siteT s ON b.siteid = s.siteid
+	WHERE ed.roomid = $1
+	`
+	rows, err := db.Query(query, roomID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var emergencyDevices []models.EmergencyDevice
+
+	// Scan the results
+	for rows.Next() {
+		var device models.EmergencyDevice
+		err := rows.Scan(
+			&device.EmergencyDeviceID,
+			&device.EmergencyDeviceTypeID,
+			&device.EmergencyDeviceTypeName,
+			&device.ExtinguisherTypeName,
+			&device.ExtinguisherTypeID,
+			&device.RoomID,
+			&device.RoomCode,
+			&device.BuildingID,
+			&device.BuildingCode,
+			&device.SiteID,
+			&device.SiteName,
+			&device.SerialNumber,
+			&device.ManufactureDate,
+			&device.LastInspectionDate,
+			&device.Description,
+			&device.Size,
+			&device.Status,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		emergencyDevices = append(emergencyDevices, device)
+	}
+
+	return emergencyDevices, nil
+}
+
 func (db *DB) GetAllDeviceTypes() ([]models.EmergencyDeviceType, error) {
 	query := `
 	SELECT emergencydevicetypeid, emergencydevicetypename
@@ -888,6 +957,24 @@ func (db *DB) AddRoom(room *models.Room) error {
 	defer insertStmt.Close()
 
 	_, err = insertStmt.Exec(room.BuildingID, room.RoomCode)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) DeleteRoom(roomID int) error {
+	query := "DELETE FROM RoomT WHERE roomID = $1"
+	deleteStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer deleteStmt.Close()
+
+	_, err = deleteStmt.Exec(roomID)
 
 	if err != nil {
 		return err

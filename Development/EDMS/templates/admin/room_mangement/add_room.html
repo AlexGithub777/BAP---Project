@@ -1,0 +1,88 @@
+<div id="addRoomModal" class="modal fade">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Room</h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    class="form-control needs-validation"
+                    method="POST"
+                    id="addRoomForm"
+                    action="/api/room"
+                    autocomplete="off"
+                    novalidate
+                >
+                    <div class="mb-3">
+                        <label for="addRoomSite" class="form-label">Site</label>
+                        <select
+                            class="form-control form-select siteInput"
+                            aria-label="Select site"
+                            name="addRoomSite"
+                            id="addRoomSite"
+                            required
+                        >
+                            <!-- Options will be populated here -->
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a site.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addRoomBuildingCode" class="form-label"
+                            >Building</label
+                        >
+                        <select
+                            class="form-control form-select buildingInput"
+                            aria-label="Select building"
+                            id="addRoomBuildingCode"
+                            name="addRoomBuildingCode"
+                            required
+                        >
+                            <option value="">Select a building...</option>
+                            <!-- Other options will be populated here -->
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a building.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addRoomCode" class="form-label"
+                            >Room Code</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="addRoomCode"
+                            name="addRoomCode"
+                            pattern="{1, 100}"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Please enter a room code (1-100 characters).
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+                <button type="button" id="addRoomBtn" class="btn btn-primary">
+                    Add Room
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

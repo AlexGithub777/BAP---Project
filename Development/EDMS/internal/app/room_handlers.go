@@ -32,11 +32,11 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 	}
 
 	//Pass room name from form
-	roomName := c.FormValue("room_name")
-	a.handleLogger("Room Name: " + roomName)
+	roomCode := c.FormValue("addRoomCode")
+	a.handleLogger("Room Code: " + roomCode)
 
 	// Parse the building ID
-	buildingId := c.FormValue("building_id")
+	buildingId := c.FormValue("addRoomBuildingCode")
 	if buildingId == "" {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Building ID is required")
 	}
@@ -48,7 +48,7 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 	}
 
 	//Validate room name length
-	if len(roomName) < 1 || len(roomName) > 100 {
+	if len(roomCode) < 1 || len(roomCode) > 100 {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Room Name must be between 1 and 100 characters long")
 	}
 
@@ -59,7 +59,7 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 	}
 
 	var room = models.Room{
-		RoomCode:   roomName,
+		RoomCode:   roomCode,
 		BuildingID: buildingIdInt,
 	}
 
@@ -72,4 +72,72 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 
 	//Redirect to admin settings with sucsess message
 	return c.Redirect(http.StatusFound, "/admin?message=Room added sucsessfully")
+}
+
+func (a *App) HandleDeleteRoom(c echo.Context) error {
+	// Check if request is not a DELETE request
+	if c.Request().Method != http.MethodDelete {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{
+			"error":       "Method not allowed",
+			"redirectURL": "/admin?error=Method not allowed",
+		})
+	}
+
+	// Get the room ID from the URL
+	roomId := c.Param("id")
+	if roomId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Room ID is required",
+			"redirectURL": "/admin?error=Room ID is required",
+		})
+	}
+
+	// Convert the room ID to an int
+	roomIdInt, err := strconv.Atoi(roomId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid room ID",
+			"redirectURL": "/admin?error=Invalid room ID",
+		})
+	}
+
+	// Check if the room exists
+	_, err = a.DB.GetRoomByID(roomIdInt)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error":       "Room does not exist",
+			"redirectURL": "/admin?error=Room does not exist",
+		})
+	}
+
+	// Handle foreign key constraints, check if room has any devices
+	devices, err := a.DB.GetDevicesByRoomID(roomIdInt)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error fetching devices",
+			"redirectURL": "/admin?error=Error fetching devices",
+		})
+	}
+
+	if len(devices) > 0 {
+		return c.JSON(http.StatusConflict, map[string]string{
+			"error":       "Can't delete room with associated devices",
+			"redirectURL": "/admin?error=Can't delete room with associated devices",
+		})
+	}
+
+	// Delete the room from the database
+	err = a.DB.DeleteRoom(roomIdInt)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error deleting room",
+			"redirectURL": "/admin?error=Error deleting room",
+		})
+	}
+
+	// Redirect to admin settings with success message
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":     "Room deleted successfully",
+		"redirectURL": "/admin?message=Room deleted successfully",
+	})
 }

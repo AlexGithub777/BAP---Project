@@ -71,7 +71,7 @@ func (a *App) initRoutes() {
 	// Room management routes
 	admin.POST("/api/room", a.HandlePostRoom)
 	//admin.PUT("/api/room/:id", a.HandlePutRoom)
-	//admin.DELETE("/api/room/:id", a.HandleDeleteRoom)
+	admin.DELETE("/api/room/:id", a.HandleDeleteRoom)
 	// Device type management routes - James
 	admin.POST("/api/emergency-device-type", a.HandlePostDeviceType)
 	admin.GET("/api/emergency-device-type/:id", a.HandleGetAllDeviceTypeByID)
