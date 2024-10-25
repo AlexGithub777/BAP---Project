@@ -112,6 +112,100 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/admin?message=Room added sucsessfully")
 }
 
+func (a *App) HandlePutRoom(c echo.Context) error {
+	// Check if request is not a PUT request
+	if c.Request().Method != http.MethodPut {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{
+			"error":       "Method not allowed",
+			"redirectURL": "/admin?error=Method not allowed",
+		})
+	}
+
+	// Get the room ID from the URL
+	roomId := c.Param("id")
+	if roomId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Room ID is required",
+			"redirectURL": "/admin?error=Room ID is required",
+		})
+	}
+
+	// Convert the room ID to an int
+	roomIdInt, err := strconv.Atoi(roomId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid room ID",
+			"redirectURL": "/admin?error=Invalid room ID",
+		})
+	}
+
+	// Check if the room exists
+	_, err = a.DB.GetRoomByID(roomIdInt)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error":       "Room does not exist",
+			"redirectURL": "/admin?error=Room does not exist",
+		})
+	}
+
+	// Parse the form data from the request body
+	var roomDto models.RoomDto
+	if err := c.Bind(&roomDto); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid request data",
+			"redirectURL": "/admin?error=Invalid request data",
+		})
+	}
+
+	// Validate the room name
+	if len(roomDto.RoomCode) < 1 || len(roomDto.RoomCode) > 100 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Room name must be between 1 and 100 characters long",
+			"redirectURL": "/admin?error=Room name must be between 1 and 100 characters long",
+		})
+	}
+
+	// Convert the building ID to an int
+	buildingIdInt, err := strconv.Atoi(roomDto.BuildingID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid building ID",
+			"redirectURL": "/admin?error=Invalid building ID",
+		})
+	}
+
+	// Check if the building exists
+	_, err = a.DB.GetBuildingById(roomDto.BuildingID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error":       "Building does not exist",
+			"redirectURL": "/admin?error=Building does not exist",
+		})
+	}
+
+	// Create a new room object
+	room := models.Room{
+		RoomID:     roomIdInt,
+		RoomCode:   roomDto.RoomCode,
+		BuildingID: buildingIdInt,
+	}
+
+	// Update the room in the database
+	err = a.DB.UpdateRoom(&room)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Error updating room",
+			"redirectURL": "/admin?error=Error updating room",
+		})
+	}
+
+	// Redirect to admin settings with success message
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":     "Room updated successfully",
+		"redirectURL": "/admin?message=Room updated successfully",
+	})
+}
+
 func (a *App) HandleDeleteRoom(c echo.Context) error {
 	// Check if request is not a DELETE request
 	if c.Request().Method != http.MethodDelete {

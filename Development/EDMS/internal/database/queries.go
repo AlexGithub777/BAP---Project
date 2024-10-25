@@ -967,6 +967,24 @@ func (db *DB) AddRoom(room *models.Room) error {
 	return nil
 }
 
+func (db *DB) UpdateRoom(room *models.Room) error {
+	query := "UPDATE RoomT SET buildingId = $1, roomCode = $2 WHERE roomID = $3"
+	updateStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	_, err = updateStmt.Exec(room.BuildingID, room.RoomCode, room.RoomID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *DB) DeleteRoom(roomID int) error {
 	query := "DELETE FROM RoomT WHERE roomID = $1"
 	deleteStmt, err := db.Prepare(query)

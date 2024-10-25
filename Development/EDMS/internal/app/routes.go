@@ -70,7 +70,7 @@ func (a *App) initRoutes() {
 	admin.DELETE("/api/building/:id", a.HandleDeleteBuilding)
 	// Room management routes
 	admin.POST("/api/room", a.HandlePostRoom)
-	//admin.PUT("/api/room/:id", a.HandlePutRoom)
+	admin.PUT("/api/room/:id", a.HandlePutRoom)
 	admin.DELETE("/api/room/:id", a.HandleDeleteRoom)
 	// Device type management routes - James
 	admin.POST("/api/emergency-device-type", a.HandlePostDeviceType)
