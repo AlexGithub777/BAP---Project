@@ -1382,6 +1382,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 }
 
 func (db *DB) AddInspection(inspection *models.Inspection) error {
+
 	query := `
 	INSERT INTO emergency_device_inspectionT (emergencydeviceid, userid, inspectiondate, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsExternalDamagePresent, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
@@ -1397,21 +1398,21 @@ func (db *DB) AddInspection(inspection *models.Inspection) error {
 		inspection.EmergencyDeviceID,
 		inspection.UserID,
 		inspection.InspectionDate,
-		inspection.IsConspicuous,
-		inspection.IsAccessible,
-		inspection.IsAssignedLocation,
-		inspection.IsSignVisible,
-		inspection.IsAntiTamperDeviceIntact,
-		inspection.IsSupportBracketSecure,
-		inspection.AreOperatingInstructionsClear,
-		inspection.IsMaintenanceTagAttached,
-		inspection.IsExternalDamagePresent,
-		inspection.IsChargeGaugeNormal,
-		inspection.IsReplaced,
-		inspection.AreMaintenanceRecordsComplete,
-		inspection.WorkOrderRequired,
+		inspection.IsConspicuous.Bool,
+		inspection.IsAccessible.Bool,
+		inspection.IsAssignedLocation.Bool,
+		inspection.IsSignVisible.Bool,
+		inspection.IsAntiTamperDeviceIntact.Bool,
+		inspection.IsSupportBracketSecure.Bool,
+		inspection.AreOperatingInstructionsClear.Bool,
+		inspection.IsMaintenanceTagAttached.Bool,
+		inspection.IsExternalDamagePresent.Bool,
+		inspection.IsChargeGaugeNormal.Bool,
+		inspection.IsReplaced.Bool,
+		inspection.AreMaintenanceRecordsComplete.Bool,
+		inspection.WorkOrderRequired.Bool,
 		inspection.InspectionStatus,
-		inspection.Notes,
+		inspection.Notes.String,
 	)
 
 	if err != nil {
