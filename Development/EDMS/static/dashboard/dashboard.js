@@ -518,12 +518,20 @@ function getBadgeClass(status) {
 
 function getActionButtons(device) {
     let buttons = `<button class="btn btn-primary" onclick="deviceNotes('${device.description.String}')">Notes</button>`;
+
     if (role === "Admin") {
+        // Only show Inspect button if device is a Fire Extinguisher
+        const isFireExtinguisher =
+            device.emergency_device_type_name === "Fire Extinguisher";
+
+        if (isFireExtinguisher) {
+            buttons += `
+                <button class="btn btn-secondary" onclick="viewDeviceInspection(${device.emergency_device_id})">Inspect</button>`;
+        }
+
         buttons += `
-            <button class="btn btn-secondary" onclick="viewDeviceInspection(${device.emergency_device_id})">Inspect</button>
             <button class="btn btn-warning" onclick="editDevice(${device.emergency_device_id})">Edit</button>
             <button class="btn btn-danger" onclick="showDeleteModal(${device.emergency_device_id},'emergency-device', '<br>${device.emergency_device_type_name} - Serial Number: ${device.serial_number.String}')">Delete</button>
-            
         `;
     }
     return buttons;
