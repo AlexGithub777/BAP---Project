@@ -36,12 +36,13 @@
                             Please select a device type.
                         </div>
                     </div>
-                    <div class="mb-3" id="extinguisherTypeInput">
+                    <div class="mb-3 ExtinguisherTypeInputDiv d-none">
                         <label for="extinguisherType" class="form-label"
                             >Extinguisher Type</label
                         >
                         <select
                             class="form-control form-select extinguisherTypeInput"
+                            id="ExtinguisherTypeInput"
                             aria-label="Select extinguisher type"
                             name="extinguisher_type"
                         >
@@ -139,14 +140,14 @@
                             Please provide a valid manufacture date.
                         </div>
                     </div>
-                    <div class="mb-3" id="lastInspectionDateInput">
+                    <div class="mb-3 LastInspectionDateInputDiv d-none">
                         <label for="lastInspectionDate" class="form-label"
                             >Last Inspection Date</label
                         >
                         <input
                             type="date"
                             class="form-control lastInspectionDateInput"
-                            id="lastInspectionDate"
+                            id="LastInspectionDateInput"
                             name="last_inspection_date"
                         />
                         <div

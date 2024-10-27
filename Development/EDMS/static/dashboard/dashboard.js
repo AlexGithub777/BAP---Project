@@ -552,26 +552,26 @@ function clearBuildingAndRoom() {
 }
 
 function addDevice() {
-    // Clear the form before showing the modal
     document.getElementById("addDeviceForm").reset();
     document.getElementById("addDeviceForm").classList.remove("was-validated");
 
-    // Populate dropdowns
-    populateDropdown(
+    const emergencyDeviceTypePromise = populateDropdown(
         ".emergencyDeviceTypeInput",
         "/api/emergency-device-type",
         "Select Device Type",
         "emergency_device_type_id",
         "emergency_device_type_name"
     );
-    populateDropdown(
+
+    const extinguisherTypePromise = populateDropdown(
         ".extinguisherTypeInput",
         "/api/extinguisher-type",
         "Select Extinguisher Type",
         "extinguisher_type_id",
         "extinguisher_type_name"
     );
-    populateDropdown(
+
+    const sitePromise = populateDropdown(
         ".siteInput",
         "/api/site",
         "Select a Site",
@@ -579,60 +579,78 @@ function addDevice() {
         "site_name"
     );
 
-    // Hide extingusher type and inspection date dropdowns if device type is not "Fire Extinguisher"
-    document
-        .querySelector(".emergencyDeviceTypeInput")
-        .addEventListener("change", (event) => {
-            // Get the selected option element
-            const selectedOption =
-                event.target.options[event.target.selectedIndex];
-            // Get the text content of the selected option
-            const selectedDeviceType = selectedOption.textContent;
-            console.log(selectedDeviceType);
+    Promise.all([
+        emergencyDeviceTypePromise,
+        extinguisherTypePromise,
+        sitePromise,
+    ])
+        .then(() => {
+            // Event listener for site change
+            document
+                .querySelector(".siteInput")
+                .addEventListener("change", (event) => {
+                    const selectedSiteId = event.target.value;
+                    clearBuildingAndRoom();
 
-            if (selectedDeviceType !== "Fire Extinguisher") {
-                document
-                    .querySelector("#extinguisherTypeInput")
-                    .classList.add("d-none");
-                document
-                    .querySelector("#lastInspectionDateInput")
-                    .classList.add("d-none");
-            } else {
-                document
-                    .querySelector("#extinguisherTypeInput")
-                    .classList.remove("d-none");
-                document
-                    .querySelector("#lastInspectionDateInput")
-                    .classList.remove("d-none");
-            }
+                    if (selectedSiteId) {
+                        fetchAndPopulateBuildings(selectedSiteId);
+                    }
+                });
+
+            // Event listener for building change
+            document
+                .querySelector(".buildingInput")
+                .addEventListener("change", (event) => {
+                    const selectedBuildingId = event.target.value;
+
+                    if (selectedBuildingId) {
+                        fetchAndPopulateRooms(selectedBuildingId);
+                    }
+                });
+
+            // Show the modal after all dropdowns are populated
+            $("#addDeviceModal").modal("show");
+        })
+        .catch((error) => {
+            console.error("Error loading dropdown data:", error);
         });
-
-    // Event listener for site change
-    document.querySelector(".siteInput").addEventListener("change", (event) => {
-        const selectedSiteId = event.target.value;
-        clearBuildingAndRoom();
-
-        if (selectedSiteId) {
-            fetchAndPopulateBuildings(selectedSiteId);
-        }
-    });
-
-    // Event listener for building change
-    document
-        .querySelector(".buildingInput")
-        .addEventListener("change", (event) => {
-            const selectedBuildingId = event.target.value;
-
-            if (selectedBuildingId) {
-                fetchAndPopulateRooms(selectedBuildingId);
-            }
-        });
-
-    // Show the modal after populating the select options
-    $("#addDeviceModal").modal("show");
 }
 
 function editDevice(deviceId) {
+    // Function to handle visibility of extinguisher-specific fields
+    function updateExtinguisherFields() {
+        const selectElement = document.querySelector(
+            "#editEmergencyDeviceTypeInput"
+        );
+        const selectedOption =
+            selectElement.options[selectElement.selectedIndex];
+        const selectedDeviceType = selectedOption.textContent;
+        console.log(selectedDeviceType);
+
+        if (selectedDeviceType !== "Fire Extinguisher") {
+            // Hide and clear extinguisher-specific fields if not a Fire Extinguisher
+            document
+                .querySelector(".editExtinguisherTypeInputDiv")
+                .classList.add("d-none");
+            document.querySelector("#editExtinguisherTypeInput").value = ""; // Clear selected value
+            document
+                .querySelector(".editLastInspectionDateInputDiv")
+                .classList.add("d-none");
+            document.querySelector("#editLastInspectionDateInput").value = ""; // Clear selected value
+        } else {
+            // Show extinguisher-specific fields and set default
+            document
+                .querySelector(".editExtinguisherTypeInputDiv")
+                .classList.remove("d-none");
+            document.querySelector(
+                "#editExtinguisherTypeInput"
+            ).selectedIndex = 0; // Set to "Select Extinguisher Type"
+            document
+                .querySelector(".editLastInspectionDateInputDiv")
+                .classList.remove("d-none");
+        }
+    }
+
     // Clear the form before showing the modal
     document.getElementById("editDeviceForm").reset();
     document.getElementById("editDeviceForm").classList.remove("was-validated");
@@ -730,6 +748,9 @@ function editDevice(deviceId) {
                                 data.room_id;
                         });
 
+                    // Check and update visibility of extinguisher fields
+                    updateExtinguisherFields();
+
                     // Now that the data is populated, show the modal
                     $("#editDeviceModal").modal("show");
                 });
@@ -737,6 +758,11 @@ function editDevice(deviceId) {
         .catch((error) => {
             console.error("Error loading dropdown data:", error);
         });
+
+    // Add change event listener for device type dropdown
+    document
+        .querySelector("#editEmergencyDeviceTypeInput")
+        .addEventListener("change", updateExtinguisherFields);
 }
 
 function fetchAndPopulateBuildings(siteId) {
@@ -808,19 +834,25 @@ function validateSelect(selectElement) {
 
 // Function to validate dates
 function validateDates() {
-    const currentDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+    const currentDate = new Date().toISOString().split("T")[0];
     let isValid = true;
 
-    // Get all manufacture date and last inspection date inputs
     const manufactureDateInputs = document.querySelectorAll(
         ".manufactureDateInput"
     );
     const lastInspectionDateInputs = document.querySelectorAll(
         ".lastInspectionDateInput"
     );
+    const deviceTypeInputs = document.querySelectorAll(
+        ".emergencyDeviceTypeInput"
+    );
 
     manufactureDateInputs.forEach((manufactureDate, index) => {
         const lastInspectionDate = lastInspectionDateInputs[index];
+        const deviceTypeSelect = deviceTypeInputs[index];
+        const isFireExtinguisher =
+            deviceTypeSelect.options[deviceTypeSelect.selectedIndex]
+                ?.textContent === "Fire Extinguisher";
 
         // Validate manufacture date
         if (manufactureDate.value && manufactureDate.value > currentDate) {
@@ -838,53 +870,58 @@ function validateDates() {
             ].textContent = "";
         }
 
-        // Validate last inspection date
-        if (
-            lastInspectionDate.value &&
-            lastInspectionDate.value > currentDate
-        ) {
-            lastInspectionDate.setCustomValidity(
-                "Last inspection date cannot be in the future"
-            );
-            document.querySelectorAll(".lastInspectionDateFeedback")[
-                index
-            ].textContent = "Last inspection date cannot be in the future";
-            isValid = false;
-        } else if (
-            lastInspectionDate.value &&
-            lastInspectionDate.value === manufactureDate.value
-        ) {
-            // Show error if the dates are equal
-            lastInspectionDate.setCustomValidity(
-                "Last inspection date cannot be the same as manufacture date"
-            );
-            document.querySelectorAll(".lastInspectionDateFeedback")[
-                index
-            ].textContent =
-                "Last inspection date cannot be the same as manufacture date";
-            isValid = false;
-        } else if (
-            lastInspectionDate.value &&
-            manufactureDate.value &&
-            lastInspectionDate.value < manufactureDate.value
-        ) {
-            // Show error if last inspection date is before manufacture date
-            lastInspectionDate.setCustomValidity(
-                "Last inspection date cannot be before manufacture date"
-            );
-            document.querySelectorAll(".lastInspectionDateFeedback")[
-                index
-            ].textContent =
-                "Last inspection date cannot be before manufacture date";
-            isValid = false;
-        } else {
+        // Only validate last inspection date if it's a Fire Extinguisher
+        if (isFireExtinguisher && lastInspectionDate) {
+            if (
+                lastInspectionDate.value &&
+                lastInspectionDate.value > currentDate
+            ) {
+                lastInspectionDate.setCustomValidity(
+                    "Last inspection date cannot be in the future"
+                );
+                document.querySelectorAll(".lastInspectionDateFeedback")[
+                    index
+                ].textContent = "Last inspection date cannot be in the future";
+                isValid = false;
+            } else if (
+                lastInspectionDate.value &&
+                lastInspectionDate.value === manufactureDate.value
+            ) {
+                lastInspectionDate.setCustomValidity(
+                    "Last inspection date cannot be the same as manufacture date"
+                );
+                document.querySelectorAll(".lastInspectionDateFeedback")[
+                    index
+                ].textContent =
+                    "Last inspection date cannot be the same as manufacture date";
+                isValid = false;
+            } else if (
+                lastInspectionDate.value &&
+                manufactureDate.value &&
+                lastInspectionDate.value < manufactureDate.value
+            ) {
+                lastInspectionDate.setCustomValidity(
+                    "Last inspection date cannot be before manufacture date"
+                );
+                document.querySelectorAll(".lastInspectionDateFeedback")[
+                    index
+                ].textContent =
+                    "Last inspection date cannot be before manufacture date";
+                isValid = false;
+            } else {
+                lastInspectionDate.setCustomValidity("");
+                document.querySelectorAll(".lastInspectionDateFeedback")[
+                    index
+                ].textContent = "";
+            }
+        } else if (lastInspectionDate) {
+            // Clear validation for non-Fire Extinguisher devices
             lastInspectionDate.setCustomValidity("");
             document.querySelectorAll(".lastInspectionDateFeedback")[
                 index
             ].textContent = "";
         }
     });
-
     return isValid;
 }
 
@@ -899,7 +936,58 @@ function validateLength(element, maxLength) {
     }
 }
 
+// Function to handle device type changes
+function handleDeviceTypeChange(event) {
+    const selectedOption = event.target.options[event.target.selectedIndex];
+    const selectedDeviceType = selectedOption.textContent;
+    const isEdit = event.target.id === "editEmergencyDeviceTypeInput";
+    const prefix = isEdit ? "edit" : "";
+
+    if (selectedDeviceType !== "Fire Extinguisher") {
+        // Clear and hide extinguisher type
+        const extinguisherTypeInput = document.querySelector(
+            `#${prefix}ExtinguisherTypeInput`
+        );
+        if (extinguisherTypeInput) {
+            extinguisherTypeInput.value = "";
+            document
+                .querySelector(`.${prefix}ExtinguisherTypeInputDiv`)
+                .classList.add("d-none");
+        }
+
+        // Clear and hide last inspection date
+        const lastInspectionDateInput = document.querySelector(
+            `#${prefix}LastInspectionDateInput`
+        );
+        if (lastInspectionDateInput) {
+            lastInspectionDateInput.value = "";
+            document
+                .querySelector(`.${prefix}LastInspectionDateInputDiv`)
+                .classList.add("d-none");
+        }
+    } else {
+        // Show fields for Fire Extinguisher
+        document
+            .querySelector(`.${prefix}ExtinguisherTypeInputDiv`)
+            .classList.remove("d-none");
+        document
+            .querySelector(`.${prefix}LastInspectionDateInputDiv`)
+            .classList.remove("d-none");
+    }
+
+    // Validate dates after changing device type
+    validateDates();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    // Add change event listeners to device type inputs
+    const deviceTypeInputs = document.querySelectorAll(
+        ".emergencyDeviceTypeInput"
+    );
+    deviceTypeInputs.forEach((input) => {
+        input.addEventListener("change", handleDeviceTypeChange);
+    });
+
     const description = document.querySelector(".descriptionInput");
     const manufactureDate = document.querySelector(".manufactureDateInput");
     const lastInspectionDate = document.querySelector(
