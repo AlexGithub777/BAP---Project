@@ -1218,7 +1218,100 @@ function viewDeviceInspection(deviceId) {
 
 function viewInspectionDetails(inspectionId) {
     console.log(`View inspection details for inspection ID: ${inspectionId}`);
-    // Add your view inspection details logic here
+    // Close the view inspection modal
+    $("#viewInspectionModal").modal("hide");
+
+    // Fetch the inspection details
+    fetch(`/api/inspection/${inspectionId}`)
+        .then((response) => response.json())
+        .then((data) => {
+            // Populate the modal with the inspection details
+            document.getElementById("inspector_username").innerText =
+                data.inspector_name || "Unknown";
+            document.getElementById("ViewInspectionDateInput").innerText = data
+                .inspection_date.Valid
+                ? new Date(data.inspection_date.Time).toLocaleString()
+                : "No Date Available";
+
+            // Create badge for the inspection status
+            const statusBadge = document.createElement("span");
+            statusBadge.className = "badge";
+
+            // Set badge color based on status
+            switch (data.inspection_status) {
+                case "Passed":
+                    statusBadge.classList.add("bg-success");
+                    statusBadge.innerText = "Passed";
+                    break;
+                case "Failed":
+                    statusBadge.classList.add("bg-danger");
+                    statusBadge.innerText = "Failed";
+                    break;
+                case "In Progress":
+                    statusBadge.classList.add("bg-warning");
+                    statusBadge.innerText = "In Progress";
+                    break;
+                default:
+                    statusBadge.classList.add("bg-secondary");
+                    statusBadge.innerText = "Not Set";
+            }
+
+            // Clear previous status display and append the new badge
+            const statusContainer = document.getElementById(
+                "ViewInspectionStatus"
+            );
+            statusContainer.innerHTML = ""; // Clear existing content
+            statusContainer.appendChild(statusBadge); // Append the badge
+
+            document.getElementById("viewNotes").innerText =
+                data.notes.String || "No Notes Available";
+
+            // Check checkboxes based on boolean values
+            document.getElementById("ViewIsConspicuous").checked =
+                data.is_conspicuous.Bool && data.is_conspicuous.Valid;
+            document.getElementById("ViewIsAccessible").checked =
+                data.is_accessible.Bool && data.is_accessible.Valid;
+            document.getElementById("ViewIsAssignedLocation").checked =
+                data.is_assigned_location.Bool &&
+                data.is_assigned_location.Valid;
+            document.getElementById("ViewIsSignVisible").checked =
+                data.is_sign_visible.Bool && data.is_sign_visible.Valid;
+            document.getElementById("ViewIsAntiTamperDeviceIntact").checked =
+                data.is_anti_tamper_device_intact.Bool &&
+                data.is_anti_tamper_device_intact.Valid;
+            document.getElementById("ViewIsSupportBracketSecure").checked =
+                data.is_support_bracket_secure.Bool &&
+                data.is_support_bracket_secure.Valid;
+            document.getElementById("ViewWorkOrderRequired").checked =
+                data.work_order_required.Bool && data.work_order_required.Valid;
+            document.getElementById(
+                "ViewAreOperatingInstructionsClear"
+            ).checked =
+                data.are_operating_instructions_clear.Bool &&
+                data.are_operating_instructions_clear.Valid;
+            document.getElementById("ViewIsMaintenanceTagAttached").checked =
+                data.is_maintenance_tag_attached.Bool &&
+                data.is_maintenance_tag_attached.Valid;
+            document.getElementById("ViewIsExternalDamagePresent").checked =
+                data.is_external_damage_present.Bool &&
+                data.is_external_damage_present.Valid;
+            document.getElementById("ViewIsChargeGaugeNormal").checked =
+                data.is_charge_gauge_normal.Bool &&
+                data.is_charge_gauge_normal.Valid;
+            document.getElementById("ViewIsReplaced").checked =
+                data.is_replaced.Bool && data.is_replaced.Valid;
+            document.getElementById(
+                "ViewAreMaintenanceRecordsComplete"
+            ).checked =
+                data.are_maintenance_records_complete.Bool &&
+                data.are_maintenance_records_complete.Valid;
+
+            // Show the modal
+            $("#viewInspectionDetailsModal").modal("show");
+        })
+        .catch((error) => {
+            console.error("Error fetching inspection details:", error);
+        });
 }
 
 console.log("User ID:", user_id);

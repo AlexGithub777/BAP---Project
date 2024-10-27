@@ -1,0 +1,264 @@
+<div id="viewInspectionDetailsModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Inspection Details</h4>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <form class="form-control" id="viewInspectionForm">
+                    <div class="mb-3">
+                        <label for="device_id" class="form-label"
+                            >Inspector Username</label
+                        >
+                        <label
+                            type="text"
+                            id="inspector_username"
+                            name="user_id"
+                        />
+                    </div>
+
+                    <div class="mb-3">
+                        <div>
+                            <label for="ViewInspectionDateInput form-label"
+                                >Inspection Date:</label
+                            >
+                            <span id="ViewInspectionDateInput"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea
+                            class="form-control"
+                            id="viewNotes"
+                            name="notes"
+                            rows="3"
+                            readonly
+                        ></textarea>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Inspection Checklist</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsConspicuous"
+                                    name="isConspicuous"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsConspicuous"
+                                    >Is Conspicuous</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsAccessible"
+                                    name="isAccessible"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsAccessible"
+                                    >Is Accessible</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsAssignedLocation"
+                                    name="isAssignedLocation"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsAssignedLocation"
+                                    >Is in Assigned Location</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsSignVisible"
+                                    name="isSignVisible"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsSignVisible"
+                                    >Is Sign Visible</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsAntiTamperDeviceIntact"
+                                    name="isAntiTamperDeviceIntact"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsAntiTamperDeviceIntact"
+                                    >Is Anti-Tamper Device Intact</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsSupportBracketSecure"
+                                    name="isSupportBracketSecure"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsSupportBracketSecure"
+                                    >Is Support Bracket Secure</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewWorkOrderRequired"
+                                    name="workOrderRequired"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewWorkOrderRequired"
+                                    >Work Order Required</label
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewAreOperatingInstructionsClear"
+                                    name="areOperatingInstructionsClear"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewAreOperatingInstructionsClear"
+                                    >Are Operating Instructions Clear</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsMaintenanceTagAttached"
+                                    name="isMaintenanceTagAttached"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsMaintenanceTagAttached"
+                                    >Is Maintenance Tag Attached</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsExternalDamagePresent"
+                                    name="isExternalDamagePresent"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsExternalDamagePresent"
+                                    >Is External Damage Present</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsChargeGaugeNormal"
+                                    name="isChargeGaugeNormal"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsChargeGaugeNormal"
+                                    >Is Charge Gauge Normal</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsReplaced"
+                                    name="isReplaced"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsReplaced"
+                                    >Is Replaced</label
+                                >
+                            </div>
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewAreMaintenanceRecordsComplete"
+                                    name="areMaintenanceRecordsComplete"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewAreMaintenanceRecordsComplete"
+                                    >Are Maintenance Records Complete</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="inspectionStatus"
+                                    >Inspection Status</label
+                                >
+                                <div>
+                                    <span id="ViewInspectionStatus"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <button
+                            type="button mx-2"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
