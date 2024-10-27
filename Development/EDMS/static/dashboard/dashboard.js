@@ -1233,6 +1233,11 @@ function viewInspectionDetails(inspectionId) {
                 ? new Date(data.inspection_date.Time).toLocaleString()
                 : "No Date Available";
 
+            document.getElementById("ViewInspectionCreatedAt").innerText = data
+                .created_at.Valid
+                ? new Date(data.created_at.Time).toLocaleString()
+                : "No Date Available";
+
             // Create badge for the inspection status
             const statusBadge = document.createElement("span");
             statusBadge.className = "badge";
