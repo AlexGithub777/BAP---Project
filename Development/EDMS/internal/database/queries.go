@@ -1279,3 +1279,91 @@ func (db *DB) DeleteEmergencyDevice(deviceID int) error {
 
 	return nil
 }
+
+func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, error) {
+	query := `
+	SELECT inspectionid, emergencydeviceid, userid, inspectiondate, createdat, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintainceRecordAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes         
+	FROM inspectionT
+	WHERE emergencydeviceid = $1
+	ORDER BY inspectiondate DESC
+	`
+
+	rows, err := db.Query(query, deviceID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var inspections []models.Inspection
+
+	// Scan the results
+	for rows.Next() {
+		var inspection models.Inspection
+		err := rows.Scan(
+			&inspection.EmergencyDeviceInspectionID,
+			&inspection.EmergencyDeviceID,
+			&inspection.UserID,
+			&inspection.InspectionDate,
+			&inspection.CreatedAt,
+			&inspection.IsConspicuous,
+			&inspection.IsAccessible,
+			&inspection.IsAssignedLocation,
+			&inspection.IsSignVisible,
+			&inspection.IsAntiTamperDeviceIntact,
+			&inspection.IsSupportBracketSecure,
+			&inspection.AreOperatingInstructionsClear,
+			&inspection.IsMaintainceTagAttached,
+			&inspection.IsExternalDamagePresent,
+			&inspection.IsReplaced,
+			&inspection.AreMaintenanceRecordsComplete,
+			&inspection.WorkOrderRequired,
+			&inspection.InspectionStatus,
+			&inspection.Notes,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		inspections = append(inspections, inspection)
+	}
+
+	return inspections, nil
+}
+
+func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
+	query := `
+	SELECT inspectionid, emergencydeviceid, userid, inspectiondate, createdat, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintainceRecordAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes
+	FROM inspectionT
+	WHERE inspectionid = $1
+	`
+
+	var inspection models.Inspection
+	err := db.QueryRow(query, inspectionID).Scan(
+		&inspection.EmergencyDeviceInspectionID,
+		&inspection.EmergencyDeviceID,
+		&inspection.UserID,
+		&inspection.InspectionDate,
+		&inspection.CreatedAt,
+		&inspection.IsConspicuous,
+		&inspection.IsAccessible,
+		&inspection.IsAssignedLocation,
+		&inspection.IsSignVisible,
+		&inspection.IsAntiTamperDeviceIntact,
+		&inspection.IsSupportBracketSecure,
+		&inspection.AreOperatingInstructionsClear,
+		&inspection.IsMaintainceTagAttached,
+		&inspection.IsExternalDamagePresent,
+		&inspection.IsReplaced,
+		&inspection.AreMaintenanceRecordsComplete,
+		&inspection.WorkOrderRequired,
+		&inspection.InspectionStatus,
+		&inspection.Notes,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &inspection, nil
+}

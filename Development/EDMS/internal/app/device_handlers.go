@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetAllDevices fetches all emergency devices from the database with optional filtering by building code
+// HandleGetAllDevices fetches all emergency devices from the database with optional filtering by building code
 // and returns the results as JSON
 func (a *App) HandleGetAllDevices(c echo.Context) error {
 	// Check if request if a POST request
