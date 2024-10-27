@@ -113,7 +113,7 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 	fmt.Println("InspectionStatus:", inspection_status)
 
 	// Validate required fields
-	if inspectionDate == "" || notes == "" || deviceID == 0 || userId == 0 || inspection_status == "" {
+	if inspectionDate == "" || deviceID == 0 || userId == 0 || inspection_status == "" {
 		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid request payload")
 	}
 
@@ -146,6 +146,11 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Inspection Date cannot be in the future")
 	}
 
+	// Validate notes length is less than 255 characters
+	if len(notes) > 255 {
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Notes must be less than 255 characters")
+	}
+
 	// Set the remaining inspection fields
 	inspection.InspectionDate = nullTimeDate
 	inspection.Notes.String = notes
@@ -163,5 +168,5 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, inspection)
+	return c.Redirect(http.StatusSeeOther, "/dashboard?message=Inspection added successfully")
 }

@@ -1166,15 +1166,29 @@ function viewDeviceInspection(deviceId) {
                               })
                             : "No Date Available";
 
+                        // Determine badge color based on inspection status
+                        let badgeClass = "badge text-bg-primary"; // default color
+                        if (inspection.inspection_status === "Passed") {
+                            badgeClass = "badge text-bg-success";
+                        } else if (inspection.inspection_status === "Failed") {
+                            badgeClass = "badge text-bg-danger";
+                        } else if (
+                            inspection.inspection_status === "In Progress"
+                        ) {
+                            badgeClass = "badge text-bg-warning";
+                        }
+
                         return `
                             <tr>
                                 <td>${formattedDate}</td>
                                 <td>${
                                     inspection.inspector_name || "Unknown"
                                 }</td>
-                                <td>${
-                                    inspection.inspection_status || "Not Set"
-                                }</td>
+                                <td>
+                                    <span class="badge ${badgeClass}">${
+                            inspection.inspection_status || "Not Set"
+                        }</span>
+                                </td>
                                 <td>
                                     <button class="btn btn-primary" onclick="viewInspectionDetails(${
                                         inspection.emergency_device_inspection_id
