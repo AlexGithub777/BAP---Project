@@ -1207,9 +1207,75 @@ function addInspection() {
     // Close the view inspection modal
     $("#viewInspectionModal").modal("hide");
 
+    // Clear the form before showing the modal
+    document.getElementById("addInspectionForm").reset();
+    document
+        .getElementById("addInspectionForm")
+        .classList.remove("was-validated");
+
     // Show the modal
     $("#addInspectionModal").modal("show");
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Select the add inspection button and form
+    const addInspectionButton = document.querySelector("#addInspectionBtn");
+    const addInspectionForm = document.querySelector("#addInspectionForm");
+    const inspectionDateInput = document.querySelector("#InspectionDateInput");
+    const inspectionDateFeedback = document.getElementById(
+        "inspectionDateFeedback"
+    );
+
+    // Ensure the elements are found
+    if (!addInspectionButton || !addInspectionForm || !inspectionDateInput) {
+        console.error("Required elements not found in the DOM.");
+        return;
+    }
+
+    // Add event listener to the add inspection button
+    addInspectionButton.addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Check if inspection date is provided
+        if (inspectionDateInput.value) {
+            const currentDate = new Date().toISOString().split("T")[0];
+            // Check if the inspection date is in the future
+            if (inspectionDateInput.value > currentDate) {
+                inspectionDateInput.setCustomValidity(
+                    "Inspection date cannot be in the future"
+                );
+                inspectionDateFeedback.textContent =
+                    "Inspection date cannot be in the future";
+            } else {
+                inspectionDateInput.setCustomValidity(""); // Clear any previous validity message
+                inspectionDateFeedback.textContent = ""; // Clear feedback message
+            }
+        }
+
+        // Validate the form before submission
+        if (!addInspectionForm.checkValidity()) {
+            event.stopPropagation();
+        } else {
+            // If the form is valid, submit it
+            addInspectionForm.submit();
+        }
+
+        addInspectionForm.classList.add("was-validated");
+    });
+
+    // Event listener for inspection date input change
+    inspectionDateInput.addEventListener("input", function () {
+        const currentDate = new Date().toISOString().split("T")[0];
+
+        if (
+            inspectionDateInput.value &&
+            inspectionDateInput.value <= currentDate
+        ) {
+            inspectionDateInput.setCustomValidity(""); // Clear the custom validity
+            inspectionDateFeedback.textContent = ""; // Clear feedback message
+        }
+    });
+});
 
 function deviceNotes(description) {
     // Populate the modal with the description

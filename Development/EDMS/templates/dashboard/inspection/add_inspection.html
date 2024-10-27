@@ -12,17 +12,31 @@
                 ></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form
+                    class="form-control needs-validation"
+                    method="POST"
+                    action="/api/inspection"
+                    id="addInspectionForm"
+                    autocomplete="off"
+                    novalidate
+                >
                     <div class="mb-3">
-                        <label for="inspectionDate" class="form-label"
+                        <label for="InspectionDate" class="form-label"
                             >Inspection Date</label
                         >
                         <input
                             type="date"
                             class="form-control"
-                            id="inspectionDate"
+                            id="InspectionDateInput"
+                            name="inspection_date"
                             required
                         />
+                        <div
+                            class="invalid-feedback"
+                            id="inspectionDateFeedback"
+                        >
+                            Please provide a inspection date.
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="notes" class="form-label">Notes</label>
@@ -201,15 +215,22 @@
                                     >Inspection Status</label
                                 >
                                 <select
-                                    class="form-select"
+                                    class="form-control form-select"
                                     id="inspectionStatus"
+                                    required
                                 >
+                                    <option disabled selected value="">
+                                        Select a Status
+                                    </option>
                                     <option value="passed">Passed</option>
                                     <option value="failed">Failed</option>
                                     <option value="in-progress">
                                         In Progress
                                     </option>
                                 </select>
+                                <div class="invalid-feedback">
+                                    Please select an inspection status.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -229,7 +250,7 @@
                     <button
                         type="button"
                         class="btn btn-primary mx-2"
-                        data-bs-dismiss="modal"
+                        id="addInspectionBtn"
                     >
                         Add Inspection
                     </button>
