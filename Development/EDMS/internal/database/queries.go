@@ -1282,17 +1282,21 @@ func (db *DB) DeleteEmergencyDevice(deviceID int) error {
 
 func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, error) {
 	query := `
-	SELECT inspectionid, emergencydeviceid, userid, inspectiondate, createdat, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintainceRecordAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes         
-	FROM inspectionT
-	WHERE emergencydeviceid = $1
-	ORDER BY inspectiondate DESC
+	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, edi.userid, u.username, edi.inspectiondate, edi.createdat,
+		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
+		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
+		   edi.IsExternalDamagePresent, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
+		   edi.InspectionStatus, edi.Notes
+	FROM emergency_device_inspectionT edi
+	JOIN userT u ON edi.userid = u.userid
+	WHERE edi.emergencydeviceid = $1
+	ORDER BY edi.inspectiondate DESC
 	`
 
 	rows, err := db.Query(query, deviceID)
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
 	var inspections []models.Inspection
@@ -1304,6 +1308,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 			&inspection.EmergencyDeviceInspectionID,
 			&inspection.EmergencyDeviceID,
 			&inspection.UserID,
+			&inspection.InspectorName, // Scans the `username` field into `InspectorName`
 			&inspection.InspectionDate,
 			&inspection.CreatedAt,
 			&inspection.IsConspicuous,
@@ -1313,7 +1318,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 			&inspection.IsAntiTamperDeviceIntact,
 			&inspection.IsSupportBracketSecure,
 			&inspection.AreOperatingInstructionsClear,
-			&inspection.IsMaintainceTagAttached,
+			&inspection.IsMaintenanceTagAttached,
 			&inspection.IsExternalDamagePresent,
 			&inspection.IsReplaced,
 			&inspection.AreMaintenanceRecordsComplete,
@@ -1333,9 +1338,14 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 
 func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 	query := `
-	SELECT inspectionid, emergencydeviceid, userid, inspectiondate, createdat, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintainceRecordAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes
-	FROM inspectionT
-	WHERE inspectionid = $1
+	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, edi.userid, u.username, edi.inspectiondate, edi.createdat,
+		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
+		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
+		   edi.IsExternalDamagePresent, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
+		   edi.InspectionStatus, edi.Notes
+	FROM emergency_device_inspectionT edi
+	JOIN userT u ON edi.userid = u.userid
+	WHERE edi.emergencydeviceinspectionid = $1
 	`
 
 	var inspection models.Inspection
@@ -1343,6 +1353,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 		&inspection.EmergencyDeviceInspectionID,
 		&inspection.EmergencyDeviceID,
 		&inspection.UserID,
+		&inspection.InspectorName, // Scans the `username` field into `InspectorName`
 		&inspection.InspectionDate,
 		&inspection.CreatedAt,
 		&inspection.IsConspicuous,
@@ -1352,7 +1363,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 		&inspection.IsAntiTamperDeviceIntact,
 		&inspection.IsSupportBracketSecure,
 		&inspection.AreOperatingInstructionsClear,
-		&inspection.IsMaintainceTagAttached,
+		&inspection.IsMaintenanceTagAttached,
 		&inspection.IsExternalDamagePresent,
 		&inspection.IsReplaced,
 		&inspection.AreMaintenanceRecordsComplete,

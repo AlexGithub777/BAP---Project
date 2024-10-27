@@ -1132,9 +1132,67 @@ function deleteDevice(deviceId) {
     // Add your delete logic here
 }
 
-// Change to add inspection
 function viewDeviceInspection(deviceId) {
     console.log(`Inspect device with ID: ${deviceId}`);
+
+    // Clear the inspection table
+    document.getElementById("inspectionTable").innerHTML = "";
+
+    // Fetch the inspections for this device
+    fetch(`/api/inspection?device_id=${deviceId}`)
+        .then((response) => response.json())
+        .then((data) => {
+            // Populate the modal with the inspection data
+            const inspectionTable = document.getElementById("inspectionTable");
+
+            if (!data || !Array.isArray(data) || data.length === 0) {
+                inspectionTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center">No inspections found</td>
+                    </tr>
+                `;
+            } else {
+                console.log(data);
+                inspectionTable.innerHTML = data
+                    .map((inspection) => {
+                        const formattedDate = inspection.inspection_date.Valid
+                            ? new Date(
+                                  inspection.inspection_date.Time
+                              ).toLocaleDateString("en-NZ", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                              })
+                            : "No Date Available";
+
+                        return `
+                            <tr>
+                                <td>${formattedDate}</td>
+                                <td>${
+                                    inspection.inspector_name || "Unknown"
+                                }</td>
+                                <td>${
+                                    inspection.inspection_status || "No Set"
+                                }</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="viewInspectionDetails(${
+                                        inspection.emergency_device_inspection_id
+                                    })">View</button>
+                                </td>
+                            </tr>
+                        `;
+                    })
+                    .join("");
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching inspection data:", error);
+            document.getElementById("inspectionTable").innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center">Failed to load inspections</td>
+                </tr>
+            `;
+        });
 
     // Show the modal
     $("#viewInspectionModal").modal("show");
