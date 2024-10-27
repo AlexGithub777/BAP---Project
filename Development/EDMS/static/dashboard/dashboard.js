@@ -571,6 +571,34 @@ function addDevice() {
         "site_name"
     );
 
+    // Hide extingusher type and inspection date dropdowns if device type is not "Fire Extinguisher"
+    document
+        .querySelector(".emergencyDeviceTypeInput")
+        .addEventListener("change", (event) => {
+            // Get the selected option element
+            const selectedOption =
+                event.target.options[event.target.selectedIndex];
+            // Get the text content of the selected option
+            const selectedDeviceType = selectedOption.textContent;
+            console.log(selectedDeviceType);
+
+            if (selectedDeviceType !== "Fire Extinguisher") {
+                document
+                    .querySelector("#extinguisherTypeInput")
+                    .classList.add("d-none");
+                document
+                    .querySelector("#lastInspectionDateInput")
+                    .classList.add("d-none");
+            } else {
+                document
+                    .querySelector("#extinguisherTypeInput")
+                    .classList.remove("d-none");
+                document
+                    .querySelector("#lastInspectionDateInput")
+                    .classList.remove("d-none");
+            }
+        });
+
     // Event listener for site change
     document.querySelector(".siteInput").addEventListener("change", (event) => {
         const selectedSiteId = event.target.value;
