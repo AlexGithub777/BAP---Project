@@ -1285,7 +1285,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, edi.userid, u.username, edi.inspectiondate, edi.createdat,
 		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
 		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
-		   edi.IsExternalDamagePresent, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
+		   edi.IsExternalDamagePresent, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
 		   edi.InspectionStatus, edi.Notes
 	FROM emergency_device_inspectionT edi
 	JOIN userT u ON edi.userid = u.userid
@@ -1320,6 +1320,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 			&inspection.AreOperatingInstructionsClear,
 			&inspection.IsMaintenanceTagAttached,
 			&inspection.IsExternalDamagePresent,
+			&inspection.IsChargeGaugeNormal,
 			&inspection.IsReplaced,
 			&inspection.AreMaintenanceRecordsComplete,
 			&inspection.WorkOrderRequired,
@@ -1341,7 +1342,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, edi.userid, u.username, edi.inspectiondate, edi.createdat,
 		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
 		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
-		   edi.IsExternalDamagePresent, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
+		   edi.IsExternalDamagePresent, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
 		   edi.InspectionStatus, edi.Notes
 	FROM emergency_device_inspectionT edi
 	JOIN userT u ON edi.userid = u.userid
@@ -1365,6 +1366,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 		&inspection.AreOperatingInstructionsClear,
 		&inspection.IsMaintenanceTagAttached,
 		&inspection.IsExternalDamagePresent,
+		&inspection.IsChargeGaugeNormal,
 		&inspection.IsReplaced,
 		&inspection.AreMaintenanceRecordsComplete,
 		&inspection.WorkOrderRequired,
@@ -1377,4 +1379,45 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 	}
 
 	return &inspection, nil
+}
+
+func (db *DB) AddInspection(inspection *models.Inspection) error {
+	query := `
+	INSERT INTO emergency_device_inspectionT (emergencydeviceid, userid, inspectiondate, createdat, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsExternalDamagePresent, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+	`
+	insertStmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer insertStmt.Close()
+
+	_, err = insertStmt.Exec(
+		inspection.EmergencyDeviceID,
+		inspection.UserID,
+		inspection.InspectionDate,
+		inspection.CreatedAt,
+		inspection.IsConspicuous,
+		inspection.IsAccessible,
+		inspection.IsAssignedLocation,
+		inspection.IsSignVisible,
+		inspection.IsAntiTamperDeviceIntact,
+		inspection.IsSupportBracketSecure,
+		inspection.AreOperatingInstructionsClear,
+		inspection.IsMaintenanceTagAttached,
+		inspection.IsExternalDamagePresent,
+		inspection.IsChargeGaugeNormal,
+		inspection.IsReplaced,
+		inspection.AreMaintenanceRecordsComplete,
+		inspection.WorkOrderRequired,
+		inspection.InspectionStatus,
+		inspection.Notes,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

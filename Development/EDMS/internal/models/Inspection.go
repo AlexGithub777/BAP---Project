@@ -19,6 +19,7 @@ type Inspection struct {
 	AreOperatingInstructionsClear sql.NullBool   `json:"are_operating_instructions_clear"`
 	IsMaintenanceTagAttached      sql.NullBool   `json:"is_maintenance_tag_attached"`
 	IsExternalDamagePresent       sql.NullBool   `json:"is_external_damage_present"`
+	IsChargeGaugeNormal           sql.NullBool   `json:"is_charge_gauge_normal"`
 	IsReplaced                    sql.NullBool   `json:"is_replaced"`
 	AreMaintenanceRecordsComplete sql.NullBool   `json:"are_maintenance_records_complete"`
 	WorkOrderRequired             sql.NullBool   `json:"work_order_required"`

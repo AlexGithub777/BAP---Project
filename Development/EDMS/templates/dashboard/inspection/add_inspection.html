@@ -20,6 +20,12 @@
                     autocomplete="off"
                     novalidate
                 >
+                    <input type="hidden" id="inspect_user_id" name="user_id" />
+                    <input
+                        type="hidden"
+                        id="add_inspection_device_id"
+                        name="device_id"
+                    />
                     <div class="mb-3">
                         <label for="InspectionDate" class="form-label"
                             >Inspection Date</label
@@ -43,6 +49,7 @@
                         <textarea
                             class="form-control"
                             id="notes"
+                            name="notes"
                             rows="3"
                         ></textarea>
                     </div>
@@ -55,6 +62,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isConspicuous"
+                                    name="isConspicuous"
                                 />
                                 <label
                                     class="form-check-label"
@@ -67,6 +75,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isAccessible"
+                                    name="isAccessible"
                                 />
                                 <label
                                     class="form-check-label"
@@ -79,6 +88,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isAssignedLocation"
+                                    name="isAssignedLocation"
                                 />
                                 <label
                                     class="form-check-label"
@@ -91,6 +101,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isSignVisible"
+                                    name="isSignVisible"
                                 />
                                 <label
                                     class="form-check-label"
@@ -103,6 +114,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isAntiTamperDeviceIntact"
+                                    name="isAntiTamperDeviceIntact"
                                 />
                                 <label
                                     class="form-check-label"
@@ -115,6 +127,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isSupportBracketSecure"
+                                    name="isSupportBracketSecure"
                                 />
                                 <label
                                     class="form-check-label"
@@ -127,6 +140,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="workOrderRequired"
+                                    name="workOrderRequired"
                                 />
                                 <label
                                     class="form-check-label"
@@ -141,6 +155,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="areOperatingInstructionsClear"
+                                    name="areOperatingInstructionsClear"
                                 />
                                 <label
                                     class="form-check-label"
@@ -153,6 +168,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isMaintenanceTagAttached"
+                                    name="isMaintenanceTagAttached"
                                 />
                                 <label
                                     class="form-check-label"
@@ -165,6 +181,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isExternalDamagePresent"
+                                    name="isExternalDamagePresent"
                                 />
                                 <label
                                     class="form-check-label"
@@ -177,6 +194,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isChargeGaugeNormal"
+                                    name="isChargeGaugeNormal"
                                 />
                                 <label
                                     class="form-check-label"
@@ -189,6 +207,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="isReplaced"
+                                    name="isReplaced"
                                 />
                                 <label class="form-check-label" for="isReplaced"
                                     >Is Replaced</label
@@ -199,6 +218,7 @@
                                     type="checkbox"
                                     class="form-check-input"
                                     id="areMaintenanceRecordsComplete"
+                                    name="areMaintenanceRecordsComplete"
                                 />
                                 <label
                                     class="form-check-label"
@@ -217,6 +237,7 @@
                                 <select
                                     class="form-control form-select"
                                     id="inspectionStatus"
+                                    name="inspection_status"
                                     required
                                 >
                                     <option disabled selected value="">

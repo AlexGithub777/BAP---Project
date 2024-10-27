@@ -1138,11 +1138,13 @@ function viewDeviceInspection(deviceId) {
     // Clear the inspection table
     document.getElementById("inspectionTable").innerHTML = "";
 
+    // Clear the hidden input field
+    document.getElementById("inspect_device_id").value = "";
+
     // Fetch the inspections for this device
     fetch(`/api/inspection?device_id=${deviceId}`)
         .then((response) => response.json())
         .then((data) => {
-            // Populate the modal with the inspection data
             const inspectionTable = document.getElementById("inspectionTable");
 
             if (!data || !Array.isArray(data) || data.length === 0) {
@@ -1152,7 +1154,6 @@ function viewDeviceInspection(deviceId) {
                     </tr>
                 `;
             } else {
-                console.log(data);
                 inspectionTable.innerHTML = data
                     .map((inspection) => {
                         const formattedDate = inspection.inspection_date.Valid
@@ -1172,7 +1173,7 @@ function viewDeviceInspection(deviceId) {
                                     inspection.inspector_name || "Unknown"
                                 }</td>
                                 <td>${
-                                    inspection.inspection_status || "No Set"
+                                    inspection.inspection_status || "Not Set"
                                 }</td>
                                 <td>
                                     <button class="btn btn-primary" onclick="viewInspectionDetails(${
@@ -1194,6 +1195,9 @@ function viewDeviceInspection(deviceId) {
             `;
         });
 
+    // Set the device ID in the hidden input field
+    document.getElementById("inspect_device_id").value = deviceId;
+
     // Show the modal
     $("#viewInspectionModal").modal("show");
 }
@@ -1203,17 +1207,31 @@ function viewInspectionDetails(inspectionId) {
     // Add your view inspection details logic here
 }
 
+console.log("User ID:", user_id);
+
 function addInspection() {
+    const deviceId = document.getElementById("inspect_device_id").value;
+
+    // Set the user ID in the hidden input field
+    document.getElementById("inspect_user_id").value = user_id;
+
+    console.log(`Adding inspection for device ID: ${deviceId}`);
+
     // Close the view inspection modal
     $("#viewInspectionModal").modal("hide");
 
-    // Clear the form before showing the modal
-    document.getElementById("addInspectionForm").reset();
-    document
-        .getElementById("addInspectionForm")
-        .classList.remove("was-validated");
+    // Clear the form and reset validation classes
+    const addInspectionForm = document.getElementById("addInspectionForm");
+    addInspectionForm.reset();
+    addInspectionForm.classList.remove("was-validated");
 
-    // Show the modal
+    // Add the device ID to the hidden input field
+    const deviceIdInput = document.getElementById("add_inspection_device_id");
+    deviceIdInput.value = deviceId;
+
+    console.log(`Device ID set in form: ${deviceIdInput.value}`);
+
+    // Show the add inspection modal
     $("#addInspectionModal").modal("show");
 }
 

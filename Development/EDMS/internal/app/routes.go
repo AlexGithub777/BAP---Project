@@ -58,6 +58,7 @@ func (a *App) initRoutes() {
 	// Inspection management routes - Alex
 	admin.GET("/api/inspection", a.HandleGetAllInspectionsByDeviceID)
 	admin.GET("/api/inspection/:id", a.HandleGetInspectionByID)
+	admin.POST("/api/inspection", a.HandlePostInspection)
 
 	// User management routes - Alex
 	admin.GET("/api/user", a.HandleGetAllUsers)
