@@ -1172,10 +1172,6 @@ function viewDeviceInspection(deviceId) {
                             badgeClass = "badge text-bg-success";
                         } else if (inspection.inspection_status === "Failed") {
                             badgeClass = "badge text-bg-danger";
-                        } else if (
-                            inspection.inspection_status === "In Progress"
-                        ) {
-                            badgeClass = "badge text-bg-warning";
                         }
 
                         return `
@@ -1251,10 +1247,6 @@ function viewInspectionDetails(inspectionId) {
                 case "Failed":
                     statusBadge.classList.add("bg-danger");
                     statusBadge.innerText = "Failed";
-                    break;
-                case "In Progress":
-                    statusBadge.classList.add("bg-warning");
-                    statusBadge.innerText = "In Progress";
                     break;
                 default:
                     statusBadge.classList.add("bg-secondary");

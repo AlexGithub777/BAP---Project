@@ -93,7 +93,7 @@ CREATE TABLE Emergency_Device_InspectionT (
     IsReplaced BOOLEAN NULL,
     AreMaintenanceRecordsComplete BOOLEAN NULL,
     WorkOrderRequired BOOLEAN NULL,
-    InspectionStatus VARCHAR(20) NOT NULL DEFAULT 'In Progress',
+    InspectionStatus VARCHAR(20) NOT NULL,
     Notes VARCHAR(255) NULL,
     FOREIGN KEY (EmergencyDeviceID) REFERENCES Emergency_DeviceT(EmergencyDeviceID)
         ON UPDATE CASCADE  -- If an EmergencyDeviceID changes, update it in Emergency_Device_InspectionT

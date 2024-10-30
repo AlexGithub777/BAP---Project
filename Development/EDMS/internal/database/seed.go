@@ -250,7 +250,7 @@ func SeedData(db *sql.DB) {
 	INSERT INTO Emergency_Device_InspectionT
 		(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES
-		(3, 1, '2024-01-01', '2024-01-01', true, NULL, true, NULL, true, NULL, NULL, true, true, NULL, true, true, 'In Progress', 'No notes')`)
+		(3, 1, '2024-01-01', '2024-01-01', true, NULL, true, NULL, true, NULL, NULL, true, true, NULL, true, true, 'Failed', 'No notes')`)
 	if err != nil {
 		log.Fatal(err)
 	}
