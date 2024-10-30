@@ -9,8 +9,109 @@ import (
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
+	_ "github.com/lib/pq" // Import the PostgreSQL driver
 	"golang.org/x/crypto/bcrypt"
 )
+
+func createTriggerAndFunctionIfNotExists(db *sql.DB) error {
+	triggerName := "trg_update_device_status"                   // Trigger name
+	triggerFunctionName := "update_device_status_on_inspection" // Function name
+
+	// Check if the trigger function exists
+	functionExistsQuery := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM pg_proc
+			WHERE proname = $1
+		)
+	`
+
+	var functionExists bool
+	err := db.QueryRow(functionExistsQuery, triggerFunctionName).Scan(&functionExists)
+	if err != nil {
+		return err
+	}
+
+	// Create the trigger function if it does not exist
+	if !functionExists {
+		createFunctionSQL := `
+		CREATE OR REPLACE FUNCTION update_device_status_on_inspection() 
+		RETURNS TRIGGER AS $$
+		DECLARE
+			current_last_inspection_date DATE;
+		BEGIN
+			-- Retrieve the current last inspection date for the device
+			SELECT LastInspectionDate INTO current_last_inspection_date
+			FROM Emergency_DeviceT
+			WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
+		
+			-- Check if the new inspection date is more recent than the current last inspection date
+			IF current_last_inspection_date IS NULL OR NEW.InspectionDate > current_last_inspection_date THEN
+				-- Update the last inspection date and status in Emergency_DeviceT
+				UPDATE Emergency_DeviceT
+				SET 
+					LastInspectionDate = NEW.InspectionDate,
+					Status = CASE 
+								WHEN NEW.InspectionStatus = 'Failed' THEN 'Inspection Failed'
+								WHEN NEW.InspectionStatus = 'Passed' THEN 'Active'
+								ELSE Status
+							 END
+				WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
+		
+				RAISE NOTICE 'Device % status updated. Last inspection date set to %.', 
+					NEW.EmergencyDeviceID, NEW.InspectionDate;
+			ELSE
+				RAISE NOTICE 'New inspection date % is not more recent than the current last inspection date % for device %. No update performed.', 
+					NEW.InspectionDate, current_last_inspection_date, NEW.EmergencyDeviceID;
+			END IF;
+		
+			RETURN NEW;
+		END;
+		$$ LANGUAGE plpgsql;
+		`
+		_, err = db.Exec(createFunctionSQL)
+		if err != nil {
+			return err
+		}
+		log.Println("Trigger function created:", triggerFunctionName)
+	} else {
+		log.Println("Trigger function already exists:", triggerFunctionName)
+	}
+
+	// Check if the trigger exists
+	triggerExistsQuery := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM pg_trigger
+			WHERE tgname = $1
+		)
+	`
+
+	var triggerExists bool
+	err = db.QueryRow(triggerExistsQuery, triggerName).Scan(&triggerExists)
+	if err != nil {
+		return err
+	}
+
+	// Create the trigger if it does not exist
+	if !triggerExists {
+		createTriggerSQL := `
+			CREATE TRIGGER trg_update_device_status
+			AFTER INSERT ON Emergency_Device_InspectionT
+			FOR EACH ROW
+			EXECUTE FUNCTION update_device_status_on_inspection();
+		`
+		_, err = db.Exec(createTriggerSQL)
+		if err != nil {
+			return err
+		}
+		log.Println("Trigger created:", triggerName)
+	} else {
+		log.Println("Trigger already exists:", triggerName)
+	}
+
+	return nil
+}
 
 func SeedData(db *sql.DB) {
 	// Get admin password from .env
@@ -160,10 +261,10 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "B1",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00002"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDate:      sql.NullTime{Valid: false},
+			LastInspectionDate:      sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			Description:             sql.NullString{Valid: true, String: "Test Fire Extinguisher 2"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
-			Status:                  sql.NullString{Valid: true, String: "Expired"},
+			Status:                  sql.NullString{Valid: true, String: "Inspection Failed"},
 		},
 		{
 			EmergencyDeviceTypeName: "Fire Extinguisher",
@@ -261,6 +362,12 @@ func SeedData(db *sql.DB) {
 		log.Fatal(err)
 	}
 	tempFile.Close()
+
+	// Create trigger and function if they don't exist
+	err = createTriggerAndFunctionIfNotExists(db)
+	if err != nil {
+		log.Fatalf("Failed to create trigger or function: %v", err)
+	}
 
 	log.Println("Seeding complete.")
 }
