@@ -6,6 +6,7 @@ import "database/sql"
 type Inspection struct {
 	EmergencyDeviceInspectionID   int            `json:"emergency_device_inspection_id"`
 	EmergencyDeviceID             int            `json:"emergency_device_id"`
+	SerialNumber                  string         `json:"serial_number"`
 	UserID                        int            `json:"user_id"`
 	InspectorName                 string         `json:"inspector_name"`
 	InspectionDate                sql.NullTime   `json:"inspection_date"`
@@ -18,7 +19,7 @@ type Inspection struct {
 	IsSupportBracketSecure        sql.NullBool   `json:"is_support_bracket_secure"`
 	AreOperatingInstructionsClear sql.NullBool   `json:"are_operating_instructions_clear"`
 	IsMaintenanceTagAttached      sql.NullBool   `json:"is_maintenance_tag_attached"`
-	IsExternalDamagePresent       sql.NullBool   `json:"is_external_damage_present"`
+	IsNoExternalDamage            sql.NullBool   `json:"is_no_external_damage"`
 	IsChargeGaugeNormal           sql.NullBool   `json:"is_charge_gauge_normal"`
 	IsReplaced                    sql.NullBool   `json:"is_replaced"`
 	AreMaintenanceRecordsComplete sql.NullBool   `json:"are_maintenance_records_complete"`

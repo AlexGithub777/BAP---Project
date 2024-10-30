@@ -88,7 +88,7 @@ CREATE TABLE Emergency_Device_InspectionT (
     IsSupportBracketSecure BOOLEAN NULL,
     AreOperatingInstructionsClear BOOLEAN NULL,
     IsMaintenanceTagAttached BOOLEAN NULL,
-    IsExternalDamagePresent BOOLEAN NULL,
+    IsNoExternalDamage BOOLEAN NULL,
     IsChargeGaugeNormal BOOLEAN NULL,
     IsReplaced BOOLEAN NULL,
     AreMaintenanceRecordsComplete BOOLEAN NULL,

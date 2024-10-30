@@ -13,6 +13,18 @@
             </div>
             <div class="modal-body">
                 <form class="form-control" id="viewInspectionForm">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="inspectionStatus"
+                                    >Inspection Status</label
+                                >
+                                <div>
+                                    <span id="ViewInspectionStatus"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label for="device_id" class="form-label m-0 p-0"
                             >Inspector Username:</label
@@ -183,14 +195,14 @@
                                 <input
                                     type="checkbox"
                                     class="form-check-input"
-                                    id="ViewIsExternalDamagePresent"
-                                    name="isExternalDamagePresent"
+                                    id="ViewIsNoExternalDamage"
+                                    name="IsNoExternalDamage"
                                     disabled
                                 />
                                 <label
                                     class="form-check-label"
-                                    for="ViewIsExternalDamagePresent"
-                                    >Is External Damage Present</label
+                                    for="ViewIsNoExternalDamage"
+                                    >Is No External Damage</label
                                 >
                             </div>
                             <div class="form-check mb-2">
@@ -234,18 +246,6 @@
                                     for="ViewAreMaintenanceRecordsComplete"
                                     >Are Maintenance Records Complete</label
                                 >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="form-group">
-                                <label for="inspectionStatus"
-                                    >Inspection Status</label
-                                >
-                                <div>
-                                    <span id="ViewInspectionStatus"></span>
-                                </div>
                             </div>
                         </div>
                     </div>

@@ -230,7 +230,7 @@ func SeedData(db *sql.DB) {
 	// Insert Inspections
 	_, err = db.Exec(`
 		INSERT INTO Emergency_Device_InspectionT
-			(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+			(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 		VALUES
 			(1, 1, '2024-01-01', '2024-01-01', true, true, true, true, true, true, true, true, true, true, true, true, 'Passed', 'No notes')`)
 	if err != nil {
@@ -239,7 +239,7 @@ func SeedData(db *sql.DB) {
 
 	_, err = db.Exec(`
 		INSERT INTO Emergency_Device_InspectionT
-			(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+			(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 		VALUES
 			(2, 1, '2024-01-01', '2024-01-01', true, true, true, true, true, true, true, true, true, true, true, true, 'Failed', 'No notes')`)
 	if err != nil {
@@ -248,7 +248,7 @@ func SeedData(db *sql.DB) {
 
 	_, err = db.Exec(`
 	INSERT INTO Emergency_Device_InspectionT
-		(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsExternalDamagePresent, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+		(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES
 		(3, 1, '2024-01-01', '2024-01-01', true, NULL, true, NULL, true, NULL, NULL, true, true, NULL, true, true, 'Failed', 'No notes')`)
 	if err != nil {

@@ -1282,13 +1282,14 @@ func (db *DB) DeleteEmergencyDevice(deviceID int) error {
 
 func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, error) {
 	query := `
-	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, edi.userid, u.username, edi.inspectiondate, edi.createdat,
+	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, ed.serialnumber, edi.userid, u.username, edi.inspectiondate, edi.createdat,
 		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
 		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
-		   edi.IsExternalDamagePresent, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
+		   edi.isNoExternalDamage, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
 		   edi.InspectionStatus, edi.Notes
 	FROM emergency_device_inspectionT edi
 	JOIN userT u ON edi.userid = u.userid
+	JOIN emergency_deviceT ed ON edi.emergencydeviceid = ed.emergencydeviceid
 	WHERE edi.emergencydeviceid = $1
 	ORDER BY edi.inspectiondate DESC
 	`
@@ -1307,6 +1308,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 		err := rows.Scan(
 			&inspection.EmergencyDeviceInspectionID,
 			&inspection.EmergencyDeviceID,
+			&inspection.SerialNumber,
 			&inspection.UserID,
 			&inspection.InspectorName, // Scans the `username` field into `InspectorName`
 			&inspection.InspectionDate,
@@ -1319,7 +1321,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 			&inspection.IsSupportBracketSecure,
 			&inspection.AreOperatingInstructionsClear,
 			&inspection.IsMaintenanceTagAttached,
-			&inspection.IsExternalDamagePresent,
+			&inspection.IsNoExternalDamage,
 			&inspection.IsChargeGaugeNormal,
 			&inspection.IsReplaced,
 			&inspection.AreMaintenanceRecordsComplete,
@@ -1339,13 +1341,14 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 
 func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 	query := `
-	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, edi.userid, u.username, edi.inspectiondate, edi.createdat,
+	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, ed.serialnumber, edi.userid, u.username, edi.inspectiondate, edi.createdat,
 		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
 		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
-		   edi.IsExternalDamagePresent, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
+		   edi.isNoExternalDamage, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
 		   edi.InspectionStatus, edi.Notes
 	FROM emergency_device_inspectionT edi
 	JOIN userT u ON edi.userid = u.userid
+	JOIN emergency_deviceT ed ON edi.emergencydeviceid = ed.emergencydeviceid
 	WHERE edi.emergencydeviceinspectionid = $1
 	`
 
@@ -1353,6 +1356,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 	err := db.QueryRow(query, inspectionID).Scan(
 		&inspection.EmergencyDeviceInspectionID,
 		&inspection.EmergencyDeviceID,
+		&inspection.SerialNumber,
 		&inspection.UserID,
 		&inspection.InspectorName, // Scans the `username` field into `InspectorName`
 		&inspection.InspectionDate,
@@ -1365,7 +1369,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 		&inspection.IsSupportBracketSecure,
 		&inspection.AreOperatingInstructionsClear,
 		&inspection.IsMaintenanceTagAttached,
-		&inspection.IsExternalDamagePresent,
+		&inspection.IsNoExternalDamage,
 		&inspection.IsChargeGaugeNormal,
 		&inspection.IsReplaced,
 		&inspection.AreMaintenanceRecordsComplete,
@@ -1384,7 +1388,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 func (db *DB) AddInspection(inspection *models.Inspection) error {
 
 	query := `
-	INSERT INTO emergency_device_inspectionT (emergencydeviceid, userid, inspectiondate, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsExternalDamagePresent, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+	INSERT INTO emergency_device_inspectionT (emergencydeviceid, userid, inspectiondate, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 	`
 	insertStmt, err := db.Prepare(query)
@@ -1406,7 +1410,7 @@ func (db *DB) AddInspection(inspection *models.Inspection) error {
 		inspection.IsSupportBracketSecure.Bool,
 		inspection.AreOperatingInstructionsClear.Bool,
 		inspection.IsMaintenanceTagAttached.Bool,
-		inspection.IsExternalDamagePresent.Bool,
+		inspection.IsNoExternalDamage.Bool,
 		inspection.IsChargeGaugeNormal.Bool,
 		inspection.IsReplaced.Bool,
 		inspection.AreMaintenanceRecordsComplete.Bool,

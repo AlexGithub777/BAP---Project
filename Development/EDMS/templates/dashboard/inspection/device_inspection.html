@@ -6,7 +6,9 @@
             <div
                 class="modal-header d-flex justify-content-between align-items-center"
             >
-                <h4 class="modal-title">Inspection List</h4>
+                <h4 id="inspectionModalTitle" class="modal-title">
+                    Inspection List
+                </h4>
                 <button
                     type="button"
                     class="btn btn-success"
@@ -16,7 +18,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="inspect_device_id" name="device_id" value="" />
+                <input
+                    type="hidden"
+                    id="inspect_device_id"
+                    name="device_id"
+                    value=""
+                />
                 <table class="table table-striped table-hover overflow-scroll">
                     <thead class="table-primary">
                         <tr>

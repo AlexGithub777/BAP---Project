@@ -510,7 +510,11 @@ function getBadgeClass(status) {
         case "Active":
             return "text-bg-success";
         case "Expired":
+            return "text-bg-warning";
+        case "Inspection Failed":
             return "text-bg-danger";
+        case "Inactive":
+            return "text-bg-secondary";
         default:
             return "text-bg-warning";
     }
@@ -526,7 +530,7 @@ function getActionButtons(device) {
 
         if (isFireExtinguisher) {
             buttons += `
-                <button class="btn btn-secondary" onclick="viewDeviceInspection(${device.emergency_device_id})">Inspect</button>`;
+                <button class="btn btn-secondary" onclick="viewDeviceInspections(${device.emergency_device_id})">Inspect</button>`;
         }
 
         buttons += `
@@ -1132,7 +1136,7 @@ function deleteDevice(deviceId) {
     // Add your delete logic here
 }
 
-function viewDeviceInspection(deviceId) {
+function viewDeviceInspections(deviceId) {
     console.log(`Inspect device with ID: ${deviceId}`);
 
     // Clear the inspection table
@@ -1195,6 +1199,18 @@ function viewDeviceInspection(deviceId) {
                     })
                     .join("");
             }
+            // log the data to the console
+            console.log(data);
+
+            if (data) {
+                // Set the modal title with the device serial number
+                document.getElementById("inspectionModalTitle").innerText =
+                    `Extinguisher Inspections - Serial Number: ${data[0].serial_number}` ||
+                    "Unknown";
+            } else {
+                document.getElementById("inspectionModalTitle").innerText =
+                    "Extinguisher Inspections";
+            }
         })
         .catch((error) => {
             console.error("Error fetching inspection data:", error);
@@ -1224,14 +1240,30 @@ function viewInspectionDetails(inspectionId) {
             // Populate the modal with the inspection details
             document.getElementById("inspector_username").innerText =
                 data.inspector_name || "Unknown";
+            // Options for formatting date and date-time
+            const dateOptions = {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            };
+
+            const dateTimeOptions = {
+                ...dateOptions,
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true,
+            };
+
+            // Update inspection date display
             document.getElementById("ViewInspectionDateInput").innerText = data
                 .inspection_date.Valid
-                ? new Date(data.inspection_date.Time).toLocaleString()
+                ? formatDate(data.inspection_date.Time, dateOptions)
                 : "No Date Available";
 
+            // Update created at date display
             document.getElementById("ViewInspectionCreatedAt").innerText = data
                 .created_at.Valid
-                ? new Date(data.created_at.Time).toLocaleString()
+                ? formatDate(data.created_at.Time, dateTimeOptions)
                 : "No Date Available";
 
             // Create badge for the inspection status
@@ -1289,9 +1321,9 @@ function viewInspectionDetails(inspectionId) {
             document.getElementById("ViewIsMaintenanceTagAttached").checked =
                 data.is_maintenance_tag_attached.Bool &&
                 data.is_maintenance_tag_attached.Valid;
-            document.getElementById("ViewIsExternalDamagePresent").checked =
-                data.is_external_damage_present.Bool &&
-                data.is_external_damage_present.Valid;
+            document.getElementById("ViewIsNoExternalDamage").checked =
+                data.is_no_external_damage.Bool &&
+                data.is_no_external_damage.Valid;
             document.getElementById("ViewIsChargeGaugeNormal").checked =
                 data.is_charge_gauge_normal.Bool &&
                 data.is_charge_gauge_normal.Valid;
@@ -1329,6 +1361,14 @@ function addInspection() {
     addInspectionForm.reset();
     addInspectionForm.classList.remove("was-validated");
 
+    // Clear the feedback messages
+    const feedbackElements =
+        addInspectionForm.querySelectorAll(".invalid-feedback");
+
+    feedbackElements.forEach((element) => {
+        element.textContent = "";
+    });
+
     // Add the device ID to the hidden input field
     const deviceIdInput = document.getElementById("add_inspection_device_id");
     deviceIdInput.value = deviceId;
@@ -1340,19 +1380,105 @@ function addInspection() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Select the add inspection button and form
+    // Select form elements
     const addInspectionButton = document.querySelector("#addInspectionBtn");
     const addInspectionForm = document.querySelector("#addInspectionForm");
     const inspectionDateInput = document.querySelector("#InspectionDateInput");
+    const inspectionStatus = document.querySelector("#inspectionStatus");
     const inspectionDateFeedback = document.getElementById(
         "inspectionDateFeedback"
     );
+    const inspectionStatusFeedback = inspectionStatus.nextElementSibling;
 
     // Ensure the elements are found
-    if (!addInspectionButton || !addInspectionForm || !inspectionDateInput) {
+    if (
+        !addInspectionButton ||
+        !addInspectionForm ||
+        !inspectionDateInput ||
+        !inspectionStatus
+    ) {
         console.error("Required elements not found in the DOM.");
         return;
     }
+
+    // Get all checkboxes except workOrderRequired and isReplaced
+    const checkboxes = Array.from(
+        addInspectionForm.querySelectorAll('input[type="checkbox"]')
+    ).filter(
+        (checkbox) => !["workOrderRequired", "isReplaced"].includes(checkbox.id)
+    );
+
+    // Function to validate checkboxes based on inspection status
+    function validateInspectionStatus() {
+        const allChecked = checkboxes.every((checkbox) => checkbox.checked);
+
+        if (inspectionStatus.value === "Passed" && !allChecked) {
+            inspectionStatus.setCustomValidity(
+                "All inspection criteria must be met to mark as Passed"
+            );
+            inspectionStatusFeedback.textContent =
+                "All inspection criteria must be met to mark as Passed";
+            return false;
+        } else if (!inspectionStatus.value) {
+            inspectionStatus.setCustomValidity(
+                "Please select an inspection status"
+            );
+            inspectionStatusFeedback.textContent =
+                "Please select an inspection status";
+            return false;
+        } else {
+            inspectionStatus.setCustomValidity("");
+            inspectionStatusFeedback.textContent = "";
+            return true;
+        }
+    }
+
+    // Add event listener to inspection status dropdown
+    inspectionStatus.addEventListener("change", function () {
+        validateInspectionStatus();
+        // Show validation message immediately on change
+        if (addInspectionForm.classList.contains("was-validated")) {
+            inspectionStatusFeedback.style.display = this.validationMessage
+                ? "block"
+                : "none";
+            inspectionStatusFeedback.textContent = this.validationMessage || "";
+        }
+    });
+
+    // Add change event listeners to all checkboxes
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+            if (inspectionStatus.value === "Passed") {
+                validateInspectionStatus();
+                // Update status feedback if form is already validated
+                if (addInspectionForm.classList.contains("was-validated")) {
+                    inspectionStatusFeedback.style.display =
+                        inspectionStatus.validationMessage ? "block" : "none";
+                    inspectionStatusFeedback.textContent =
+                        inspectionStatus.validationMessage;
+                }
+            }
+        });
+    });
+
+    // Event listener for inspection date input change
+    inspectionDateInput.addEventListener("input", function () {
+        const currentDate = new Date().toISOString().split("T")[0];
+
+        if (
+            inspectionDateInput.value &&
+            inspectionDateInput.value <= currentDate
+        ) {
+            inspectionDateInput.setCustomValidity(""); // Clear the custom validity
+            inspectionDateFeedback.textContent = ""; // Clear feedback message
+        } else if (inspectionDateInput.value > currentDate) {
+            inspectionDateInput.setCustomValidity(
+                "Inspection date cannot be in the future"
+            );
+            inspectionDateFeedback.textContent =
+                "Inspection date cannot be in the future";
+        }
+    });
 
     // Add event listener to the add inspection button
     addInspectionButton.addEventListener("click", function (event) {
@@ -1372,29 +1498,39 @@ document.addEventListener("DOMContentLoaded", function () {
                 inspectionDateInput.setCustomValidity(""); // Clear any previous validity message
                 inspectionDateFeedback.textContent = ""; // Clear feedback message
             }
+        } else {
+            inspectionDateInput.setCustomValidity(
+                "Please provide an inspection date"
+            );
+            inspectionDateFeedback.textContent =
+                "Please provide an inspection date";
         }
+
+        // Validate inspection status
+        validateInspectionStatus();
+
+        // Add was-validated class before checking validity
+        addInspectionForm.classList.add("was-validated");
 
         // Validate the form before submission
         if (!addInspectionForm.checkValidity()) {
             event.stopPropagation();
+
+            // Show custom error messages for invalid fields
+            if (inspectionStatus.validationMessage) {
+                inspectionStatusFeedback.style.display = "block";
+                inspectionStatusFeedback.textContent =
+                    inspectionStatus.validationMessage;
+            }
+
+            if (inspectionDateInput.validationMessage) {
+                inspectionDateFeedback.style.display = "block";
+                inspectionDateFeedback.textContent =
+                    inspectionDateInput.validationMessage;
+            }
         } else {
             // If the form is valid, submit it
             addInspectionForm.submit();
-        }
-
-        addInspectionForm.classList.add("was-validated");
-    });
-
-    // Event listener for inspection date input change
-    inspectionDateInput.addEventListener("input", function () {
-        const currentDate = new Date().toISOString().split("T")[0];
-
-        if (
-            inspectionDateInput.value &&
-            inspectionDateInput.value <= currentDate
-        ) {
-            inspectionDateInput.setCustomValidity(""); // Clear the custom validity
-            inspectionDateFeedback.textContent = ""; // Clear feedback message
         }
     });
 });
