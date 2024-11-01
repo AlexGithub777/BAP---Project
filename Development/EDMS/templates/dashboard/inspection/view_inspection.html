@@ -1,5 +1,5 @@
 <div id="viewInspectionDetailsModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
@@ -14,8 +14,8 @@
             <div class="modal-body">
                 <form class="form-control" id="viewInspectionForm">
                     <div class="row mb-3">
-                        <div class="col-12">
-                            <div class="form-group">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
                                 <label for="inspectionStatus"
                                     >Inspection Status</label
                                 >
@@ -23,43 +23,53 @@
                                     <span id="ViewInspectionStatus"></span>
                                 </div>
                             </div>
+                            <div class="form-group mb-3">
+                                <label
+                                    for="inspector_username"
+                                    class="form-label m-0 p-0"
+                                    >Inspector Username</label
+                                ><br />
+                                <label
+                                    type="text"
+                                    id="inspector_username"
+                                    name="user_id"
+                                    class="m-0 p-0"
+                                />
+                            </div>
+                            <div class="mb-3">
+                                <label for="notes" class="form-label"
+                                    >Notes</label
+                                >
+                                <textarea
+                                    class="form-control"
+                                    id="viewNotes"
+                                    name="notes"
+                                    rows="3"
+                                    readonly
+                                ></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="serial_number" class="form-label"
+                                    >Serial Number</label
+                                ><br />
+                                <span id="ViewdeviceSerialNumber"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ViewInspectionDateInput form-label"
+                                    >Inspection Date</label
+                                ><br />
+                                <span id="ViewInspectionDateInput"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ViewInspectionCreatedAt form-label"
+                                    >Inspection Created</label
+                                ><br />
+                                <span id="ViewInspectionCreatedAt"></span>
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="device_id" class="form-label m-0 p-0"
-                            >Inspector Username:</label
-                        ><br />
-                        <label
-                            type="text"
-                            id="inspector_username"
-                            name="user_id"
-                            class="m-0 p-0"
-                        />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="ViewInspectionDateInput form-label"
-                            >Inspection Date:</label
-                        ><br />
-                        <span id="ViewInspectionDateInput"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="ViewInspectionCreatedAt form-label"
-                            >Inspection Created:</label
-                        ><br />
-                        <span id="ViewInspectionCreatedAt"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="notes" class="form-label">Notes</label>
-                        <textarea
-                            class="form-control"
-                            id="viewNotes"
-                            name="notes"
-                            rows="3"
-                            readonly
-                        ></textarea>
-                    </div>
-
                     <h4 class="mt-4 mb-3">Inspection Checklist</h4>
                     <div class="row">
                         <div class="col-md-6">
@@ -147,20 +157,6 @@
                                     >Is Support Bracket Secure</label
                                 >
                             </div>
-                            <div class="form-check mb-2">
-                                <input
-                                    type="checkbox"
-                                    class="form-check-input"
-                                    id="ViewWorkOrderRequired"
-                                    name="workOrderRequired"
-                                    disabled
-                                />
-                                <label
-                                    class="form-check-label"
-                                    for="ViewWorkOrderRequired"
-                                    >Work Order Required</label
-                                >
-                            </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-check mb-2">
@@ -223,20 +219,6 @@
                                 <input
                                     type="checkbox"
                                     class="form-check-input"
-                                    id="ViewIsReplaced"
-                                    name="isReplaced"
-                                    disabled
-                                />
-                                <label
-                                    class="form-check-label"
-                                    for="ViewIsReplaced"
-                                    >Is Replaced</label
-                                >
-                            </div>
-                            <div class="form-check mb-2">
-                                <input
-                                    type="checkbox"
-                                    class="form-check-input"
                                     id="ViewAreMaintenanceRecordsComplete"
                                     name="areMaintenanceRecordsComplete"
                                     disabled
@@ -245,6 +227,44 @@
                                     class="form-check-label"
                                     for="ViewAreMaintenanceRecordsComplete"
                                     >Are Maintenance Records Complete</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <hr
+                            class="my-3"
+                            style="margin-left: 12px; width: calc(100% - 24px)"
+                        />
+                        <div class="col-md-6 col-12">
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewWorkOrderRequired"
+                                    name="workOrderRequired"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewWorkOrderRequired"
+                                    >Work Order Required</label
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="ViewIsReplaced"
+                                    name="isReplaced"
+                                    disabled
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="ViewIsReplaced"
+                                    >Is Replaced</label
                                 >
                             </div>
                         </div>

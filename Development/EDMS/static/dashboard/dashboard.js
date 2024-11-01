@@ -1293,8 +1293,9 @@ function viewInspectionDetails(inspectionId) {
             statusContainer.appendChild(statusBadge); // Append the badge
 
             document.getElementById("viewNotes").innerText =
-                data.notes.String || "No Notes Available";
-
+                data.notes.String || "";
+            document.getElementById("ViewdeviceSerialNumber").innerText =
+                data.serial_number || "Unknown";
             // Check checkboxes based on boolean values
             document.getElementById("ViewIsConspicuous").checked =
                 data.is_conspicuous.Bool && data.is_conspicuous.Valid;

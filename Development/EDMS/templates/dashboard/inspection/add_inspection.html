@@ -1,5 +1,5 @@
 <div id="addInspectionModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
@@ -53,7 +53,6 @@
                             rows="3"
                         ></textarea>
                     </div>
-
                     <h4 class="mt-4 mb-3">Inspection Checklist</h4>
                     <div class="row">
                         <div class="col-md-6">
@@ -135,19 +134,6 @@
                                     >Is Support Bracket Secure</label
                                 >
                             </div>
-                            <div class="form-check mb-2">
-                                <input
-                                    type="checkbox"
-                                    class="form-check-input"
-                                    id="workOrderRequired"
-                                    name="workOrderRequired"
-                                />
-                                <label
-                                    class="form-check-label"
-                                    for="workOrderRequired"
-                                    >Work Order Required</label
-                                >
-                            </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-check mb-2">
@@ -206,17 +192,6 @@
                                 <input
                                     type="checkbox"
                                     class="form-check-input"
-                                    id="isReplaced"
-                                    name="isReplaced"
-                                />
-                                <label class="form-check-label" for="isReplaced"
-                                    >Is Replaced</label
-                                >
-                            </div>
-                            <div class="form-check mb-2">
-                                <input
-                                    type="checkbox"
-                                    class="form-check-input"
                                     id="areMaintenanceRecordsComplete"
                                     name="areMaintenanceRecordsComplete"
                                 />
@@ -224,6 +199,40 @@
                                     class="form-check-label"
                                     for="areMaintenanceRecordsComplete"
                                     >Are Maintenance Records Complete</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <hr
+                            class="my-3"
+                            style="margin-left: 12px; width: calc(100% - 24px)"
+                        />
+                        <div class="col-md-6 col-12">
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="workOrderRequired"
+                                    name="workOrderRequired"
+                                />
+                                <label
+                                    class="form-check-label"
+                                    for="workOrderRequired"
+                                    >Work Order Required</label
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="isReplaced"
+                                    name="isReplaced"
+                                />
+                                <label class="form-check-label" for="isReplaced"
+                                    >Is Replaced</label
                                 >
                             </div>
                         </div>
