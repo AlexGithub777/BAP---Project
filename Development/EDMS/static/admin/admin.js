@@ -82,16 +82,6 @@ $(document).ready(function () {
             reader.readAsDataURL(file);
         }
     );
-
-    // Debugging: Log when the edit modal is opened
-    $("#editSiteModal").on("shown.bs.modal", function () {
-        console.log("Edit site modal opened");
-        console.log(
-            "File input element:",
-            $("#editSiteModal #editSiteImgInput")[0]
-        );
-        5;
-    });
 });
 
 console.log(is_current_user_default_admin);
@@ -834,6 +824,12 @@ function editSite(siteId) {
     // Show the modal
 
     $("#editSiteModal").modal("show");
+}
+
+function addSite() {
+    // Clear the form before showing it
+    document.getElementById("addSiteForm").reset();
+    document.getElementById("addSiteForm").classList.remove("was-validated");
 }
 
 (function () {

@@ -230,14 +230,28 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 	var args []interface{}
 
 	// Check if the building exists
-	buildingExistsQuery := `
-	SELECT EXISTS (
-		SELECT 1 FROM buildingT b WHERE b.buildingcode = $1
-	)`
-	var exists bool
+	var buildingExists bool
+	var siteExists bool
 
+	// Check if the building exists (if building code is provided)
 	if buildingCode != "" {
-		err := db.QueryRow(buildingExistsQuery, buildingCode).Scan(&exists)
+		buildingExistsQuery := `
+		SELECT EXISTS (
+			SELECT 1 FROM buildingT b WHERE b.buildingcode = $1
+		)`
+		err := db.QueryRow(buildingExistsQuery, buildingCode).Scan(&buildingExists)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Check if the site exists (if site ID is provided)
+	if siteId != "" {
+		siteExistsQuery := `
+		SELECT EXISTS (
+			SELECT 1 FROM siteT s WHERE s.siteid = $1
+		)`
+		err := db.QueryRow(siteExistsQuery, siteId).Scan(&siteExists)
 		if err != nil {
 			return nil, err
 		}
@@ -314,7 +328,7 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 			return nil, err
 		}
 
-		// If any of the following fields are null, replace them with a default value
+		// Handle null fields (same as before)
 		if !device.ExtinguisherTypeName.Valid {
 			device.ExtinguisherTypeName.String = "N/A"
 			device.ExtinguisherTypeName.Valid = false
@@ -336,7 +350,7 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 			device.Status.Valid = false
 		}
 
-		// Handle dates and calculate expiry and next inspection dates
+		// Handle dates (same as before)
 		if device.ManufactureDate.Valid {
 			expiryDate := device.ManufactureDate.Time.AddDate(5, 0, 0)
 			device.ExpireDate = sql.NullTime{
@@ -345,11 +359,11 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 			}
 		} else {
 			device.ManufactureDate = sql.NullTime{
-				Time:  time.Time{}, // Zero value of time.Time
+				Time:  time.Time{},
 				Valid: false,
 			}
 			device.ExpireDate = sql.NullTime{
-				Time:  time.Time{}, // Zero value of time.Time
+				Time:  time.Time{},
 				Valid: false,
 			}
 		}
@@ -370,8 +384,11 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 		emergencyDevices = append(emergencyDevices, device)
 	}
 
-	// If the building exists but no devices were found, return an empty slice
-	if exists && len(emergencyDevices) == 0 {
+	// Return empty slice if:
+	// 1. Building exists but no devices found
+	// 2. Site exists but no devices found
+	if (buildingExists && len(emergencyDevices) == 0) ||
+		(siteExists && len(emergencyDevices) == 0) {
 		return []models.EmergencyDevice{}, nil
 	}
 
