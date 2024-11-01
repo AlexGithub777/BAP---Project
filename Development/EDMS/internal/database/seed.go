@@ -282,7 +282,7 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "A1",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00001"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC)},
 			Description:             sql.NullString{Valid: true, String: "Test Fire Extinguisher 1"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
 			Status:                  sql.NullString{Valid: true, String: "Active"},
@@ -293,7 +293,7 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "B1",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00002"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC)},
 			Description:             sql.NullString{Valid: true, String: "Test Fire Extinguisher 2"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
 			Status:                  sql.NullString{Valid: true, String: "Inspection Failed"},
@@ -304,10 +304,10 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "A1",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00003"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDateTime:  sql.NullTime{Valid: false},
+			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 07, 1, 0, 0, 0, 0, time.UTC)},
 			Description:             sql.NullString{Valid: true, String: "Test Fire Extinguisher 3"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
-			Status:                  sql.NullString{Valid: true, String: "Active"},
+			Status:                  sql.NullString{Valid: true, String: "Inspection Due"},
 		},
 		{
 			EmergencyDeviceTypeName: "Fire Extinguisher",
@@ -315,7 +315,7 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "Main Room",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00004"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			LastInspectionDateTime:  sql.NullTime{Valid: false},
 			Description:             sql.NullString{Valid: true, String: "Hastings Main Room Fire Extinguisher"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
 			Status:                  sql.NullString{Valid: true, String: "Inactive"},
@@ -366,8 +366,8 @@ func SeedData(db *sql.DB) {
 	(EmergencyDeviceID, UserID, InspectionDateTime, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES
 	(1, 1, 
-	 '2024-01-01 13:00:00+13'::timestamptz, 
-	 '2024-01-01 13:00:00+13'::timestamptz, 
+	 '2024-09-01 13:00:00+13'::timestamptz, 
+	 '2024-09-01 13:00:00+13'::timestamptz, 
 	 true, true, true, true, true, true, true, true, true, true ,NULL, true, NULL, 'Passed', 'Passed good as new')`)
 	if err != nil {
 		log.Fatal(err)
@@ -378,8 +378,8 @@ func SeedData(db *sql.DB) {
 	(EmergencyDeviceID, UserID, InspectionDateTime, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES
 	(2, 1, 
-	 '2024-01-01 14:30:00+13'::timestamptz, 
-	 '2024-01-01 14:30:00+13'::timestamptz, 
+	 '2024-10-01 14:30:00+13'::timestamptz, 
+	 '2024-10-01 14:30:00+13'::timestamptz, 
 	 true, true, true, true, true, true, NULL, true, NULL, true ,NULL, true, NULL, 'Failed', 'No notes')`)
 	if err != nil {
 		log.Fatal(err)
@@ -390,8 +390,8 @@ func SeedData(db *sql.DB) {
 	(EmergencyDeviceID, UserID, InspectionDateTime, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal , IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES
 	(3, 1, 
-	 '2024-01-01 15:45:00+13'::timestamptz, 
-	 '2024-01-01 15:45:00+13'::timestamptz, 
+	 '2024-07-01 15:45:00+13'::timestamptz, 
+	 '2024-07-01 15:45:00+13'::timestamptz, 
 	 true, true, true, true, true, true, true, true, true, true ,true, true, true, 'Passed', 'Passed and replaced')`)
 	if err != nil {
 		log.Fatal(err)

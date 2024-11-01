@@ -821,6 +821,78 @@ function editDevice(deviceId) {
                     // Check and update visibility of extinguisher fields
                     updateExtinguisherFields();
 
+                    // Check if status is "Inspection Failed" or "Inspection Due" and disable the dropdown
+                    if (
+                        data.status.String === "Inspection Failed" ||
+                        data.status.String === "Inspection Due"
+                    ) {
+                        document.getElementById(
+                            "editStatusInput"
+                        ).disabled = true;
+
+                        // Create and add the "Inspection Failed" option if needed
+                        if (data.status.String === "Inspection Failed") {
+                            var option = document.createElement("option");
+                            option.text = "Inspection Failed";
+                            option.value = "Inspection Failed";
+                            document
+                                .getElementById("editStatusInput")
+                                .add(option);
+                            // Set the value of the dropdown to "Inspection Failed"
+                            document.getElementById("editStatusInput").value =
+                                "Inspection Failed";
+                        }
+
+                        // Create and add the "Inspection Due" option if needed
+                        if (data.status.String === "Inspection Due") {
+                            var option = document.createElement("option");
+                            option.text = "Inspection Due";
+                            option.value = "Inspection Due";
+                            document
+                                .getElementById("editStatusInput")
+                                .add(option);
+                            // Set the value of the dropdown to "Inspection Due"
+                            document.getElementById("editStatusInput").value =
+                                "Inspection Due";
+                        }
+                    } else {
+                        // If the status is not "Inspection Failed" or "Inspection Due", enable the dropdown
+                        document.getElementById(
+                            "editStatusInput"
+                        ).disabled = false;
+                    }
+
+                    // Now remove options that are not needed based on current status
+                    if (data.status.String !== "Inspection Failed") {
+                        // Remove the option from the dropdown where value = "Inspection Failed"
+                        let statusInput =
+                            document.getElementById("editStatusInput");
+                        for (let i = 0; i < statusInput.options.length; i++) {
+                            if (
+                                statusInput.options[i].value ===
+                                "Inspection Failed"
+                            ) {
+                                statusInput.remove(i);
+                                break; // Exit loop after removing the option
+                            }
+                        }
+                    }
+
+                    if (data.status.String !== "Inspection Due") {
+                        // Remove the option from the dropdown where value = "Inspection Due"
+                        let statusInput =
+                            document.getElementById("editStatusInput");
+                        for (let i = 0; i < statusInput.options.length; i++) {
+                            if (
+                                statusInput.options[i].value ===
+                                "Inspection Due"
+                            ) {
+                                statusInput.remove(i);
+                                break; // Exit loop after removing the option
+                            }
+                        }
+                    }
+
                     // Now that the data is populated, show the modal
                     $("#editDeviceModal").modal("show");
                 });
@@ -1076,6 +1148,10 @@ document.addEventListener("DOMContentLoaded", function () {
             event.stopPropagation();
             editDeviceForm.classList.add("was-validated");
         } else {
+            // Inside the form submission logic
+            if (document.getElementById("editStatusInput").disabled) {
+                document.getElementById("editStatusInput").disabled = false; // Temporarily enable
+            }
             // If the form is valid, prepare to send the PUT request
             const formData = new FormData(editDeviceForm);
             const jsonData = {};
