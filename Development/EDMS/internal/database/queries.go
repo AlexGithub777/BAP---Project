@@ -225,10 +225,23 @@ func (db *DB) GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-// Refactor/add new function to GetAllDevices by Site
 func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.EmergencyDevice, error) {
 	var query string
 	var args []interface{}
+
+	// Check if the building exists
+	buildingExistsQuery := `
+	SELECT EXISTS (
+		SELECT 1 FROM buildingT b WHERE b.buildingcode = $1
+	)`
+	var exists bool
+
+	if buildingCode != "" {
+		err := db.QueryRow(buildingExistsQuery, buildingCode).Scan(&exists)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	// Define the base query
 	query = `
@@ -258,7 +271,6 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 		`
 		args = append(args, siteId, buildingCode)
 	} else if siteId != "" {
-		// Add filtering by site name if provided
 		query += `
 		JOIN buildingT b ON r.buildingid = b.buildingid
 		JOIN siteT s ON b.siteid = s.siteid
@@ -266,7 +278,6 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 		`
 		args = append(args, siteId)
 	} else if buildingCode != "" {
-		// Add filtering by building code if provided
 		query += `
 		JOIN buildingT b ON r.buildingid = b.buildingid
 		WHERE b.buildingcode = $1
@@ -357,6 +368,11 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 		}
 
 		emergencyDevices = append(emergencyDevices, device)
+	}
+
+	// If the building exists but no devices were found, return an empty slice
+	if exists && len(emergencyDevices) == 0 {
+		return []models.EmergencyDevice{}, nil
 	}
 
 	return emergencyDevices, nil

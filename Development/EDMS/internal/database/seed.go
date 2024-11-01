@@ -167,7 +167,7 @@ func SeedData(db *sql.DB) {
 		log.Fatal(err)
 	}
 
-	// Insert Buildings
+	// Insert Buildings - A, B, Main
 	err = db.QueryRow(`
 			INSERT INTO BuildingT (SiteID, BuildingCode)
 			VALUES ($1, 'A') RETURNING BuildingID`, siteID).Scan(&buildingIDA)
@@ -183,6 +183,45 @@ func SeedData(db *sql.DB) {
 	err = db.QueryRow(`
 			INSERT INTO BuildingT (SiteID, BuildingCode)
 			VALUES ($1, 'Main') RETURNING BuildingID`, hastingsSiteID).Scan(&hastingsBuildingID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Insert Rest of Taradale Buildings
+	_, err = db.Exec(`
+	INSERT INTO buildingT (siteID, buildingCode)
+	VALUES
+		(1, 'O'),
+		(1, 'T'),
+		(1, 'R'),
+		(1, 'E2'),
+		(1, 'E'),
+		(1, 'E1'),
+		(1, 'D'),
+		(1, 'P1'),
+		(1, 'P'),
+		(1, 'N1'),
+		(1, 'N2'),
+		(1, 'N'),
+		(1, 'M'),
+		(1, 'F1'),
+		(1, 'F'),
+		(1, 'C'),
+		(1, 'L'),
+		(1, 'L1'),
+		(1, 'K1'),
+		(1, 'K'),
+		(1, 'J'),
+		(1, 'G'),
+		(1, 'G1'),
+		(1, 'G2'),
+		(1, 'I'),
+		(1, 'I1'),
+		(1, 'H'),
+		(1, 'Q'),
+		(1, 'S'),
+		(1, 'J1');
+	`)
 	if err != nil {
 		log.Fatal(err)
 	}

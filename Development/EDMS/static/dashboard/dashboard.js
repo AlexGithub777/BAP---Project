@@ -47,7 +47,8 @@ function renderBuildings(data, svgDimensions, minCoordinates) {
         ]).addTo(map);
 
         rectangle.on("click", () => {
-            getAllDevices(building.name, "1");
+            filterByBuilding(building.name);
+            filterByRoom();
             console.log("Building clicked:", building.name);
         });
     });
@@ -70,6 +71,17 @@ function getFilterOptions() {
         null,
         "All Device Types"
     );
+}
+
+function clearFilters() {
+    // Reset each filter dropdown to its first option (except site filter)
+    document.getElementById("buildingFilter").selectedIndex = 0;
+    document.getElementById("roomFilter").selectedIndex = 0;
+    document.getElementById("deviceTypeFilter").selectedIndex = 0;
+    document.getElementById("statusFilter").selectedIndex = 0;
+
+    clearTableBody();
+    getAllDevices();
 }
 
 function fetchAndPopulateSelect(
@@ -113,30 +125,16 @@ function addDefaultOption(select, text) {
 }
 
 function setupBuildingFilter() {
-    document.getElementById("siteFilter").addEventListener("change", () => {
-        const selectedSite = document.getElementById("siteFilter").value;
-        fetchAndPopulateSelect(
-            `/api/building?siteId=${selectedSite}`,
-            "buildingFilter",
-            "building_code",
-            "building_id",
-            "All Buildings"
-        );
+    document.getElementById("buildingFilter").addEventListener("change", () => {
+        filterByBuilding();
         clearRoomFilter();
+        clearTableBody();
     });
 }
 
 function setupRoomFilter() {
     document.getElementById("buildingFilter").addEventListener("change", () => {
-        const selectedBuilding =
-            document.getElementById("buildingFilter").value;
-        fetchAndPopulateSelect(
-            `/api/room?buildingId=${selectedBuilding}`,
-            "roomFilter",
-            "room_code",
-            null,
-            "All Rooms"
-        );
+        filterByRoom();
     });
 }
 
@@ -146,10 +144,32 @@ function clearRoomFilter() {
     addDefaultOption(roomSelect, "All Rooms");
 }
 
+function clearBuildingFilter() {
+    const buildingSelect = document.getElementById("buildingFilter");
+    buildingSelect.innerHTML = "";
+    addDefaultOption(buildingSelect, "All Buildings");
+}
+
 function filterBySite() {
-    const siteName =
+    var siteName =
         document.getElementById("siteFilter").selectedOptions[0].text;
-    const siteId = document.getElementById("siteFilter").value;
+
+    console.log("Filtering by site:", siteName);
+    var siteId = document.getElementById("siteFilter").value;
+
+    if (siteId !== "All Sites") {
+        fetchAndPopulateSelect(
+            `/api/building?siteId=${siteId}`,
+            "buildingFilter",
+            "building_code",
+            "building_id",
+            "All Buildings"
+        );
+
+        clearRoomFilter();
+    }
+
+    console.log("Selected site ID:", siteId);
 
     // Clear the table body
     clearTableBody();
@@ -180,6 +200,50 @@ function filterBySite() {
     getAllDevices("", siteId);
     clearRoomFilter();
     updateMapForSite(siteId);
+}
+
+function filterByBuilding(buildingCode) {
+    const buildingFilter = document.getElementById("buildingFilter");
+    var siteId;
+
+    if (buildingCode) {
+        siteId = "1";
+        // Loop through `buildingFilter` options to select the one with matching text
+        for (const option of buildingFilter.options) {
+            if (option.text === buildingCode) {
+                option.selected = true;
+                break;
+            }
+        }
+    } else {
+        // If `buildingCode` is not provided, use the selected dropdown value
+        buildingCode = buildingFilter.selectedOptions[0].text;
+        siteId = document.getElementById("siteFilter").value;
+    }
+
+    // Fetch devices based on `buildingCode` and `siteId`
+    if (buildingCode === "All Buildings" || buildingFilter.value === "") {
+        getAllDevices("", siteId);
+    } else {
+        console.log("Fetching devices for building:", buildingCode);
+        console.log("Site ID:", siteId);
+        getAllDevices(buildingCode, siteId);
+    }
+}
+
+function filterByRoom() {
+    const selectedBuilding = document.getElementById("buildingFilter").value;
+
+    if (selectedBuilding != "All Buildings") {
+        fetchAndPopulateSelect(
+            `/api/room?buildingId=${selectedBuilding}`,
+            "roomFilter",
+            "room_code",
+            "room_id",
+            "All Rooms"
+        );
+        return;
+    }
 }
 
 function clearTableBody() {
@@ -250,6 +314,7 @@ function showMap() {
 // Update the event listener to include table clearing
 document.getElementById("siteFilter").addEventListener("change", () => {
     filterBySite();
+    clearBuildingFilter();
     clearTableBody();
 });
 
@@ -275,14 +340,23 @@ async function getAllDevices(buildingCode = "", siteId = "") {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        allDevices = await response.json();
+        if (response.ok) {
+            allDevices = await response.json();
 
-        updateTable();
+            updateTable();
+        }
+
+        if (allDevices.length === 0) {
+            const tbody = document.getElementById("emergency-device-body");
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
+            }
+        }
     } catch (err) {
         console.error("Failed to fetch devices:", err);
         const tbody = document.getElementById("emergency-device-body");
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="11" class="text-center">Error fetching devices. Please try again.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" class="text-center">Error.</td></tr>`;
         }
     }
 }
