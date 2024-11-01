@@ -442,6 +442,7 @@ function formatDeviceRow(device) {
             year: "numeric",
             month: "long",
             day: "numeric",
+            timeZone: "Pacific/Auckland",
         });
 
     const badgeClass = getBadgeClass(device.status.String);
@@ -474,7 +475,7 @@ function formatDeviceRow(device) {
             ${
                 isAdmin
                     ? `<td data-label="Last Inspection Date">${formatDateFull(
-                          device.last_inspection_date.Time
+                          device.last_inspection_datetime.Time
                       )}</td>`
                     : ""
             }
@@ -502,7 +503,10 @@ function formatDate(dateString, options) {
     if (!dateString || dateString === "0001-01-01T00:00:00Z") {
         return "N/A";
     }
-    return new Date(dateString).toLocaleDateString("en-NZ", options);
+    return new Date(dateString).toLocaleString("en-NZ", {
+        timeZone: "Pacific/Auckland", // Ensure the correct timezone
+        ...options,
+    });
 }
 
 function getBadgeClass(status) {
@@ -637,20 +641,10 @@ function editDevice(deviceId) {
                 .querySelector(".editExtinguisherTypeInputDiv")
                 .classList.add("d-none");
             document.querySelector("#editExtinguisherTypeInput").value = ""; // Clear selected value
-            document
-                .querySelector(".editLastInspectionDateInputDiv")
-                .classList.add("d-none");
-            document.querySelector("#editLastInspectionDateInput").value = ""; // Clear selected value
         } else {
             // Show extinguisher-specific fields and set default
             document
                 .querySelector(".editExtinguisherTypeInputDiv")
-                .classList.remove("d-none");
-            document.querySelector(
-                "#editExtinguisherTypeInput"
-            ).selectedIndex = 0; // Set to "Select Extinguisher Type"
-            document
-                .querySelector(".editLastInspectionDateInputDiv")
                 .classList.remove("d-none");
         }
     }
@@ -725,6 +719,7 @@ function editDevice(deviceId) {
                     ).value = data.emergency_device_type_id;
                     document.getElementById("editExtinguisherTypeInput").value =
                         data.extinguisher_type_id.Int64;
+                    console.log(data.extinguisher_type_id.Int64);
                     document.getElementById("editSerialNumberInput").value =
                         data.serial_number.String;
                     document.getElementById("editManufactureDateInput").value =
@@ -735,9 +730,6 @@ function editDevice(deviceId) {
                         data.description.String;
                     document.getElementById("editSiteInput").value =
                         data.site_id;
-                    document.getElementById(
-                        "editLastInspectionDateInput"
-                    ).value = data.last_inspection_date.Time.split("T")[0];
                     document.getElementById("editStatusInput").value =
                         data.status.String;
 
@@ -844,15 +836,11 @@ function validateDates() {
     const manufactureDateInputs = document.querySelectorAll(
         ".manufactureDateInput"
     );
-    const lastInspectionDateInputs = document.querySelectorAll(
-        ".lastInspectionDateInput"
-    );
     const deviceTypeInputs = document.querySelectorAll(
         ".emergencyDeviceTypeInput"
     );
 
     manufactureDateInputs.forEach((manufactureDate, index) => {
-        const lastInspectionDate = lastInspectionDateInputs[index];
         const deviceTypeSelect = deviceTypeInputs[index];
         const isFireExtinguisher =
             deviceTypeSelect.options[deviceTypeSelect.selectedIndex]
@@ -873,59 +861,8 @@ function validateDates() {
                 index
             ].textContent = "";
         }
-
-        // Only validate last inspection date if it's a Fire Extinguisher
-        if (isFireExtinguisher && lastInspectionDate) {
-            if (
-                lastInspectionDate.value &&
-                lastInspectionDate.value > currentDate
-            ) {
-                lastInspectionDate.setCustomValidity(
-                    "Last inspection date cannot be in the future"
-                );
-                document.querySelectorAll(".lastInspectionDateFeedback")[
-                    index
-                ].textContent = "Last inspection date cannot be in the future";
-                isValid = false;
-            } else if (
-                lastInspectionDate.value &&
-                lastInspectionDate.value === manufactureDate.value
-            ) {
-                lastInspectionDate.setCustomValidity(
-                    "Last inspection date cannot be the same as manufacture date"
-                );
-                document.querySelectorAll(".lastInspectionDateFeedback")[
-                    index
-                ].textContent =
-                    "Last inspection date cannot be the same as manufacture date";
-                isValid = false;
-            } else if (
-                lastInspectionDate.value &&
-                manufactureDate.value &&
-                lastInspectionDate.value < manufactureDate.value
-            ) {
-                lastInspectionDate.setCustomValidity(
-                    "Last inspection date cannot be before manufacture date"
-                );
-                document.querySelectorAll(".lastInspectionDateFeedback")[
-                    index
-                ].textContent =
-                    "Last inspection date cannot be before manufacture date";
-                isValid = false;
-            } else {
-                lastInspectionDate.setCustomValidity("");
-                document.querySelectorAll(".lastInspectionDateFeedback")[
-                    index
-                ].textContent = "";
-            }
-        } else if (lastInspectionDate) {
-            // Clear validation for non-Fire Extinguisher devices
-            lastInspectionDate.setCustomValidity("");
-            document.querySelectorAll(".lastInspectionDateFeedback")[
-                index
-            ].textContent = "";
-        }
     });
+
     return isValid;
 }
 
@@ -958,24 +895,10 @@ function handleDeviceTypeChange(event) {
                 .querySelector(`.${prefix}ExtinguisherTypeInputDiv`)
                 .classList.add("d-none");
         }
-
-        // Clear and hide last inspection date
-        const lastInspectionDateInput = document.querySelector(
-            `#${prefix}LastInspectionDateInput`
-        );
-        if (lastInspectionDateInput) {
-            lastInspectionDateInput.value = "";
-            document
-                .querySelector(`.${prefix}LastInspectionDateInputDiv`)
-                .classList.add("d-none");
-        }
     } else {
         // Show fields for Fire Extinguisher
         document
             .querySelector(`.${prefix}ExtinguisherTypeInputDiv`)
-            .classList.remove("d-none");
-        document
-            .querySelector(`.${prefix}LastInspectionDateInputDiv`)
             .classList.remove("d-none");
     }
 
@@ -994,19 +917,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const description = document.querySelector(".descriptionInput");
     const manufactureDate = document.querySelector(".manufactureDateInput");
-    const lastInspectionDate = document.querySelector(
-        ".lastInspectionDateInput"
-    );
     const editDescriptionInput = document.querySelector(
         "#editDescriptionInput"
     );
     const editManufactureDateInput = document.querySelector(
         "#editManufactureDateInput"
     );
-    const editLastInspectionDateInput = document.querySelector(
-        "#editLastInspectionDateInput"
-    );
-
     // Validate edit description length
     editDescriptionInput.addEventListener("input", function () {
         validateLength(this, 255);
@@ -1014,9 +930,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Validate edit manufacture date
     editManufactureDateInput.addEventListener("change", validateDates);
-
-    // Validate edit last inspection date
-    editLastInspectionDateInput.addEventListener("change", validateDates);
 
     // Validate description length
     description.addEventListener("input", function () {
@@ -1036,7 +949,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add event listeners for date validation
     manufactureDate.addEventListener("change", validateDates);
-    lastInspectionDate.addEventListener("change", validateDates);
 
     // Add event listener to the add device button
     addDeviceButton.addEventListener("click", function (event) {
@@ -1160,9 +1072,10 @@ function viewDeviceInspections(deviceId) {
             } else {
                 inspectionTable.innerHTML = data
                     .map((inspection) => {
-                        const formattedDate = inspection.inspection_date.Valid
+                        const formattedDate = inspection.inspection_datetime
+                            .Valid
                             ? new Date(
-                                  inspection.inspection_date.Time
+                                  inspection.inspection_datetime.Time
                               ).toLocaleDateString("en-NZ", {
                                   day: "numeric",
                                   month: "long",
@@ -1207,6 +1120,10 @@ function viewDeviceInspections(deviceId) {
                 document.getElementById("inspectionModalTitle").innerText =
                     `Extinguisher Inspections - Serial Number: ${data[0].serial_number}` ||
                     "Unknown";
+                // Set the add inspection modal title with the device serial number
+                document.getElementById("addInspectionModalTitle").innerText =
+                    `Add Inspection - Serial Number: ${data[0].serial_number}` ||
+                    "Add Inspection";
             } else {
                 document.getElementById("inspectionModalTitle").innerText =
                     "Extinguisher Inspections";
@@ -1230,21 +1147,20 @@ function viewDeviceInspections(deviceId) {
 
 function viewInspectionDetails(inspectionId) {
     console.log(`View inspection details for inspection ID: ${inspectionId}`);
-    // Close the view inspection modal
     $("#viewInspectionModal").modal("hide");
 
-    // Fetch the inspection details
     fetch(`/api/inspection/${inspectionId}`)
         .then((response) => response.json())
         .then((data) => {
-            // Populate the modal with the inspection details
             document.getElementById("inspector_username").innerText =
                 data.inspector_name || "Unknown";
-            // Options for formatting date and date-time
+
+            // Options for date and date-time formatting
             const dateOptions = {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
+                timeZone: "Pacific/Auckland", // Ensure correct timezone here as well
             };
 
             const dateTimeOptions = {
@@ -1252,25 +1168,25 @@ function viewInspectionDetails(inspectionId) {
                 hour: "numeric",
                 minute: "numeric",
                 hour12: true,
+                timeZone: "Pacific/Auckland",
             };
 
-            // Update inspection date display
-            document.getElementById("ViewInspectionDateInput").innerText = data
-                .inspection_date.Valid
-                ? formatDate(data.inspection_date.Time, dateOptions)
-                : "No Date Available";
+            // Format and display inspection date
+            document.getElementById("ViewInspectionDateTimeInput").innerText =
+                data.inspection_datetime.Valid
+                    ? formatDate(data.inspection_datetime.Time, dateTimeOptions)
+                    : "No Date Available";
 
-            // Update created at date display
+            // Format and display created date
             document.getElementById("ViewInspectionCreatedAt").innerText = data
                 .created_at.Valid
                 ? formatDate(data.created_at.Time, dateTimeOptions)
                 : "No Date Available";
 
-            // Create badge for the inspection status
+            // Create badge for inspection status
             const statusBadge = document.createElement("span");
             statusBadge.className = "badge";
 
-            // Set badge color based on status
             switch (data.inspection_status) {
                 case "Passed":
                     statusBadge.classList.add("bg-success");
@@ -1285,18 +1201,18 @@ function viewInspectionDetails(inspectionId) {
                     statusBadge.innerText = "Not Set";
             }
 
-            // Clear previous status display and append the new badge
             const statusContainer = document.getElementById(
                 "ViewInspectionStatus"
             );
-            statusContainer.innerHTML = ""; // Clear existing content
-            statusContainer.appendChild(statusBadge); // Append the badge
+            statusContainer.innerHTML = "";
+            statusContainer.appendChild(statusBadge);
 
             document.getElementById("viewNotes").innerText =
                 data.notes.String || "";
             document.getElementById("ViewdeviceSerialNumber").innerText =
                 data.serial_number || "Unknown";
-            // Check checkboxes based on boolean values
+
+            // Populate checkboxes
             document.getElementById("ViewIsConspicuous").checked =
                 data.is_conspicuous.Bool && data.is_conspicuous.Valid;
             document.getElementById("ViewIsAccessible").checked =
@@ -1384,7 +1300,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Select form elements
     const addInspectionButton = document.querySelector("#addInspectionBtn");
     const addInspectionForm = document.querySelector("#addInspectionForm");
-    const inspectionDateInput = document.querySelector("#InspectionDateInput");
+    const inspectionDateTimeInput = document.querySelector(
+        "#InspectionDateTimeInput"
+    );
     const inspectionStatus = document.querySelector("#inspectionStatus");
     const inspectionDateFeedback = document.getElementById(
         "inspectionDateFeedback"
@@ -1395,7 +1313,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (
         !addInspectionButton ||
         !addInspectionForm ||
-        !inspectionDateInput ||
+        !inspectionDateTimeInput ||
         !inspectionStatus
     ) {
         console.error("Required elements not found in the DOM.");
@@ -1463,21 +1381,37 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Event listener for inspection date input change
-    inspectionDateInput.addEventListener("input", function () {
-        const currentDate = new Date().toISOString().split("T")[0];
+    inspectionDateTimeInput.addEventListener("input", function () {
+        // Get the current local date and time
+        const currentDateTime = new Date(); // Current date and time in local time
+        console.log(
+            "Current Local Date and Time:",
+            currentDateTime.toISOString()
+        );
+        console.log("Input Date and Time:", inspectionDateTimeInput.value);
 
-        if (
-            inspectionDateInput.value &&
-            inspectionDateInput.value <= currentDate
-        ) {
-            inspectionDateInput.setCustomValidity(""); // Clear the custom validity
-            inspectionDateFeedback.textContent = ""; // Clear feedback message
-        } else if (inspectionDateInput.value > currentDate) {
-            inspectionDateInput.setCustomValidity(
-                "Inspection date cannot be in the future"
+        // Create a Date object from the input value
+        const inputDateTime = new Date(inspectionDateTimeInput.value);
+
+        // Check if the input date and time is valid
+        if (inputDateTime) {
+            // Check if the inspection date and time is in the future
+            if (inputDateTime > currentDateTime) {
+                inspectionDateTimeInput.setCustomValidity(
+                    "Inspection date and time cannot be in the future"
+                );
+                inspectionDateFeedback.textContent =
+                    "Inspection date and time cannot be in the future";
+            } else {
+                inspectionDateTimeInput.setCustomValidity(""); // Clear any previous validity message
+                inspectionDateFeedback.textContent = ""; // Clear feedback message
+            }
+        } else {
+            inspectionDateTimeInput.setCustomValidity(
+                "Please provide a valid inspection date and time"
             );
             inspectionDateFeedback.textContent =
-                "Inspection date cannot be in the future";
+                "Please provide a valid inspection date and time";
         }
     });
 
@@ -1485,26 +1419,36 @@ document.addEventListener("DOMContentLoaded", function () {
     addInspectionButton.addEventListener("click", function (event) {
         event.preventDefault(); // Prevent default form submission
 
-        // Check if inspection date is provided
-        if (inspectionDateInput.value) {
-            const currentDate = new Date().toISOString().split("T")[0];
-            // Check if the inspection date is in the future
-            if (inspectionDateInput.value > currentDate) {
-                inspectionDateInput.setCustomValidity(
-                    "Inspection date cannot be in the future"
+        // Check if inspection date and time are provided
+        if (inspectionDateTimeInput.value) {
+            // Get the current local date and time
+            const currentDateTime = new Date(); // Current date and time in local time
+            console.log(
+                "Current Local Date and Time:",
+                currentDateTime.toISOString()
+            );
+            console.log("Input Date and Time:", inspectionDateTimeInput.value);
+
+            // Create a Date object from the input value
+            const inputDateTime = new Date(inspectionDateTimeInput.value);
+
+            // Check if the inspection date and time is in the future
+            if (inputDateTime > currentDateTime) {
+                inspectionDateTimeInput.setCustomValidity(
+                    "Inspection date and time cannot be in the future"
                 );
                 inspectionDateFeedback.textContent =
-                    "Inspection date cannot be in the future";
+                    "Inspection date and time cannot be in the future";
             } else {
-                inspectionDateInput.setCustomValidity(""); // Clear any previous validity message
+                inspectionDateTimeInput.setCustomValidity(""); // Clear any previous validity message
                 inspectionDateFeedback.textContent = ""; // Clear feedback message
             }
         } else {
-            inspectionDateInput.setCustomValidity(
-                "Please provide an inspection date"
+            inspectionDateTimeInput.setCustomValidity(
+                "Please provide an inspection date and time"
             );
             inspectionDateFeedback.textContent =
-                "Please provide an inspection date";
+                "Please provide an inspection date and time";
         }
 
         // Validate inspection status
@@ -1524,10 +1468,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     inspectionStatus.validationMessage;
             }
 
-            if (inspectionDateInput.validationMessage) {
+            if (inspectionDateTimeInput.validationMessage) {
                 inspectionDateFeedback.style.display = "block";
                 inspectionDateFeedback.textContent =
-                    inspectionDateInput.validationMessage;
+                    inspectionDateTimeInput.validationMessage;
             }
         } else {
             // If the form is valid, submit it
@@ -1602,7 +1546,7 @@ async function searchDevices() {
         if (role === "Admin") {
             // Format the dates for searching
             const lastInspectionFormatted = new Date(
-                device.last_inspection_date.Time
+                device.last_inspection_datetime.Time
             )
                 .toLocaleDateString("en-NZ", {
                     day: "numeric",

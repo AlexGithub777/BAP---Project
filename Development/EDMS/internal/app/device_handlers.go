@@ -68,7 +68,6 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 	extinguisherTypeIDStr := c.FormValue("extinguisher_type")
 	serialNumber := c.FormValue("serial_number")
 	manufactureDateStr := c.FormValue("manufacture_date")
-	lastInspectionDateStr := c.FormValue("last_inspection_date")
 	size := c.FormValue("size")
 	description := c.FormValue("description")
 	status := c.FormValue("status")
@@ -77,13 +76,12 @@ func (a *App) HandlePostDevice(c echo.Context) error {
 	a.handleLogger("extinguisher_type_id: " + extinguisherTypeIDStr)
 	a.handleLogger("serial_number: " + serialNumber)
 	a.handleLogger("manufacture_date: " + manufactureDateStr)
-	a.handleLogger("last_inspection_date: " + lastInspectionDateStr)
 	a.handleLogger("size: " + size)
 	a.handleLogger("description: " + description)
 	a.handleLogger("status: " + status)
 
 	// Validate input
-	emergencyDevice, err := validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, lastInspectionDateStr, size, description, status)
+	emergencyDevice, err := validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, size, description, status)
 	if err != nil {
 		a.handleLogger("Error validating device: " + err.Error())
 		// Redirect to dashboard with error message
@@ -137,13 +135,12 @@ func (a *App) HandlePutDevice(c echo.Context) error {
 	a.handleLogger("Extinguisher Type: " + device.ExtinguisherTypeID)
 	a.handleLogger("Serial Number: " + device.SerialNumber)
 	a.handleLogger("Manufacture Date: " + device.ManufactureDate)
-	a.handleLogger("Last Inspection Date: " + device.LastInspectionDate)
 	a.handleLogger("Size: " + device.Size)
 	a.handleLogger("Description: " + device.Description)
 	a.handleLogger("Status: " + device.Status)
 
 	// Validate input
-	emergencyDevice, err := validateDevice(device.RoomID, device.EmergencyDeviceTypeID, device.ExtinguisherTypeID, device.SerialNumber, device.ManufactureDate, device.LastInspectionDate, device.Size, device.Description, device.Status)
+	emergencyDevice, err := validateDevice(device.RoomID, device.EmergencyDeviceTypeID, device.ExtinguisherTypeID, device.SerialNumber, device.ManufactureDate, device.Size, device.Description, device.Status)
 	if err != nil {
 		a.handleLogger("Error validating device: " + err.Error())
 		// Redirect to dashboard with error message
@@ -166,25 +163,22 @@ func (a *App) HandlePutDevice(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"message": "Device updated successfully", "redirectURL": "/dashboard?message=Device updated successfully"})
 }
 
-func validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, lastInspectionDateStr, size, description, status string) (*models.EmergencyDevice, error) {
+func validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, serialNumber, manufactureDateStr, size, description, status string) (*models.EmergencyDevice, error) {
 	const (
-		ErrDeviceTypeRequired          string = "device type is required"
-		ErrRoomRequired                string = "room is required"
-		ErrInvalidRoomID               string = "invalid room ID"
-		ErrInvalidEmergencyDeviceID    string = "invalid emergency device type ID"
-		ErrInvalidExtinguisherTypeID   string = "invalid extinguisher type ID"
-		ErrRoomDoesNotExist            string = "room does not exist"
-		ErrDeviceTypeDoesNotExist      string = "emergency Device Type does not exist"
-		ErrExtinguisherTypeNotExist    string = "extinguisher Type does not exist"
-		ErrInvalidManufactureDate      string = "invalid manufacture date format"
-		ErrManufactureDateInFuture     string = "manufacture date cannot be in the future"
-		ErrInvalidInspectionDate       string = "invalid last inspection date format"
-		ErrInspectionDateInFuture      string = "last inspection date cannot be in the future"
-		ErrInspectionBeforeManufacture string = "last inspection date cannot be before manufacture date"
-		ErrSerialNumberTooLong         string = "serial number is too long, maximum 50 characters"
-		ErrDescriptionTooLong          string = "description is too long, maximum 255 characters"
-		ErrSizeTooLong                 string = "size is too long, maximum 50 characters"
-		ErrStatusTooLong               string = "status is too long, maximum 50 characters"
+		ErrDeviceTypeRequired        string = "device type is required"
+		ErrRoomRequired              string = "room is required"
+		ErrInvalidRoomID             string = "invalid room ID"
+		ErrInvalidEmergencyDeviceID  string = "invalid emergency device type ID"
+		ErrInvalidExtinguisherTypeID string = "invalid extinguisher type ID"
+		ErrRoomDoesNotExist          string = "room does not exist"
+		ErrDeviceTypeDoesNotExist    string = "emergency Device Type does not exist"
+		ErrExtinguisherTypeNotExist  string = "extinguisher Type does not exist"
+		ErrInvalidManufactureDate    string = "invalid manufacture date format"
+		ErrManufactureDateInFuture   string = "manufacture date cannot be in the future"
+		ErrSerialNumberTooLong       string = "serial number is too long, maximum 50 characters"
+		ErrDescriptionTooLong        string = "description is too long, maximum 255 characters"
+		ErrSizeTooLong               string = "size is too long, maximum 50 characters"
+		ErrStatusTooLong             string = "status is too long, maximum 50 characters"
 	)
 
 	var device models.EmergencyDevice
@@ -227,19 +221,6 @@ func validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, 
 		return &device, errors.New(ErrManufactureDateInFuture)
 	}
 
-	lastInspectionDate, err := parseDate(lastInspectionDateStr)
-	if err != nil {
-		return &device, errors.New(ErrInvalidInspectionDate)
-	}
-
-	if lastInspectionDate.Valid && lastInspectionDate.Time.After(time.Now()) {
-		return &device, errors.New(ErrInspectionDateInFuture)
-	}
-
-	if lastInspectionDate.Valid && manufactureDate.Valid && lastInspectionDate.Time.Before(manufactureDate.Time) {
-		return &device, errors.New(ErrInspectionBeforeManufacture)
-	}
-
 	if len(serialNumber) > 50 {
 		return &device, errors.New(ErrSerialNumberTooLong)
 	}
@@ -266,7 +247,6 @@ func validateDevice(roomIDStr, emergencyDeviceTypeIDStr, extinguisherTypeIDStr, 
 	device.EmergencyDeviceTypeID = emergencyDeviceTypeID
 	device.ExtinguisherTypeID = extinguisherTypeID
 	device.ManufactureDate = manufactureDate
-	device.LastInspectionDate = lastInspectionDate
 
 	return &device, nil
 }

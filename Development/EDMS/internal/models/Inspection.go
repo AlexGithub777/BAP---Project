@@ -9,7 +9,7 @@ type Inspection struct {
 	SerialNumber                  string         `json:"serial_number"`
 	UserID                        int            `json:"user_id"`
 	InspectorName                 string         `json:"inspector_name"`
-	InspectionDate                sql.NullTime   `json:"inspection_date"`
+	InspectionDateTime            sql.NullTime   `json:"inspection_datetime"`
 	CreatedAt                     sql.NullTime   `json:"created_at"`
 	IsConspicuous                 sql.NullBool   `json:"is_conspicuous"`
 	IsAccessible                  sql.NullBool   `json:"is_accessible"`

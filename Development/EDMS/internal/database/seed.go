@@ -38,33 +38,26 @@ func createTriggerAndFunctionIfNotExists(db *sql.DB) error {
 		CREATE OR REPLACE FUNCTION update_device_status_on_inspection() 
 		RETURNS TRIGGER AS $$
 		DECLARE
-			current_last_inspection_date DATE;
+			current_last_inspection_timestamp TIMESTAMP;
 		BEGIN
-			-- Retrieve the current last inspection date for the device
-			SELECT LastInspectionDate INTO current_last_inspection_date
+			-- Retrieve the current last inspection timestamp for the device
+			SELECT LastInspectionDateTime INTO current_last_inspection_timestamp
 			FROM Emergency_DeviceT
 			WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
-		
-			-- Check if the new inspection date is more recent than the current last inspection date
-			IF current_last_inspection_date IS NULL OR NEW.InspectionDate > current_last_inspection_date THEN
-				-- Update the last inspection date and status in Emergency_DeviceT
+
+			-- Check if the new inspection timestamp is more recent than the current last inspection timestamp
+			IF current_last_inspection_timestamp IS NULL OR NEW.InspectionDateTime > current_last_inspection_timestamp THEN
+				-- Update LastInspectionDateTime with the new inspection timestamp
 				UPDATE Emergency_DeviceT
-				SET 
-					LastInspectionDate = NEW.InspectionDate,
-					Status = CASE 
+				SET LastInspectionDateTime = NEW.InspectionDateTime,
+				Status = CASE 
 								WHEN NEW.InspectionStatus = 'Failed' THEN 'Inspection Failed'
 								WHEN NEW.InspectionStatus = 'Passed' THEN 'Active'
 								ELSE Status
 							 END
 				WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
-		
-				RAISE NOTICE 'Device % status updated. Last inspection date set to %.', 
-					NEW.EmergencyDeviceID, NEW.InspectionDate;
-			ELSE
-				RAISE NOTICE 'New inspection date % is not more recent than the current last inspection date % for device %. No update performed.', 
-					NEW.InspectionDate, current_last_inspection_date, NEW.EmergencyDeviceID;
 			END IF;
-		
+
 			RETURN NEW;
 		END;
 		$$ LANGUAGE plpgsql;
@@ -250,7 +243,7 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "A1",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00001"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDate:      sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			Description:             sql.NullString{Valid: true, String: "Test Fire Extinguisher 1"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
 			Status:                  sql.NullString{Valid: true, String: "Active"},
@@ -261,7 +254,7 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "B1",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00002"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDate:      sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			Description:             sql.NullString{Valid: true, String: "Test Fire Extinguisher 2"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
 			Status:                  sql.NullString{Valid: true, String: "Inspection Failed"},
@@ -272,10 +265,10 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "A1",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00003"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDate:      sql.NullTime{Valid: false},
+			LastInspectionDateTime:  sql.NullTime{Valid: false},
 			Description:             sql.NullString{Valid: true, String: "Test Fire Extinguisher 3"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
-			Status:                  sql.NullString{Valid: true, String: "Inactive"},
+			Status:                  sql.NullString{Valid: true, String: "Active"},
 		},
 		{
 			EmergencyDeviceTypeName: "Fire Extinguisher",
@@ -283,10 +276,10 @@ func SeedData(db *sql.DB) {
 			RoomCode:                "Main Room",
 			SerialNumber:            sql.NullString{Valid: true, String: "SN00004"},
 			ManufactureDate:         sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-			LastInspectionDate:      sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			LastInspectionDateTime:  sql.NullTime{Valid: true, Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			Description:             sql.NullString{Valid: true, String: "Hastings Main Room Fire Extinguisher"},
 			Size:                    sql.NullString{Valid: true, String: "5kg"},
-			Status:                  sql.NullString{Valid: true, String: "Active"},
+			Status:                  sql.NullString{Valid: true, String: "Inactive"},
 		},
 	}
 
@@ -317,11 +310,11 @@ func SeedData(db *sql.DB) {
 
 		_, err := db.Exec(`
 				INSERT INTO Emergency_DeviceT
-					(EmergencyDeviceTypeID, RoomID, ExtinguisherTypeID, SerialNumber, ManufactureDate, LastInspectionDate, Description, Size, Status)
+					(EmergencyDeviceTypeID, RoomID, ExtinguisherTypeID, SerialNumber, ManufactureDate, LastInspectionDateTime, Description, Size, Status)
 				VALUES
 					($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 			emergencyDeviceTypeID, roomID, extinguisherTypeID,
-			device.SerialNumber, device.ManufactureDate, device.LastInspectionDate, device.Description, device.Size, device.Status,
+			device.SerialNumber, device.ManufactureDate, device.LastInspectionDateTime, device.Description, device.Size, device.Status,
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -330,28 +323,37 @@ func SeedData(db *sql.DB) {
 
 	// Insert Inspections
 	_, err = db.Exec(`
-		INSERT INTO Emergency_Device_InspectionT
-			(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
-		VALUES
-			(1, 1, '2024-01-01', '2024-01-01', true, true, true, true, true, true, true, true, true, true, true, true, 'Passed', 'No notes')`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
-		INSERT INTO Emergency_Device_InspectionT
-			(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
-		VALUES
-			(2, 1, '2024-01-01', '2024-01-01', true, true, true, true, true, true, true, true, true, true, true, true, 'Failed', 'No notes')`)
+	INSERT INTO Emergency_Device_InspectionT
+	(EmergencyDeviceID, UserID, InspectionDateTime, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+	VALUES
+	(1, 1, 
+	 '2024-01-01 13:00:00+13'::timestamptz, 
+	 '2024-01-01 13:00:00+13'::timestamptz, 
+	 true, true, true, true, true, true, true, true, true, true ,NULL, true, NULL, 'Passed', 'Passed good as new')`)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	_, err = db.Exec(`
 	INSERT INTO Emergency_Device_InspectionT
-		(EmergencyDeviceID, UserID, InspectionDate, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+	(EmergencyDeviceID, UserID, InspectionDateTime, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES
-		(3, 1, '2024-01-01', '2024-01-01', true, NULL, true, NULL, true, NULL, NULL, true, true, NULL, true, true, 'Failed', 'No notes')`)
+	(2, 1, 
+	 '2024-01-01 14:30:00+13'::timestamptz, 
+	 '2024-01-01 14:30:00+13'::timestamptz, 
+	 true, true, true, true, true, true, NULL, true, NULL, true ,NULL, true, NULL, 'Failed', 'No notes')`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+	INSERT INTO Emergency_Device_InspectionT
+	(EmergencyDeviceID, UserID, InspectionDateTime, CreatedAt, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal , IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+	VALUES
+	(3, 1, 
+	 '2024-01-01 15:45:00+13'::timestamptz, 
+	 '2024-01-01 15:45:00+13'::timestamptz, 
+	 true, true, true, true, true, true, true, true, true, true ,true, true, true, 'Passed', 'Passed and replaced')`)
 	if err != nil {
 		log.Fatal(err)
 	}

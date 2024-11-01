@@ -239,7 +239,7 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 		r.roomcode,
 		ed.serialnumber,
 		ed.manufacturedate,
-		ed.lastinspectiondate,
+		ed.LastInspectionDateTime AT TIME ZONE 'Pacific/Auckland' AS lastinspectiondatetime_nzdt,
 		ed.description,
 		ed.size,
 		ed.status 
@@ -294,7 +294,7 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 			&device.RoomCode,
 			&device.SerialNumber,
 			&device.ManufactureDate,
-			&device.LastInspectionDate,
+			&device.LastInspectionDateTime,
 			&device.Description,
 			&device.Size,
 			&device.Status,
@@ -343,8 +343,8 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 			}
 		}
 
-		if device.LastInspectionDate.Valid {
-			nextInspectionDate := device.LastInspectionDate.Time.AddDate(0, 3, 0)
+		if device.LastInspectionDateTime.Valid {
+			nextInspectionDate := device.LastInspectionDateTime.Time.AddDate(0, 3, 0)
 			device.NextInspectionDate = sql.NullTime{
 				Time:  nextInspectionDate,
 				Valid: true,
@@ -379,7 +379,7 @@ func (db *DB) GetDeviceByID(deviceID int) (*models.EmergencyDevice, error) {
 		s.sitename,
 		ed.serialnumber,
 		ed.manufacturedate,
-		ed.lastinspectiondate,
+		ed.LastInspectionDateTime AT TIME ZONE 'Pacific/Auckland' AS lastinspectiondatetime_nzdt,
 		ed.description,
 		ed.size,
 		ed.status
@@ -406,7 +406,7 @@ func (db *DB) GetDeviceByID(deviceID int) (*models.EmergencyDevice, error) {
 		&device.SiteName,
 		&device.SerialNumber,
 		&device.ManufactureDate,
-		&device.LastInspectionDate,
+		&device.LastInspectionDateTime,
 		&device.Description,
 		&device.Size,
 		&device.Status,
@@ -435,7 +435,7 @@ func (db *DB) GetDevicesByRoomID(roomID int) ([]models.EmergencyDevice, error) {
 		s.sitename,
 		ed.serialnumber,
 		ed.manufacturedate,
-		ed.lastinspectiondate,
+		ed.LastInspectionDateTime AT TIME ZONE 'Pacific/Auckland' AS lastinspectiondatetime_nzdt,
 		ed.description,
 		ed.size,
 		ed.status
@@ -473,7 +473,7 @@ func (db *DB) GetDevicesByRoomID(roomID int) ([]models.EmergencyDevice, error) {
 			&device.SiteName,
 			&device.SerialNumber,
 			&device.ManufactureDate,
-			&device.LastInspectionDate,
+			&device.LastInspectionDateTime,
 			&device.Description,
 			&device.Size,
 			&device.Status,
@@ -1126,7 +1126,7 @@ func (db *DB) GetDevicesByTypeID(emergencyDeviceTypeID int) ([]models.EmergencyD
         s.sitename,
         ed.serialnumber,
         ed.manufacturedate,
-        ed.lastinspectiondate,
+        ed.LastInspectionDateTime AT TIME ZONE 'Pacific/Auckland' AS lastinspectiondatetime_nzdt,
         ed.description,
         ed.size,
         ed.status
@@ -1161,7 +1161,7 @@ func (db *DB) GetDevicesByTypeID(emergencyDeviceTypeID int) ([]models.EmergencyD
 			&device.SiteName,
 			&device.SerialNumber,
 			&device.ManufactureDate,
-			&device.LastInspectionDate,
+			&device.LastInspectionDateTime,
 			&device.Description,
 			&device.Size,
 			&device.Status,
@@ -1200,8 +1200,8 @@ func (db *DB) GetExtinguisherTypeByID(extinguisherTypeID int) (*models.Extinguis
 
 func (db *DB) AddEmergencyDevice(device *models.EmergencyDevice) error {
 	query := `
-	INSERT INTO emergency_deviceT (emergencydevicetypeid, extinguishertypeid, roomid, serialnumber, manufacturedate, lastinspectiondate, description, size, status)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	INSERT INTO emergency_deviceT (emergencydevicetypeid, extinguishertypeid, roomid, serialnumber, manufacturedate, description, size, status)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 	insertStmt, err := db.Prepare(query)
 	if err != nil {
@@ -1216,7 +1216,6 @@ func (db *DB) AddEmergencyDevice(device *models.EmergencyDevice) error {
 		device.RoomID,
 		device.SerialNumber,
 		device.ManufactureDate,
-		device.LastInspectionDate,
 		device.Description,
 		device.Size,
 		device.Status,
@@ -1232,8 +1231,8 @@ func (db *DB) AddEmergencyDevice(device *models.EmergencyDevice) error {
 func (db *DB) UpdateEmergencyDevice(device *models.EmergencyDevice) error {
 	query := `
 	UPDATE emergency_deviceT
-	SET emergencydevicetypeid = $1, extinguishertypeid = $2, roomid = $3, serialnumber = $4, manufacturedate = $5, lastinspectiondate = $6, description = $7, size = $8, status = $9
-	WHERE emergencydeviceid = $10
+	SET emergencydevicetypeid = $1, extinguishertypeid = $2, roomid = $3, serialnumber = $4, manufacturedate = $5, description = $6, size = $7, status = $8
+	WHERE emergencydeviceid = $9
 	`
 	updateStmt, err := db.Prepare(query)
 	if err != nil {
@@ -1248,7 +1247,6 @@ func (db *DB) UpdateEmergencyDevice(device *models.EmergencyDevice) error {
 		device.RoomID,
 		device.SerialNumber,
 		device.ManufactureDate,
-		device.LastInspectionDate,
 		device.Description,
 		device.Size,
 		device.Status,
@@ -1282,7 +1280,7 @@ func (db *DB) DeleteEmergencyDevice(deviceID int) error {
 
 func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, error) {
 	query := `
-	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, ed.serialnumber, edi.userid, u.username, edi.inspectiondate, edi.createdat,
+	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, ed.serialnumber, edi.userid, u.username, edi.inspectiondatetime AT TIME ZONE 'Pacific/Auckland' AS lastinspectiondate_nzdt, edi.createdat AT TIME ZONE 'Pacific/Auckland' AS createdat_nzdt,
 		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
 		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
 		   edi.isNoExternalDamage, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
@@ -1291,7 +1289,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 	JOIN userT u ON edi.userid = u.userid
 	JOIN emergency_deviceT ed ON edi.emergencydeviceid = ed.emergencydeviceid
 	WHERE edi.emergencydeviceid = $1
-	ORDER BY edi.inspectiondate DESC
+	ORDER BY edi.inspectiondatetime DESC
 	`
 
 	rows, err := db.Query(query, deviceID)
@@ -1311,7 +1309,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 			&inspection.SerialNumber,
 			&inspection.UserID,
 			&inspection.InspectorName, // Scans the `username` field into `InspectorName`
-			&inspection.InspectionDate,
+			&inspection.InspectionDateTime,
 			&inspection.CreatedAt,
 			&inspection.IsConspicuous,
 			&inspection.IsAccessible,
@@ -1341,7 +1339,7 @@ func (db *DB) GetAllInspectionsByDeviceID(deviceID int) ([]models.Inspection, er
 
 func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 	query := `
-	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, ed.serialnumber, edi.userid, u.username, edi.inspectiondate, edi.createdat,
+	SELECT edi.emergencydeviceinspectionid, edi.emergencydeviceid, ed.serialnumber, edi.userid, u.username, edi.inspectiondatetime AT TIME ZONE 'Pacific/Auckland' AS lastinspectiondate_nzdt, edi.createdat AT TIME ZONE 'Pacific/Auckland' AS createdat_nzdt,
 		   edi.IsConspicuous, edi.IsAccessible, edi.IsAssignedLocation, edi.IsSignVisible, edi.IsAntiTamperDeviceIntact,
 		   edi.IsSupportBracketSecure, edi.AreOperatingInstructionsClear, edi.IsMaintenanceTagAttached,
 		   edi.isNoExternalDamage, edi.IsChargeGaugeNormal, edi.IsReplaced, edi.AreMaintenanceRecordsComplete, edi.WorkOrderRequired,
@@ -1359,7 +1357,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 		&inspection.SerialNumber,
 		&inspection.UserID,
 		&inspection.InspectorName, // Scans the `username` field into `InspectorName`
-		&inspection.InspectionDate,
+		&inspection.InspectionDateTime,
 		&inspection.CreatedAt,
 		&inspection.IsConspicuous,
 		&inspection.IsAccessible,
@@ -1388,7 +1386,7 @@ func (db *DB) GetInspectionByID(inspectionID int) (*models.Inspection, error) {
 func (db *DB) AddInspection(inspection *models.Inspection) error {
 
 	query := `
-	INSERT INTO emergency_device_inspectionT (emergencydeviceid, userid, inspectiondate, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
+	INSERT INTO emergency_device_inspectionT (emergencydeviceid, userid, inspectiondatetime, IsConspicuous, IsAccessible, IsAssignedLocation, IsSignVisible, IsAntiTamperDeviceIntact, IsSupportBracketSecure, AreOperatingInstructionsClear, IsMaintenanceTagAttached, IsNoExternalDamage, IsChargeGaugeNormal, IsReplaced, AreMaintenanceRecordsComplete, WorkOrderRequired, InspectionStatus, Notes)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 	`
 	insertStmt, err := db.Prepare(query)
@@ -1401,7 +1399,7 @@ func (db *DB) AddInspection(inspection *models.Inspection) error {
 	_, err = insertStmt.Exec(
 		inspection.EmergencyDeviceID,
 		inspection.UserID,
-		inspection.InspectionDate,
+		inspection.InspectionDateTime,
 		inspection.IsConspicuous.Bool,
 		inspection.IsAccessible.Bool,
 		inspection.IsAssignedLocation.Bool,

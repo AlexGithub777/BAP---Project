@@ -60,7 +60,7 @@ CREATE TABLE Emergency_DeviceT (
     SerialNumber VARCHAR(50) NULL,
     Description VARCHAR(255) NULL,
     Size VARCHAR(50) NULL,
-    LastInspectionDate DATE NULL,
+    LastInspectionDateTime TIMESTAMP NULL,
     Status VARCHAR(50) NULL,
     FOREIGN KEY (EmergencyDeviceTypeID) REFERENCES Emergency_Device_TypeT(EmergencyDeviceTypeID)
         ON UPDATE CASCADE  -- If an EmergencyDeviceTypeID changes, update it in Emergency_DeviceT
@@ -78,7 +78,7 @@ CREATE TABLE Emergency_Device_InspectionT (
     EmergencyDeviceInspectionID SERIAL PRIMARY KEY,
     EmergencyDeviceID INT NOT NULL,
     UserID INT NOT NULL,
-    InspectionDate DATE NOT NULL,
+    InspectionDateTime TIMESTAMP NOT NULL,
     CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     IsConspicuous BOOLEAN NULL,
     IsAccessible BOOLEAN NULL,
@@ -113,3 +113,5 @@ DROP TABLE IF EXISTS RoomT;
 DROP TABLE IF EXISTS BuildingT;
 DROP TABLE IF EXISTS SiteT;
 DROP TABLE IF EXISTS UserT;
+DROP TRIGGER IF EXISTS trg_update_device_status ON Emergency_Device_InspectionT;
+DROP FUNCTION IF EXISTS update_device_status_on_inspection;

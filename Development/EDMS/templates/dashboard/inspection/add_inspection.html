@@ -3,7 +3,9 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Add Inspection</h4>
+                <h4 class="modal-title" id="addInspectionModalTitle">
+                    Add Inspection
+                </h4>
                 <button
                     type="button"
                     class="btn-close"
@@ -28,13 +30,13 @@
                     />
                     <div class="mb-3">
                         <label for="InspectionDate" class="form-label"
-                            >Inspection Date</label
+                            >Inspection Time and Date</label
                         >
                         <input
-                            type="date"
+                            type="datetime-local"
                             class="form-control"
-                            id="InspectionDateInput"
-                            name="inspection_date"
+                            id="InspectionDateTimeInput"
+                            name="inspection_datetime"
                             required
                         />
                         <div

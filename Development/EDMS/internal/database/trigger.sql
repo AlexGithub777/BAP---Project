@@ -1,31 +1,24 @@
 CREATE OR REPLACE FUNCTION update_device_status_on_inspection() 
 RETURNS TRIGGER AS $$
 DECLARE
-    current_last_inspection_date DATE;
+    current_last_inspection_timestamp TIMESTAMP;
 BEGIN
-    -- Retrieve the current last inspection date for the device
-    SELECT LastInspectionDate INTO current_last_inspection_date
+    -- Retrieve the current last inspection timestamp for the device
+    SELECT LastInspectionDateTime INTO current_last_inspection_timestamp
     FROM Emergency_DeviceT
     WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
 
-    -- Check if the new inspection date is more recent than the current last inspection date
-    IF current_last_inspection_date IS NULL OR NEW.InspectionDate > current_last_inspection_date THEN
-        -- Update the last inspection date and status in Emergency_DeviceT
+    -- Check if the new inspection timestamp is more recent than the current last inspection timestamp
+    IF current_last_inspection_timestamp IS NULL OR NEW.InspectionDateTime > current_last_inspection_timestamp THEN
+        -- Update LastInspectionDate with the new inspection timestamp
         UPDATE Emergency_DeviceT
-        SET 
-            LastInspectionDate = NEW.InspectionDate,
-            Status = CASE 
+        SET LastInspectionDateTime = NEW.InspectionDateTime
+        Status = CASE 
                         WHEN NEW.InspectionStatus = 'Failed' THEN 'Inspection Failed'
                         WHEN NEW.InspectionStatus = 'Passed' THEN 'Active'
                         ELSE Status
                      END
         WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
-
-        RAISE NOTICE 'Device % status updated. Last inspection date set to %.', 
-            NEW.EmergencyDeviceID, NEW.InspectionDate;
-    ELSE
-        RAISE NOTICE 'New inspection date % is not more recent than the current last inspection date % for device %. No update performed.', 
-            NEW.InspectionDate, current_last_inspection_date, NEW.EmergencyDeviceID;
     END IF;
 
     RETURN NEW;

@@ -19,7 +19,7 @@ type EmergencyDevice struct {
 	SerialNumber            sql.NullString `json:"serial_number"`              // From emergency_deviceT table
 	ManufactureDate         sql.NullTime   `json:"manufacture_date"`           // From emergency_deviceT table
 	ExpireDate              sql.NullTime   `json:"expire_date"`                // Calculated
-	LastInspectionDate      sql.NullTime   `json:"last_inspection_date"`       // From emergency_deviceT table
+	LastInspectionDateTime  sql.NullTime   `json:"last_inspection_datetime"`   // From emergency_deviceT table
 	NextInspectionDate      sql.NullTime   `json:"next_inspection_date"`       // Calculated
 	Description             sql.NullString `json:"description"`                // From emergency_deviceT table
 	Size                    sql.NullString `json:"size"`                       // From emergency_deviceT table
@@ -27,13 +27,13 @@ type EmergencyDevice struct {
 }
 
 type EmergencyDeviceDto struct {
-	RoomID                string `json:"room_id"`
-	EmergencyDeviceTypeID string `json:"emergency_device_type"`
-	ExtinguisherTypeID    string `json:"extinguisher_type"`
-	SerialNumber          string `json:"serial_number"`
-	ManufactureDate       string `json:"manufacture_date"`
-	LastInspectionDate    string `json:"last_inspection_date"`
-	Size                  string `json:"size"`
-	Description           string `json:"description"`
-	Status                string `json:"status"`
+	RoomID                 string `json:"room_id"`
+	EmergencyDeviceTypeID  string `json:"emergency_device_type"`
+	ExtinguisherTypeID     string `json:"extinguisher_type"`
+	SerialNumber           string `json:"serial_number"`
+	ManufactureDate        string `json:"manufacture_date"`
+	LastInspectionDateTime string `json:"last_inspection_datetime"`
+	Size                   string `json:"size"`
+	Description            string `json:"description"`
+	Status                 string `json:"status"`
 }

@@ -65,7 +65,7 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 	inspection := new(models.Inspection)
 
 	// Parse required fields first
-	inspectionDate := c.FormValue("inspection_date")
+	inspectionDateTime := c.FormValue("inspection_datetime")
 	notes := c.FormValue("notes")
 	deviceID, err := strconv.Atoi(c.FormValue("device_id"))
 	if err != nil {
@@ -93,7 +93,7 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 	inspection_status := c.FormValue("inspection_status")
 
 	// Log the inspection details
-	fmt.Println("Inspection Date:", inspectionDate)
+	fmt.Println("Inspection Date:", inspectionDateTime)
 	fmt.Println("Notes:", notes)
 	fmt.Println("Device ID:", deviceID)
 	fmt.Println("User ID:", userId)
@@ -113,7 +113,7 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 	fmt.Println("InspectionStatus:", inspection_status)
 
 	// Validate required fields
-	if inspectionDate == "" || deviceID == 0 || userId == 0 || inspection_status == "" {
+	if inspectionDateTime == "" || deviceID == 0 || userId == 0 || inspection_status == "" {
 		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid request payload")
 	}
 
@@ -129,21 +129,32 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid User ID")
 	}
 
-	// Parse and validate inspection date
-	formattedInspectionDate, err := time.Parse("2006-01-02", inspectionDate)
+	// Parse the input date and time, assuming it's in local time
+	localLocation, err := time.LoadLocation("Pacific/Auckland") // Load NZDT timezone
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid Inspection Date")
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid Timezone")
 	}
+	formattedInspectionDateTime, err := time.ParseInLocation("2006-01-02T15:04", inspectionDateTime, localLocation)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Invalid Inspection Date and Time")
+	}
+
+	// Log the formatted inspection date time
+	fmt.Println("Formatted Inspection Date Time:", formattedInspectionDateTime)
 
 	// Create the sql.NullTime struct
 	nullTimeDate := sql.NullTime{
-		Time:  formattedInspectionDate,
+		Time:  formattedInspectionDateTime,
 		Valid: true,
 	}
 
-	// Check if date is in the future
-	if time.Now().Before(formattedInspectionDate) {
-		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Inspection Date cannot be in the future")
+	// Log the current time in local timezone
+	currentTime := time.Now().In(localLocation) // Get current local time
+	fmt.Println("Current Local Time:", currentTime)
+
+	// Check if the formatted inspection date time is valid and in the future
+	if nullTimeDate.Valid && nullTimeDate.Time.After(currentTime) {
+		return c.Redirect(http.StatusSeeOther, "/dashboard?error=Inspection Date and Time cannot be in the future")
 	}
 
 	// Validate notes length is less than 255 characters
@@ -152,7 +163,7 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 	}
 
 	// Set the remaining inspection fields
-	inspection.InspectionDate = nullTimeDate
+	inspection.InspectionDateTime = nullTimeDate
 	inspection.Notes.String = notes
 	inspection.EmergencyDeviceID = deviceID
 	inspection.UserID = userId
@@ -160,7 +171,7 @@ func (a *App) HandlePostInspection(c echo.Context) error {
 
 	// Log the inspection details (consider using structured logging)
 	a.handleLogger(fmt.Sprintf("New inspection submission: deviceID=%d, userID=%d, date=%s",
-		deviceID, userId, inspectionDate))
+		deviceID, userId, inspectionDateTime))
 
 	// Add the inspection to the database
 	err = a.DB.AddInspection(inspection)
