@@ -507,6 +507,259 @@ document.getElementById("rowsPerPage").addEventListener("change", (e) => {
 // Initial fetch without filtering
 getAllDevices();
 
+// Define priorityOrder globally
+const priorityOrder = {
+    "Inspection Failed": 0,
+    Expired: 1,
+    "Inspection Due": 2,
+    "Expiring Soon": 3,
+    "Inspection Due Soon": 4,
+};
+
+// Function to generate notifications
+if (role === "Admin") {
+    (async () => {
+        const notifications = await generateNotifications();
+        const html = generateNotificationHTML(notifications);
+
+        // Update the notifications section
+        document.getElementById("deviceNotificationsCards").innerHTML = html;
+
+        // Update the notification count
+        const notificationCountElement = document.querySelector(
+            ".notification-count"
+        );
+        notificationCountElement.textContent = notifications.length;
+    })();
+}
+
+async function generateNotifications() {
+    await getAllDevices();
+
+    const currentDate = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(currentDate.getDate() + 30);
+
+    // Helper function to calculate days difference
+    const calculateDaysOverdue = (date) => {
+        const diffTime = currentDate - new Date(date);
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    // Create a Map to store unique devices by their ID
+    const notificationMap = new Map();
+
+    // Helper function to add device to map with reason and days
+    const addDeviceWithReason = (device, reason, days = null) => {
+        if (!notificationMap.has(device.emergency_device_id)) {
+            notificationMap.set(device.emergency_device_id, {
+                ...device,
+                notification_details: [
+                    {
+                        reason: reason,
+                        days: days,
+                    },
+                ],
+            });
+        } else {
+            const existing = notificationMap.get(device.emergency_device_id);
+            if (
+                !existing.notification_details.some(
+                    (detail) => detail.reason === reason
+                )
+            ) {
+                existing.notification_details.push({
+                    reason: reason,
+                    days: days,
+                });
+            }
+        }
+    };
+
+    // Check each device
+    allDevices.forEach((device) => {
+        // Skip inactive devices
+        if (device.status.String === "Inactive") {
+            return;
+        }
+
+        // Check failed inspection status
+        if (device.status.String === "Inspection Failed") {
+            addDeviceWithReason(device, "Inspection Failed");
+        }
+
+        // Check inspection due status
+        if (
+            device.status.String === "Inspection Due" &&
+            device.next_inspection_date.Valid
+        ) {
+            const daysOverdue = calculateDaysOverdue(
+                device.next_inspection_date.Time
+            );
+            addDeviceWithReason(device, "Inspection Due", daysOverdue);
+        }
+
+        // Check expired status
+        if (device.status.String === "Expired" && device.expire_date.Valid) {
+            const daysOverdue = calculateDaysOverdue(device.expire_date.Time);
+            addDeviceWithReason(device, "Expired", daysOverdue);
+        }
+
+        // Check expire date within 30 days
+        if (device.expire_date.Valid) {
+            const expireDate = new Date(device.expire_date.Time);
+            if (expireDate > currentDate && expireDate <= thirtyDaysFromNow) {
+                const daysUntil = Math.ceil(
+                    (expireDate - currentDate) / (1000 * 60 * 60 * 24)
+                );
+                addDeviceWithReason(device, "Expiring Soon", daysUntil);
+            }
+        }
+
+        // Check next inspection date within 30 days
+        if (device.next_inspection_date.Valid) {
+            const inspectionDate = new Date(device.next_inspection_date.Time);
+            if (
+                inspectionDate > currentDate &&
+                inspectionDate <= thirtyDaysFromNow
+            ) {
+                const daysUntil = Math.ceil(
+                    (inspectionDate - currentDate) / (1000 * 60 * 60 * 24)
+                );
+                addDeviceWithReason(device, "Inspection Due Soon", daysUntil);
+            }
+        }
+    });
+
+    // Convert map to array
+    const notifications = Array.from(notificationMap.values());
+
+    // Sort notifications by priority
+    const priorityOrder = {
+        "Inspection Failed": 0,
+        Expired: 1,
+        "Inspection Due": 2,
+        "Expiring Soon": 3,
+        "Inspection Due Soon": 4,
+    };
+
+    notifications.sort((a, b) => {
+        const aPriority = Math.min(
+            ...a.notification_details.map((d) => priorityOrder[d.reason])
+        );
+        const bPriority = Math.min(
+            ...b.notification_details.map((d) => priorityOrder[d.reason])
+        );
+
+        if (aPriority !== bPriority) {
+            return aPriority - bPriority;
+        }
+
+        // If same priority, sort by days overdue (highest first)
+        const aDetails = a.notification_details.find(
+            (d) => priorityOrder[d.reason] === aPriority
+        );
+        const bDetails = b.notification_details.find(
+            (d) => priorityOrder[d.reason] === bPriority
+        );
+        return (bDetails?.days || 0) - (aDetails?.days || 0);
+    });
+
+    return notifications;
+}
+
+function generateNotificationHTML(notifications) {
+    const getStatusBadge = (detail) => {
+        const { reason, days } = detail;
+        let badgeClass = "";
+        let icon = "";
+        let text = "";
+
+        switch (reason) {
+            case "Inspection Failed":
+                badgeClass = "bg-danger text-light";
+                icon = '<i class="text-danger fa fa-exclamation-circle"></i>';
+                text = "Inspection Failed";
+                break;
+            case "Expired":
+                badgeClass = "bg-danger text-light";
+                icon = '<i class="text-danger fa fa-exclamation-circle"></i>';
+                text = `Expired (${days} days ago)`;
+                break;
+            case "Inspection Due":
+                badgeClass = "bg-danger text-light";
+                icon = '<i class="text-danger fa fa-exclamation-circle"></i>';
+                text = `Inspection Due (${days} days ago)`;
+                break;
+            case "Expiring Soon":
+                badgeClass = "bg-warning text-black";
+                icon =
+                    '<i class="text-warning fa-solid fa-exclamation-triangle"></i>';
+                text = `Expires (In ${days} days)`;
+                break;
+            case "Inspection Due Soon":
+                badgeClass = "bg-warning text-black";
+                icon =
+                    '<i class="text-warning fa-solid fa-exclamation-triangle"></i>';
+                text = `Inspection Due (In ${days} days)`;
+                break;
+        }
+
+        return { badgeClass, icon, text };
+    };
+
+    let html = "";
+
+    notifications.forEach((device) => {
+        // Get highest priority notification detail
+        const mainDetail = device.notification_details.reduce((a, b) =>
+            priorityOrder[a.reason] < priorityOrder[b.reason] ? a : b
+        );
+
+        const { badgeClass, icon, text } = getStatusBadge(mainDetail);
+
+        html += `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        ${device.emergency_device_type_name}
+                        ${icon}
+                    </h5>
+                    <div class="card-text">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span>Serial Number: ${
+                                    device.serial_number.String
+                                }</span><br />
+                                <span>Room: ${device.room_code}</span><br />
+                                <span>Status: 
+                                    <span class="badge ${badgeClass}">
+                                        ${text}
+                                    </span>
+                                </span>
+                            </div>
+                            <div>
+                                ${
+                                    mainDetail.reason.includes("Inspection")
+                                        ? `<button class="btn btn-primary" onclick="ViewDeviceInspection(${device.emergency_device_id})">
+                                        Inspect
+                                    </button>`
+                                        : ""
+                                }
+                                <button class="btn btn-secondary" onclick="">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    return html;
+}
+
 function formatDeviceRow(device) {
     if (!device) return "";
     const formatDateMonthYear = (dateString) =>
@@ -830,7 +1083,6 @@ function editDevice(deviceId) {
                             "editStatusInput"
                         ).disabled = true;
 
-                        // Create and add the "Inspection Failed" option if needed
                         if (data.status.String === "Inspection Failed") {
                             var option = document.createElement("option");
                             option.text = "Inspection Failed";
@@ -838,12 +1090,10 @@ function editDevice(deviceId) {
                             document
                                 .getElementById("editStatusInput")
                                 .add(option);
-                            // Set the value of the dropdown to "Inspection Failed"
                             document.getElementById("editStatusInput").value =
                                 "Inspection Failed";
                         }
 
-                        // Create and add the "Inspection Due" option if needed
                         if (data.status.String === "Inspection Due") {
                             var option = document.createElement("option");
                             option.text = "Inspection Due";
@@ -893,7 +1143,6 @@ function editDevice(deviceId) {
                         }
                     }
 
-                    // Now that the data is populated, show the modal
                     $("#editDeviceModal").modal("show");
                 });
         })
@@ -901,7 +1150,6 @@ function editDevice(deviceId) {
             console.error("Error loading dropdown data:", error);
         });
 
-    // Add change event listener for device type dropdown
     document
         .querySelector("#editEmergencyDeviceTypeInput")
         .addEventListener("change", updateExtinguisherFields);
@@ -1082,6 +1330,11 @@ document.addEventListener("DOMContentLoaded", function () {
         validateLength(this, 255);
     });
 
+    // Add event listener for status validation
+    document.getElementById("status").addEventListener("change", function () {
+        validateAddStatus();
+    });
+
     // Add event listeners to select elements
     document
         .querySelectorAll(
@@ -1095,6 +1348,153 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add event listeners for date validation
     manufactureDate.addEventListener("change", validateDates);
+
+    // Add event listener for status validation
+    // Check if device status is "Expired" then check that the expire date is in the past
+    document
+        .getElementById("editStatusInput")
+        .addEventListener("change", validateEditStatus);
+
+    function validateEditStatus() {
+        const statusInput = document.getElementById("editStatusInput");
+        const statusFeedback = document.getElementById("editStatusFeedback");
+        const manufactureDateInput = document.getElementById(
+            "editManufactureDateInput"
+        );
+
+        if (statusInput.value === "Expired") {
+            // Check if manufacture date is empty return false
+            if (manufactureDateInput.value === "") {
+                statusInput.setCustomValidity(
+                    "Please enter a manufacture date before setting status to 'Expired'"
+                );
+                statusFeedback.textContent =
+                    "Please enter a manufacture date before setting status to 'Expired'";
+                manufactureDateInput.setCustomValidity(
+                    "Please enter a manufacture date before setting status to 'Expired'"
+                );
+                document.getElementById(
+                    "editManufactureDateFeedback"
+                ).textContent =
+                    "Please enter a manufacture date before setting status to 'Expired'";
+                return false;
+            }
+            // Get manufacture date and calculate expire date (manufacture date + 5 years)
+            const manufactureDate = document.getElementById(
+                "editManufactureDateInput"
+            ).value;
+            const expireDate = new Date(manufactureDate);
+            expireDate.setFullYear(expireDate.getFullYear() + 5);
+            console.log("Calculated Expire Date:", expireDate);
+
+            // Get the current date and set its time to midnight for accurate comparison
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            console.log("Current Date:", currentDate);
+
+            // If expireDate is in the future, set custom validity error
+            if (expireDate > currentDate) {
+                statusInput.setCustomValidity(
+                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future."
+                );
+                statusFeedback.textContent =
+                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future.";
+                manufactureDateInput.setCustomValidity(
+                    "Manufacture date cannot be within the past 5 years if status is 'Expired'"
+                );
+
+                document.getElementById(
+                    "editManufactureDateFeedback"
+                ).textContent =
+                    "Manufacture date cannot be within the past 5 years if status is 'Expired'";
+                return false;
+            }
+
+            // Clear any previous custom validity message if status is correctly "Expired"
+            statusInput.setCustomValidity("");
+            statusFeedback.textContent = "";
+            manufactureDateInput.setCustomValidity("");
+            document.getElementById("editManufactureDateFeedback").textContent =
+                "";
+            return true;
+        }
+
+        // Clear any previous custom validity message if status is not "Expired"
+        statusInput.setCustomValidity("");
+        statusFeedback.textContent = "";
+        manufactureDateInput.setCustomValidity("");
+        document.getElementById("editManufactureDateFeedback").textContent = "";
+        return true;
+    }
+
+    function validateAddStatus() {
+        const statusInput = document.getElementById("status");
+        const statusFeedback = document.getElementById("statusFeedback");
+        const manufactureDateInput = document.getElementById("manufactureDate");
+
+        if (statusInput.value === "Expired") {
+            // Check if manufacture date is empty return false
+            if (manufactureDateInput.value === "") {
+                statusInput.setCustomValidity(
+                    "Please enter a manufacture date before setting status to 'Expired'"
+                );
+                statusFeedback.textContent =
+                    "Please enter a manufacture date before setting status to 'Expired'";
+                manufactureDateInput.setCustomValidity(
+                    "Please enter a manufacture date before setting status to 'Expired'"
+                );
+                document.getElementById(
+                    "addManufactureDateFeedback"
+                ).textContent =
+                    "Please enter a manufacture date before setting status to 'Expired'";
+                return false;
+            }
+            // Get manufacture date and calculate expire date (manufacture date + 5 years)
+            const manufactureDate =
+                document.getElementById("manufactureDate").value;
+            const expireDate = new Date(manufactureDate);
+            expireDate.setFullYear(expireDate.getFullYear() + 5);
+            console.log("Calculated Expire Date:", expireDate);
+
+            // Get the current date and set its time to midnight for accurate comparison
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            console.log("Current Date:", currentDate);
+
+            // If expireDate is in the future, set custom validity error
+            if (expireDate > currentDate) {
+                statusInput.setCustomValidity(
+                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future."
+                );
+                statusFeedback.textContent =
+                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future.";
+                manufactureDateInput.setCustomValidity(
+                    "Manufacture date cannot be within the past 5 years if status is 'Expired'"
+                );
+                document.getElementById(
+                    "addManufactureDateFeedback"
+                ).textContent =
+                    "Manufacture date cannot be within the past 5 years if status is 'Expired'";
+
+                return false;
+            }
+
+            // Clear any previous custom validity message if status is correctly "Expired"
+            statusInput.setCustomValidity("");
+            statusFeedback.textContent = "";
+            manufactureDateInput.setCustomValidity("");
+            document.getElementById("addManufactureDateFeedback").textContent =
+                "";
+            return true;
+        }
+
+        // Clear any previous custom validity message if status is not "Expired"
+        statusInput.setCustomValidity("");
+        statusFeedback.textContent = "";
+        manufactureDateInput.setCustomValidity("");
+        document.getElementById("addManufactureDateFeedback").textContent = "";
+        return true;
+    }
 
     // Add event listener to the add device button
     addDeviceButton.addEventListener("click", function (event) {
@@ -1113,7 +1513,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // Validate dates
         const datesValid = validateDates();
 
-        if (!addDeviceForm.checkValidity() || !datesValid) {
+        // Validate status
+        const statusValid = validateAddStatus();
+
+        if (!addDeviceForm.checkValidity() || !datesValid || !statusValid) {
             event.preventDefault();
             event.stopPropagation();
         } else {
@@ -1143,8 +1546,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // Validate dates
         const datesValid = validateDates();
 
+        // Validate status
+        const statusValid = validateEditStatus();
+
         // Check if the form is valid
-        if (!editDeviceForm.checkValidity() || !datesValid) {
+        if (!editDeviceForm.checkValidity() || !datesValid || !statusValid) {
             event.stopPropagation();
             editDeviceForm.classList.add("was-validated");
         } else {
