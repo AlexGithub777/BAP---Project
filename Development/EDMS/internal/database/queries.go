@@ -368,6 +368,14 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 			}
 		}
 
+		// check if manufacture date is null or zero value, if true, set expire date to null
+		if device.ManufactureDate.Time.IsZero() {
+			device.ExpireDate = sql.NullTime{
+				Time:  time.Time{},
+				Valid: false,
+			}
+		}
+
 		if device.LastInspectionDateTime.Valid {
 			nextInspectionDate := device.LastInspectionDateTime.Time.AddDate(0, 3, 0)
 			device.NextInspectionDate = sql.NullTime{
