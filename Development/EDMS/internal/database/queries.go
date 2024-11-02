@@ -1464,3 +1464,13 @@ func (db *DB) AddInspection(inspection *models.Inspection) error {
 
 	return nil
 }
+
+func (db *DB) UpdateDeviceStatus(deviceID int, status string) error {
+	query := `
+        UPDATE emergency_devicet
+        SET status = $1
+        WHERE emergencydeviceid = $2`
+
+	_, err := db.Exec(query, status, deviceID)
+	return err
+}

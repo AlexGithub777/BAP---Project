@@ -296,3 +296,82 @@ func (a *App) HandleDeleteDevice(c echo.Context) error {
 		"redirectURL": "/dashboard?message=Device deleted successfully",
 	})
 }
+
+// HandlePutDeviceStatus
+
+func (a *App) HandlePutDeviceStatus(c echo.Context) error {
+	// Check if request is not a PUT request
+	if c.Request().Method != http.MethodPut {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{
+			"error":       "Method not allowed",
+			"redirectURL": "/dashboard?error=Method not allowed"})
+	}
+
+	// Parse the device ID from the URL parameter
+	deviceIDStr := c.Param("id")
+
+	// Create a struct to bind the JSON request body
+	type StatusRequest struct {
+		Status string `json:"status"`
+	}
+
+	// Bind the JSON request body to the struct
+	var req StatusRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid request body",
+			"redirectURL": "/dashboard?error=Invalid request body"})
+	}
+
+	// Convert device ID string to int
+	deviceID, err := strconv.Atoi(deviceIDStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid device ID",
+			"redirectURL": "/dashboard?error=Invalid device ID"})
+	}
+
+	// Validate device exists
+	device, err := a.DB.GetDeviceByID(deviceID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error":       "Device not found",
+			"redirectURL": "/dashboard?error=Device not found"})
+	}
+
+	// if no device found, return 404
+	if device == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error":       "Device not found",
+			"redirectURL": "/dashboard?error=Device not found"})
+	}
+
+	// Validate status
+	if req.Status == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Status is required",
+			"redirectURL": "/dashboard?error=Status is required"})
+	}
+
+	// Validate status is valid (Inspection Due or Expired)
+	if req.Status != "Inspection Due" && req.Status != "Expired" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Invalid status",
+			"redirectURL": "/dashboard?error=Invalid status"})
+	}
+
+	// Log the incoming data
+	a.handleLogger("Device ID: " + deviceIDStr)
+	a.handleLogger("Status: " + req.Status)
+
+	// Update the device status in the database
+	err = a.DB.UpdateDeviceStatus(deviceID, req.Status)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error":       "Failed to update device status",
+			"redirectURL": "/dashboard?error=Failed to update device status"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Device status updated successfully"})
+}

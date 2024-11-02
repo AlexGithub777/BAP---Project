@@ -519,17 +519,51 @@ const priorityOrder = {
 // Function to generate notifications
 if (role === "Admin") {
     (async () => {
+        try {
         const notifications = await generateNotifications();
         const html = generateNotificationHTML(notifications);
 
         // Update the notifications section
-        document.getElementById("deviceNotificationsCards").innerHTML = html;
+            const notificationsElement = document.getElementById(
+                "deviceNotificationsCards"
+            );
+            if (notificationsElement) {
+                notificationsElement.innerHTML = html;
+            } else {
+                console.error("Notifications element not found");
+            }
 
         // Update the notification count
         const notificationCountElement = document.querySelector(
             ".notification-count"
         );
+            if (notificationCountElement) {
         notificationCountElement.textContent = notifications.length;
+            } else {
+                console.error("Notification count element not found");
+            }
+        } catch (error) {
+            console.error("Failed to generate notifications:", error);
+            // Optionally show user-friendly error message
+            const notificationsElement = document.getElementById(
+                "deviceNotificationsCards"
+            );
+            if (notificationsElement) {
+                notificationsElement.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        Failed to load notifications. Please try refreshing the page.
+                    </div>
+                `;
+            }
+
+            // Reset notification count to 0 if there's an error
+            const notificationCountElement = document.querySelector(
+                ".notification-count"
+            );
+            if (notificationCountElement) {
+                notificationCountElement.textContent = "0";
+            }
+        }
     })();
 }
 
@@ -545,6 +579,60 @@ async function generateNotifications() {
         const diffTime = currentDate - new Date(date);
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
+
+    // Helper function to check if a date is today or in the past
+    const isDateDueOrPast = (date) => {
+        const targetDate = new Date(date);
+        // Reset time parts to compare just the dates
+        targetDate.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return targetDate <= today;
+    };
+
+    // Update device statuses based on dates
+    for (const device of allDevices) {
+        let statusUpdated = false;
+
+        // Check inspection date
+        if (
+            device.next_inspection_date.Valid &&
+            isDateDueOrPast(device.next_inspection_date.Time) &&
+            device.status.String !== "Inspection Failed" &&
+            device.status.String !== "Inspection Due"
+        ) {
+            const success = await updateDeviceStatus(
+                device.emergency_device_id,
+                "Inspection Due"
+            );
+            if (success) {
+                device.status.String = "Inspection Due"; // Update local state
+                statusUpdated = true;
+                // reload devices
+                await getAllDevices();
+            }
+        }
+
+        // Check expire date
+        if (
+            device.expire_date.Valid &&
+            isDateDueOrPast(device.expire_date.Time) &&
+            device.status.String !== "Expired" &&
+            !statusUpdated
+        ) {
+            // Only update if no other status change
+
+            const success = await updateDeviceStatus(
+                device.emergency_device_id,
+                "Expired"
+            );
+            if (success) {
+                device.status.String = "Expired"; // Update local state
+                // reload devices
+                await getAllDevices();
+            }
+        }
+    }
 
     // Create a Map to store unique devices by their ID
     const notificationMap = new Map();
@@ -741,7 +829,7 @@ function generateNotificationHTML(notifications) {
                             <div>
                                 ${
                                     mainDetail.reason.includes("Inspection")
-                                        ? `<button class="btn btn-primary" onclick="ViewDeviceInspection(${device.emergency_device_id})">
+                                        ? `<button class="btn btn-primary" onclick="viewDeviceInspections(${device.emergency_device_id})">
                                         Inspect
                                     </button>`
                                         : ""
@@ -758,6 +846,42 @@ function generateNotificationHTML(notifications) {
     });
 
     return html;
+}
+
+async function updateDeviceStatus(deviceId, status) {
+    try {
+        const response = await fetch(
+            `/api/emergency-device/${deviceId}/status`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ status: status }),
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.error) {
+            console.error("Error:", data.error);
+            window.location.href = data.redirectURL;
+            throw new Error(data.error);
+        } else if (data.message) {
+            console.log("Success:", data.message);
+            // Only redirect if redirectURL is provided
+            if (data.redirectURL) {
+                window.location.href = data.redirectURL;
+            }
+            return true; // Indicate success
+        } else {
+            console.error("Unexpected response:", data);
+            throw new Error("Unexpected response");
+        }
+    } catch (error) {
+        console.error(`Failed to update status for device ${deviceId}:`, error);
+        return false; // Indicate failure
+    }
 }
 
 function formatDeviceRow(device) {
@@ -1605,6 +1729,9 @@ function deleteDevice(deviceId) {
 }
 
 function viewDeviceInspections(deviceId) {
+    // Close the notification modal if open
+    $("#notificationsModal").modal("hide");
+
     console.log(`Inspect device with ID: ${deviceId}`);
 
     // Clear the inspection table

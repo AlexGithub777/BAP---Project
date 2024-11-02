@@ -55,6 +55,7 @@ func (a *App) initRoutes() {
 	admin.Use(a.AdminOnly)
 	admin.GET("/admin", a.HandleGetAdmin)
 	// Add any other admin-only routes as needed
+	admin.PUT("/api/emergency-device/:id/status", a.HandlePutDeviceStatus)
 	// Inspection management routes - Alex
 	admin.GET("/api/inspection", a.HandleGetAllInspectionsByDeviceID)
 	admin.GET("/api/inspection/:id", a.HandleGetInspectionByID)
