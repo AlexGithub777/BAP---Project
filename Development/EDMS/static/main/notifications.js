@@ -1,12 +1,3 @@
-// Define priorityOrder globally
-const priorityOrder = {
-    "Inspection Failed": 0,
-    Expired: 1,
-    "Inspection Due": 2,
-    "Expiring Soon": 3,
-    "Inspection Due Soon": 4,
-};
-
 export async function getAllDevices(buildingCode = "", siteId = "") {
     try {
         let url = "/api/emergency-device";
@@ -64,6 +55,10 @@ export async function updateDeviceStatus(deviceId, status) {
         return false; // Indicate failure
     }
 }
+
+// Initialize currentNotifications from sessionStorage or empty array
+let currentNotifications =
+    JSON.parse(sessionStorage.getItem("notifications")) || [];
 
 export async function generateNotifications() {
     const allDevices = await getAllDevices(); // Store the returned devices
@@ -251,10 +246,28 @@ export async function generateNotifications() {
         return (bDetails?.days || 0) - (aDetails?.days || 0);
     });
 
+    // Update global notifications list
+    currentNotifications = notifications;
+
     return notifications;
 }
 
+// Function to get current notifications
+export function getCurrentNotifications() {
+    return currentNotifications;
+}
+
 export function generateNotificationHTML(notifications) {
+    // check if notifications lenght is 0 if yes return no notifications message
+    if (notifications.length === 0) {
+        return `
+            <div class="alert alert-info" role="alert">
+
+                No notifications to display.
+            </div>
+        `;
+    }
+
     const getStatusBadge = (detail) => {
         const { reason, days } = detail;
         let badgeClass = "";
@@ -332,7 +345,9 @@ export function generateNotificationHTML(notifications) {
                                     </button>`
                                         : ""
                                 }
-                                <button class="btn btn-secondary" onclick="">
+                                <button class="btn btn-secondary" onclick="clearNotificationHandler(${
+                                    device.emergency_device_id
+                                })">
                                     Clear
                                 </button>
                             </div>
@@ -346,9 +361,71 @@ export function generateNotificationHTML(notifications) {
     return html;
 }
 
-export async function updateNotificationsUI() {
+// Function to save notifications to sessionStorage
+function saveNotificationsToSession(notifications) {
+    sessionStorage.setItem("notifications", JSON.stringify(notifications));
+}
+
+// Function to clear a single notification
+export function clearNotificationById(deviceId) {
+    currentNotifications = currentNotifications.filter(
+        (device) => device.emergency_device_id !== deviceId
+    );
+    saveNotificationsToSession(currentNotifications);
+    updateNotificationsUI(currentNotifications);
+}
+
+// Function to clear all notifications
+export function clearAllNotifications() {
+    currentNotifications = [];
+    saveNotificationsToSession(currentNotifications);
+    console.log("Cleared all notifications", currentNotifications);
+    updateNotificationsUI(currentNotifications);
+}
+
+export async function checkForNewNotifications() {
     try {
-        const notifications = await generateNotifications();
+        // Generate fresh notifications
+        const freshNotifications = await generateNotifications();
+
+        // Save to session storage
+        saveNotificationsToSession(freshNotifications);
+
+        // Update the UI with new notifications
+        await updateNotificationsUI(freshNotifications);
+
+        return freshNotifications;
+    } catch (error) {
+        console.error("Failed to refresh notifications:", error);
+        throw error;
+    }
+}
+
+// Modify updateNotificationsUI to accept a forceRefresh parameter
+export async function updateNotificationsUI(
+    notifications,
+    forceRefresh = false
+) {
+    try {
+        if (!notifications || forceRefresh) {
+            if (forceRefresh) {
+                // Generate fresh notifications if force refresh
+                notifications = await generateNotifications();
+                saveNotificationsToSession(notifications);
+            } else {
+                // Check session storage first
+                const storedNotifications =
+                    sessionStorage.getItem("notifications");
+                if (storedNotifications) {
+                    notifications = JSON.parse(storedNotifications);
+                } else {
+                    notifications = await generateNotifications();
+                    saveNotificationsToSession(notifications);
+                }
+            }
+        }
+
+        console.log("Updating UI with notifications:", notifications);
         const html = generateNotificationHTML(notifications);
 
         // Update the notifications section
@@ -370,9 +447,23 @@ export async function updateNotificationsUI() {
         } else {
             console.error("Notification count element not found");
         }
+
+        // Keep currentNotifications in sync
+        currentNotifications = notifications;
+
+        // Add loading state management to the refresh button
+        const refreshButton = document.querySelector(
+            '[onclick="refreshNotificationsHandler()"]'
+        );
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            const icon = refreshButton.querySelector(".fa-sync-alt");
+            if (icon) {
+                icon.classList.remove("fa-spin");
+            }
+        }
     } catch (error) {
         console.error("Failed to generate notifications:", error);
-        // Optionally show user-friendly error message
         const notificationsElement = document.getElementById(
             "deviceNotificationsCards"
         );
@@ -384,7 +475,6 @@ export async function updateNotificationsUI() {
             `;
         }
 
-        // Reset notification count to 0 if there's an error
         const notificationCountElements = document.querySelectorAll(
             ".notification-count"
         );
@@ -392,6 +482,18 @@ export async function updateNotificationsUI() {
             notificationCountElements.forEach((element) => {
                 element.textContent = "0";
             });
+        }
+
+        // Reset refresh button state on error
+        const refreshButton = document.querySelector(
+            '[onclick="refreshNotificationsHandler()"]'
+        );
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            const icon = refreshButton.querySelector(".fa-sync-alt");
+            if (icon) {
+                icon.classList.remove("fa-spin");
+            }
         }
     }
 }

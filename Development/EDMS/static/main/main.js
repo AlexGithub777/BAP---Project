@@ -1,11 +1,35 @@
-function logout() {
+import {
+    clearAllNotifications,
+    clearNotificationById,
+    updateNotificationsUI,
+} from "/static/main/notifications.js";
+
+export function logout() {
     window.location.href = "/logout";
 }
 
-function viewNotifications() {
+export function viewNotifications() {
     console.log("View notifications");
     $("#notificationsModal").modal("show");
     // Add your view notifications logic here
+}
+
+export function clearAllNotificationsHandler() {
+    console.log("Clearing all notifications");
+    clearAllNotifications(); // Calls the function in notifications.js
+}
+
+export function clearNotificationHandler(deviceId) {
+    console.log("Clearing notification for device:", deviceId);
+    clearNotificationById(deviceId); // Calls the function in notifications.js
+}
+
+export async function refreshNotificationsHandler() {
+    console.log("Refreshing notifications");
+    // Clear session storage to force fresh data
+    sessionStorage.removeItem("notifications");
+    // Get fresh notifications and update UI
+    await updateNotificationsUI();
 }
 
 // hot reload
@@ -25,7 +49,7 @@ function formatEntityType(entityType) {
 }
 
 // Function to populate dropdowns with specific property mapping
-function populateDropdown(
+export function populateDropdown(
     selector,
     url,
     defaultText = "Select an option",
@@ -62,7 +86,7 @@ function populateDropdown(
         .catch((error) => console.error("Error:", error));
 }
 
-function showDeleteModal(id, entityType, entityName, currentUserId) {
+export function showDeleteModal(id, entityType, entityName, currentUserId) {
     const deleteModal = document.getElementById("deleteModal");
     const deleteForm = document.getElementById("deleteForm");
     const currentUserIdInput = document.getElementById("deleteCurrentUserID");
@@ -144,7 +168,7 @@ document
     });
 
 // function to toggle dark mode
-function toggleDarkMode() {
+export function toggleDarkMode() {
     // check data-theme attribute on html element
     const html = document.documentElement;
     const currentTheme = html.getAttribute("data-bs-theme");
@@ -196,3 +220,13 @@ if (savedTheme) {
         });
     }
 }
+
+// Make functions available to the browser
+window.logout = logout;
+window.viewNotifications = viewNotifications;
+window.clearAllNotificationsHandler = clearAllNotificationsHandler;
+window.clearNotificationHandler = clearNotificationHandler;
+window.refreshNotificationsHandler = refreshNotificationsHandler;
+window.showDeleteModal = showDeleteModal;
+window.toggleDarkMode = toggleDarkMode;
+window.populateDropdown = populateDropdown;
