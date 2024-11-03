@@ -86,6 +86,13 @@ export function clearFilters() {
     document.getElementById("deviceTypeFilter").selectedIndex = 0;
     document.getElementById("statusFilter").selectedIndex = 0;
 
+    // Reset active filters
+    activeFilters = {
+        room: null,
+        deviceType: null,
+        status: null,
+    };
+
     filteredDevices = [...allDevices]; // Reset to original devices
     clearTableBody();
     loadDevicesAndUpdateTable();
@@ -343,6 +350,13 @@ let currentPage = 1;
 let rowsPerPage = 10;
 let allDevices = [];
 
+// Keep track of active filters
+let activeFilters = {
+    room: null,
+    deviceType: null,
+    status: null,
+};
+
 // Add event listeners for the new filters
 document.getElementById("roomFilter").addEventListener("change", () => {
     filterTableByRoom();
@@ -423,6 +437,8 @@ function filterTableByRoom() {
                 device.room_id === selectedRoom
         );
     }
+    activeFilters.room = selectedRoomText;
+    applyFilters();
 
     console.log("Filtered devices count:", filteredDevices.length);
 }
@@ -438,6 +454,8 @@ function filterTableByDeviceType() {
             (device) => device.emergency_device_type_name === selectedDeviceType
         );
     }
+    activeFilters.deviceType = selectedDeviceType;
+    applyFilters();
 }
 
 function filterTableByStatus() {
@@ -451,6 +469,46 @@ function filterTableByStatus() {
             (device) => device.status.String === selectedStatus
         );
     }
+    activeFilters.status = selectedStatus;
+    applyFilters();
+}
+
+// Apply all active filters
+function applyFilters() {
+    // Start with all devices
+    filteredDevices = [...allDevices];
+
+    // Apply room filter if active
+    if (activeFilters.room && activeFilters.room !== "All Rooms") {
+        filteredDevices = filteredDevices.filter(
+            (device) => device.room_code === activeFilters.room
+        );
+    }
+
+    // Apply device type filter if active
+    if (
+        activeFilters.deviceType &&
+        activeFilters.deviceType !== "Device Type" &&
+        activeFilters.deviceType !== "All Device Types"
+    ) {
+        filteredDevices = filteredDevices.filter(
+            (device) =>
+                device.emergency_device_type_name === activeFilters.deviceType
+        );
+    }
+
+    // Apply status filter if active
+    if (
+        activeFilters.status &&
+        activeFilters.status !== "Status" &&
+        activeFilters.status !== "All Statuses"
+    ) {
+        filteredDevices = filteredDevices.filter(
+            (device) => device.status.String === activeFilters.status
+        );
+    }
+
+    updateTable();
 }
 
 //debugging
