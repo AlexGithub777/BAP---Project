@@ -443,7 +443,8 @@ function filterTableByDeviceType() {
 function filterTableByStatus() {
     const selectedStatus = document.getElementById("statusFilter").value;
 
-    if (selectedStatus === "All Statuses") {
+    // Check for either the default "Status" option or "All Statuses"
+    if (selectedStatus === "Status" || selectedStatus === "All Statuses") {
         filteredDevices = [...allDevices];
     } else {
         filteredDevices = allDevices.filter(
