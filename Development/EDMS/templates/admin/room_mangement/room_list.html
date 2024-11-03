@@ -1,5 +1,5 @@
 <!-- Purpose: Display a list of rooms with the ability to add, edit, and delete rooms -->
-<div class="overflow-y-scroll" style="max-height: 50vh">
+<div>
     <div class="d-flex justify-content-between align-items-center">
         <h3 class="my-3">Rooms</h3>
         <button
@@ -11,17 +11,19 @@
             Add Room
         </button>
     </div>
-    <table class="table table-striped" id="rooms-table">
-        <thead class="table-secondary">
-            <tr>
-                <th>Room Code</th>
-                <th>Building Code</th>
-                <th>Site</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Existing rooms will be populated here -->
-        </tbody>
-    </table>
+    <div class="overflow-y-scroll" style="max-height: 50vh">
+        <table class="table table-striped" id="rooms-table">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Room Code</th>
+                    <th>Building Code</th>
+                    <th>Site</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Existing rooms will be populated here -->
+            </tbody>
+        </table>
+    </div>
 </div>
