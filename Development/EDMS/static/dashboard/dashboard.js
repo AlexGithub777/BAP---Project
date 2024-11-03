@@ -86,14 +86,6 @@ export function clearFilters() {
     document.getElementById("deviceTypeFilter").selectedIndex = 0;
     document.getElementById("statusFilter").selectedIndex = 0;
 
-    // Reset active filters
-    activeFilters = {
-        room: null,
-        deviceType: null,
-        status: null,
-    };
-
-    filteredDevices = [...allDevices]; // Reset to original devices
     clearTableBody();
     loadDevicesAndUpdateTable();
 }
@@ -249,23 +241,13 @@ function filterByRoom() {
     const selectedBuilding = document.getElementById("buildingFilter").value;
 
     if (selectedBuilding != "All Buildings") {
-        fetch(`/api/room?buildingId=${selectedBuilding}`)
-            .then((response) => response.json())
-            .then((data) => {
-                const roomSelect = document.getElementById("roomFilter");
-                roomSelect.innerHTML = "";
-
-                // Add default "All Rooms" option
-                addDefaultOption(roomSelect, "All Rooms");
-
-                // Add room options
-                data.forEach((room) => {
-                    const option = document.createElement("option");
-                    option.value = room.room_id; // Store the ID as the value
-                    option.text = room.room_code; // Show the code as the text
-                    roomSelect.add(option);
-                });
-            });
+        fetchAndPopulateSelect(
+            `/api/room?buildingId=${selectedBuilding}`,
+            "roomFilter",
+            "room_code",
+            "room_id",
+            "All Rooms"
+        );
         return;
     }
 }
@@ -350,39 +332,10 @@ let currentPage = 1;
 let rowsPerPage = 10;
 let allDevices = [];
 
-// Keep track of active filters
-let activeFilters = {
-    room: null,
-    deviceType: null,
-    status: null,
-};
-
-// Add event listeners for the new filters
-document.getElementById("roomFilter").addEventListener("change", () => {
-    filterTableByRoom();
-    clearTableBody();
-    updateTable();
-});
-
-document.getElementById("deviceTypeFilter").addEventListener("change", () => {
-    filterTableByDeviceType();
-    clearTableBody();
-    updateTable();
-});
-
-document.getElementById("statusFilter").addEventListener("change", () => {
-    filterTableByStatus();
-    clearTableBody();
-    updateTable();
-});
-
-let filteredDevices = [];
-
 // Modify the dashboard version of getAllDevices to update the table
 async function loadDevicesAndUpdateTable(buildingCode = "", siteId = "") {
     const devices = await getAllDevices(buildingCode, siteId);
     allDevices = devices; // Update global variable if needed
-    filteredDevices = devices; // Initialize filtered devices
 
     updateTable();
 
@@ -403,7 +356,7 @@ function updateTable() {
 
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
-    const pageDevices = filteredDevices.slice(startIndex, endIndex);
+    const pageDevices = allDevices.slice(startIndex, endIndex);
 
     if (!Array.isArray(pageDevices) || pageDevices.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
@@ -413,111 +366,6 @@ function updateTable() {
 
     updatePaginationControls();
 }
-
-// Filter functions for each criteria
-function filterTableByRoom() {
-    const roomSelect = document.getElementById("roomFilter");
-    const selectedRoom = roomSelect.value;
-    const selectedRoomText = roomSelect.selectedOptions[0].text;
-
-    console.log("Selected room value:", selectedRoom);
-    console.log("Selected room text:", selectedRoomText);
-    console.log(
-        "Sample device room codes:",
-        allDevices.slice(0, 3).map((d) => d.room_code)
-    );
-
-    if (selectedRoom === "All Rooms") {
-        filteredDevices = [...allDevices];
-    } else {
-        // Try matching against both the value and text of the selected room
-        filteredDevices = allDevices.filter(
-            (device) =>
-                device.room_code === selectedRoomText ||
-                device.room_id === selectedRoom
-        );
-    }
-    activeFilters.room = selectedRoomText;
-    applyFilters();
-
-    console.log("Filtered devices count:", filteredDevices.length);
-}
-
-function filterTableByDeviceType() {
-    const selectedDeviceType =
-        document.getElementById("deviceTypeFilter").selectedOptions[0].text;
-
-    if (selectedDeviceType === "All Device Types") {
-        filteredDevices = [...allDevices];
-    } else {
-        filteredDevices = allDevices.filter(
-            (device) => device.emergency_device_type_name === selectedDeviceType
-        );
-    }
-    activeFilters.deviceType = selectedDeviceType;
-    applyFilters();
-}
-
-function filterTableByStatus() {
-    const selectedStatus = document.getElementById("statusFilter").value;
-
-    // Check for either the default "Status" option or "All Statuses"
-    if (selectedStatus === "Status" || selectedStatus === "All Statuses") {
-        filteredDevices = [...allDevices];
-    } else {
-        filteredDevices = allDevices.filter(
-            (device) => device.status.String === selectedStatus
-        );
-    }
-    activeFilters.status = selectedStatus;
-    applyFilters();
-}
-
-// Apply all active filters
-function applyFilters() {
-    // Start with all devices
-    filteredDevices = [...allDevices];
-
-    // Apply room filter if active
-    if (activeFilters.room && activeFilters.room !== "All Rooms") {
-        filteredDevices = filteredDevices.filter(
-            (device) => device.room_code === activeFilters.room
-        );
-    }
-
-    // Apply device type filter if active
-    if (
-        activeFilters.deviceType &&
-        activeFilters.deviceType !== "Device Type" &&
-        activeFilters.deviceType !== "All Device Types"
-    ) {
-        filteredDevices = filteredDevices.filter(
-            (device) =>
-                device.emergency_device_type_name === activeFilters.deviceType
-        );
-    }
-
-    // Apply status filter if active
-    if (
-        activeFilters.status &&
-        activeFilters.status !== "Status" &&
-        activeFilters.status !== "All Statuses"
-    ) {
-        filteredDevices = filteredDevices.filter(
-            (device) => device.status.String === activeFilters.status
-        );
-    }
-
-    updateTable();
-}
-
-//debugging
-const selectedRoom = document.getElementById("roomFilter").value;
-console.log("Selected room:", selectedRoom);
-console.log(
-    "Device room codes:",
-    allDevices.map((device) => device.room_code)
-);
 
 // JavaScript
 function updatePaginationControls() {
