@@ -841,6 +841,10 @@ export function addDevice() {
 }
 
 function editDevice(deviceId) {
+    // Clear the form before showing the modal
+    document.getElementById("editDeviceForm").reset();
+    document.getElementById("editDeviceForm").classList.remove("was-validated");
+
     // Function to handle visibility of extinguisher-specific fields
     function updateExtinguisherFields() {
         const selectElement = document.querySelector(
@@ -1102,51 +1106,13 @@ const addDeviceButton = document.querySelector("#addDeviceBtn");
 const editDeviceForm = document.querySelector("#editDeviceForm");
 const editDeviceButton = document.querySelector("#editDeviceBtn");
 
-// Function to validate select elements
+// Function to validate select elementsvalidateDateshandle
 function validateSelect(selectElement) {
     if (selectElement.value === "") {
         selectElement.setCustomValidity("Please make a selection");
     } else {
         selectElement.setCustomValidity("");
     }
-}
-
-// Function to validate dates
-function validateDates() {
-    const currentDate = new Date().toISOString().split("T")[0];
-    let isValid = true;
-
-    const manufactureDateInputs = document.querySelectorAll(
-        ".manufactureDateInput"
-    );
-    const deviceTypeInputs = document.querySelectorAll(
-        ".emergencyDeviceTypeInput"
-    );
-
-    manufactureDateInputs.forEach((manufactureDate, index) => {
-        const deviceTypeSelect = deviceTypeInputs[index];
-        const isFireExtinguisher =
-            deviceTypeSelect.options[deviceTypeSelect.selectedIndex]
-                ?.textContent === "Fire Extinguisher";
-
-        // Validate manufacture date
-        if (manufactureDate.value && manufactureDate.value > currentDate) {
-            manufactureDate.setCustomValidity(
-                "Manufacture date cannot be in the future"
-            );
-            document.querySelectorAll(".manufactureDateFeedback")[
-                index
-            ].textContent = "Manufacture date cannot be in the future";
-            isValid = false;
-        } else {
-            manufactureDate.setCustomValidity("");
-            document.querySelectorAll(".manufactureDateFeedback")[
-                index
-            ].textContent = "";
-        }
-    });
-
-    return isValid;
 }
 
 // Function to validate length for input and textarea elements
@@ -1184,9 +1150,6 @@ function handleDeviceTypeChange(event) {
             .querySelector(`.${prefix}ExtinguisherTypeInputDiv`)
             .classList.remove("d-none");
     }
-
-    // Validate dates after changing device type
-    validateDates();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -1199,7 +1162,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const description = document.querySelector(".descriptionInput");
-    const manufactureDate = document.querySelector(".manufactureDateInput");
     const editDescriptionInput = document.querySelector(
         "#editDescriptionInput"
     );
@@ -1210,9 +1172,6 @@ document.addEventListener("DOMContentLoaded", function () {
     editDescriptionInput.addEventListener("input", function () {
         validateLength(this, 255);
     });
-
-    // Validate edit manufacture date
-    editManufactureDateInput.addEventListener("change", validateDates);
 
     // Validate description length
     description.addEventListener("input", function () {
@@ -1234,9 +1193,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 validateSelect(this);
             });
         });
-
-    // Add event listeners for date validation
-    manufactureDate.addEventListener("change", validateDates);
 
     // Add event listener for status validation
     // Check if device status is "Expired" then check that the expire date is in the past
@@ -1399,13 +1355,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // Validate description length
         validateLength(description, 255);
 
-        // Validate dates
-        const datesValid = validateDates();
-
         // Validate status
         const statusValid = validateAddStatus();
 
-        if (!addDeviceForm.checkValidity() || !datesValid || !statusValid) {
+        if (!addDeviceForm.checkValidity() || !statusValid) {
             event.preventDefault();
             event.stopPropagation();
         } else {
@@ -1432,14 +1385,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // Validate description length
         validateLength(description, 255);
 
-        // Validate dates
-        const datesValid = validateDates();
-
         // Validate status
         const statusValid = validateEditStatus();
 
         // Check if the form is valid
-        if (!editDeviceForm.checkValidity() || !datesValid || !statusValid) {
+        if (!editDeviceForm.checkValidity() || !statusValid) {
             event.stopPropagation();
             editDeviceForm.classList.add("was-validated");
         } else {
@@ -1951,7 +1901,7 @@ export function toggleMap() {
     }
 }
 
-async function searchDevices() {
+export async function searchDevices() {
     const siteFilter = document.getElementById("siteFilter");
     const searchInput = document.getElementById("searchInput");
     const searchValue = searchInput.value.toLowerCase();
@@ -2023,6 +1973,28 @@ async function searchDevices() {
 
 document.getElementById("searchInput").addEventListener("input", () => {
     searchDevices();
+});
+
+// Function to limit the date input to yesterday's date
+$(function () {
+    var dtToday = new Date();
+
+    // Subtract one day to get yesterday's date
+    dtToday.setDate(dtToday.getDate() - 1);
+
+    var month = dtToday.getMonth() + 1;
+    var day = dtToday.getDate();
+    var year = dtToday.getFullYear();
+
+    // Pad month and day with leading zeros if necessary
+    if (month < 10) month = "0" + month.toString();
+    if (day < 10) day = "0" + day.toString();
+
+    var maxDate = year + "-" + month + "-" + day;
+
+    // Set max attribute for the date inputs
+    $("#editManufactureDateInput").attr("max", maxDate);
+    $("#manufactureDate").attr("max", maxDate);
 });
 
 // Make functions available globally
