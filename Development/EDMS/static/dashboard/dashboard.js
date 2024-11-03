@@ -1384,11 +1384,11 @@ export function viewDeviceInspections(deviceId) {
 
                         return `
                             <tr>
-                                <td>${formattedDate}</td>
-                                <td>${
+                                <td data-label="Inspection Date">${formattedDate}</td>
+                                <td data-label="Inspector Name">${
                                     inspection.inspector_name || "Unknown"
                                 }</td>
-                                <td>
+                                <td data-label="Inspection Status">
                                     <span class="badge ${badgeClass}">${
                             inspection.inspection_status || "Not Set"
                         }</span>
