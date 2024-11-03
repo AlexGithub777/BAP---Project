@@ -782,7 +782,7 @@ fetch("/api/emergency-device-type")
     });
 
 // Function to edit a site in the database
-function editSite(siteId) {
+export function editSite(siteId) {
     // Clear the form
     $("#editSiteForm")[0].reset();
     $("#currentSiteMapContainer").hide();
@@ -834,7 +834,7 @@ function editSite(siteId) {
     $("#editSiteModal").modal("show");
 }
 
-function addSite() {
+export function addSite() {
     // Clear the form before showing it
     document.getElementById("addSiteForm").reset();
     document.getElementById("addSiteForm").classList.remove("was-validated");
@@ -891,7 +891,7 @@ function addSite() {
     );
 })();
 
-function AddBuilding() {
+export function AddBuilding() {
     // Clear the form before showing it
     document.getElementById("addBuildingForm").reset();
     document
@@ -908,7 +908,7 @@ function AddBuilding() {
     );
 }
 
-function AddRoom() {
+export function AddRoom() {
     // Clear the form before showing it
     document.getElementById("addRoomForm").reset();
     document.getElementById("addRoomForm").classList.remove("was-validated");
@@ -1176,3 +1176,9 @@ function AddRoom() {
         false
     );
 })();
+
+// Make functions available globally
+window.editSite = editSite;
+window.AddBuilding = AddBuilding;
+window.AddRoom = AddRoom;
+window.editSite = editSite;
