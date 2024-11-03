@@ -1,3 +1,11 @@
+// admin.js
+import { updateNotificationsUI } from "/static/main/notifications.js";
+
+// Call it when needed
+if (role === "Admin") {
+    updateNotificationsUI();
+}
+
 $(document).ready(function () {
     // Image Preview
     $("#siteMapImgInput").change(function () {
