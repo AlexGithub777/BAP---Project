@@ -623,7 +623,7 @@ function clearBuildingAndRoom() {
     });
 }
 
-function addDevice() {
+export function addDevice() {
     document.getElementById("addDeviceForm").reset();
     document.getElementById("addDeviceForm").classList.remove("was-validated");
 
@@ -1875,6 +1875,7 @@ document.getElementById("searchInput").addEventListener("input", () => {
 
 // Make functions available globally
 window.clearFilters = clearFilters;
+window.addDevice = addDevice;
 window.editDevice = editDevice;
 window.viewDeviceInspections = viewDeviceInspections;
 window.viewInspectionDetails = viewInspectionDetails;
