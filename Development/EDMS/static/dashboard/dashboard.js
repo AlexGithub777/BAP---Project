@@ -405,6 +405,7 @@ function updateTable() {
     const endIndex = startIndex + rowsPerPage;
     const pageDevices = filteredDevices.slice(startIndex, endIndex);
 
+    // Clear table if no devices
     if (!Array.isArray(pageDevices) || pageDevices.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
     } else {
@@ -1906,20 +1907,16 @@ export async function searchDevices() {
     const searchInput = document.getElementById("searchInput");
     const searchValue = searchInput.value.toLowerCase();
 
-    console.log("siteFilter:", siteFilter.value);
-
-    // If site filter is "All Sites", reload all devices
-    if (
-        document.getElementById("siteFilter").selectedOptions[0].text ===
-        "All Sites"
-    ) {
+    // If site filter is "All Sites", load all devices
+    if (siteFilter.selectedOptions[0].text === "All Sites") {
         await loadDevicesAndUpdateTable();
     } else {
         // Reload devices for the selected site
         await loadDevicesAndUpdateTable("", siteFilter.value);
     }
 
-    allDevices = allDevices.filter((device) => {
+    // Filter allDevices and update filteredDevices
+    filteredDevices = allDevices.filter((device) => {
         const baseSearch =
             device.emergency_device_type_name
                 .toLowerCase()
@@ -1935,9 +1932,8 @@ export async function searchDevices() {
             device.status.String.toLowerCase().includes(searchValue) ||
             device.description.String.toLowerCase().includes(searchValue);
 
-        // Add admin-only search fields if user is admin
+        // Add admin-only fields if user is admin
         if (role === "Admin") {
-            // Format the dates for searching
             const lastInspectionFormatted = new Date(
                 device.last_inspection_datetime.Time
             )
@@ -1968,7 +1964,7 @@ export async function searchDevices() {
         return baseSearch;
     });
 
-    updateTable();
+    updateTable(); // Call updateTable after filtering
 }
 
 document.getElementById("searchInput").addEventListener("input", () => {
