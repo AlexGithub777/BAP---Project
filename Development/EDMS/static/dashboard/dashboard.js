@@ -4,7 +4,6 @@ import {
     updateNotificationsUI,
 } from "/static/main/notifications.js";
 
-
 // Leaflet map setup
 let map;
 
@@ -80,7 +79,7 @@ function getFilterOptions() {
     );
 }
 
-function clearFilters() {
+export function clearFilters() {
     // Reset each filter dropdown to its first option (except site filter)
     document.getElementById("buildingFilter").selectedIndex = 0;
     document.getElementById("roomFilter").selectedIndex = 0;
@@ -589,7 +588,7 @@ function getBadgeClass(status) {
     }
 }
 
-function getActionButtons(device) {
+export function getActionButtons(device) {
     let buttons = `<button class="btn btn-primary" onclick="deviceNotes('${device.description.String}')">Notes</button>`;
 
     if (role === "Admin") {
@@ -1337,12 +1336,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-function deleteDevice(deviceId) {
-    console.log(`Delete device with ID: ${deviceId}`);
-    // Add your delete logic here
-}
-
-function viewDeviceInspections(deviceId) {
+export function viewDeviceInspections(deviceId) {
     // Close the notification modal if open
     $("#notificationsModal").modal("hide");
 
@@ -1442,7 +1436,7 @@ function viewDeviceInspections(deviceId) {
     $("#viewInspectionModal").modal("show");
 }
 
-function viewInspectionDetails(inspectionId) {
+export function viewInspectionDetails(inspectionId) {
     console.log(`View inspection details for inspection ID: ${inspectionId}`);
     $("#viewInspectionModal").modal("hide");
 
@@ -1559,7 +1553,7 @@ function viewInspectionDetails(inspectionId) {
 
 console.log("User ID:", user_id);
 
-function addInspection() {
+export function addInspection() {
     const deviceId = document.getElementById("inspect_device_id").value;
 
     // Set the user ID in the hidden input field
@@ -1777,7 +1771,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-function deviceNotes(description) {
+export function deviceNotes(description) {
     // Populate the modal with the description
     document.getElementById("notesModalBody").innerText = description;
 
@@ -1786,7 +1780,7 @@ function deviceNotes(description) {
 }
 
 // Function to toggle the map visibility
-function toggleMap() {
+export function toggleMap() {
     var map = document.getElementById("map");
     var deviceList = document.querySelector(".device-list");
 
@@ -1878,3 +1872,12 @@ async function searchDevices() {
 document.getElementById("searchInput").addEventListener("input", () => {
     searchDevices();
 });
+
+// Make functions available globally
+window.clearFilters = clearFilters;
+window.editDevice = editDevice;
+window.viewDeviceInspections = viewDeviceInspections;
+window.viewInspectionDetails = viewInspectionDetails;
+window.addInspection = addInspection;
+window.deviceNotes = deviceNotes;
+window.toggleMap = toggleMap;
