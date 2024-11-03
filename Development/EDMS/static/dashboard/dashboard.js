@@ -1095,9 +1095,10 @@ function fetchAndPopulateRooms(buildingId) {
         .catch((error) => console.error("Error:", error));
 }
 
-// Fetch the forms and submit buttons
+/// Fetch the form and the submit button
 const addDeviceForm = document.querySelector("#addDeviceForm");
 const addDeviceButton = document.querySelector("#addDeviceBtn");
+/// Fetch the form and the submit button
 const editDeviceForm = document.querySelector("#editDeviceForm");
 const editDeviceButton = document.querySelector("#editDeviceBtn");
 
@@ -1111,44 +1112,39 @@ function validateSelect(selectElement) {
 }
 
 // Function to validate dates
-f; // Function to validate dates
-function validateDates(form) {
+function validateDates() {
     const currentDate = new Date().toISOString().split("T")[0];
     let isValid = true;
 
-    const manufactureDate = form.querySelector(".manufactureDateInput");
-    const deviceTypeSelect = form.querySelector(".emergencyDeviceTypeInput");
-    const manufactureDateFeedback = form.querySelector(
-        ".manufactureDateFeedback"
+    const manufactureDateInputs = document.querySelectorAll(
+        ".manufactureDateInput"
+    );
+    const deviceTypeInputs = document.querySelectorAll(
+        ".emergencyDeviceTypeInput"
     );
 
-    if (manufactureDate && deviceTypeSelect) {
+    manufactureDateInputs.forEach((manufactureDate, index) => {
+        const deviceTypeSelect = deviceTypeInputs[index];
         const isFireExtinguisher =
             deviceTypeSelect.options[deviceTypeSelect.selectedIndex]
                 ?.textContent === "Fire Extinguisher";
 
-        // Clear previous validation state
-        manufactureDate.classList.remove("is-invalid");
-        manufactureDate.classList.remove("is-valid");
-
         // Validate manufacture date
-        if (manufactureDate.value) {
-            if (manufactureDate.value > currentDate) {
-                manufactureDate.classList.add("is-invalid");
-                manufactureDateFeedback.textContent =
-                    "Manufacture date cannot be in the future";
-                isValid = false;
-            } else {
-                manufactureDate.classList.add("is-valid");
-                manufactureDateFeedback.textContent = "";
-            }
-        } else {
-            manufactureDate.classList.add("is-invalid");
-            manufactureDateFeedback.textContent =
-                "Please provide a manufacture date";
+        if (manufactureDate.value && manufactureDate.value > currentDate) {
+            manufactureDate.setCustomValidity(
+                "Manufacture date cannot be in the future"
+            );
+            document.querySelectorAll(".manufactureDateFeedback")[
+                index
+            ].textContent = "Manufacture date cannot be in the future";
             isValid = false;
+        } else {
+            manufactureDate.setCustomValidity("");
+            document.querySelectorAll(".manufactureDateFeedback")[
+                index
+            ].textContent = "";
         }
-    }
+    });
 
     return isValid;
 }
@@ -1218,9 +1214,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Validate edit manufacture date
     editManufactureDateInput.addEventListener("change", validateDates);
 
-    // Add event listeners for date validation
-    manufactureDate.addEventListener("change", validateDates);
-
     // Validate description length
     description.addEventListener("input", function () {
         validateLength(this, 255);
@@ -1241,6 +1234,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 validateSelect(this);
             });
         });
+
+    // Add event listeners for date validation
+    manufactureDate.addEventListener("change", validateDates);
 
     // Add event listener for status validation
     // Check if device status is "Expired" then check that the expire date is in the past
