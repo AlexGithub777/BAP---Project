@@ -40,7 +40,6 @@ export async function updateDeviceStatus(deviceId, status) {
             window.location.href = data.redirectURL;
             throw new Error(data.error);
         } else if (data.message) {
-            console.log("Success:", data.message);
             // Only redirect if redirectURL is provided
             if (data.redirectURL) {
                 window.location.href = data.redirectURL;
@@ -379,7 +378,6 @@ export function clearNotificationById(deviceId) {
 export function clearAllNotifications() {
     currentNotifications = [];
     saveNotificationsToSession(currentNotifications);
-    console.log("Cleared all notifications", currentNotifications);
     updateNotificationsUI(currentNotifications);
 }
 
@@ -425,7 +423,6 @@ export async function updateNotificationsUI(
             }
         }
 
-        console.log("Updating UI with notifications:", notifications);
         const html = generateNotificationHTML(notifications);
 
         // Update the notifications section

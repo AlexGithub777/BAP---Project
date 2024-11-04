@@ -1,7 +1,6 @@
 package app
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -120,8 +119,6 @@ func (a *App) HandleEditBuilding(c echo.Context) error {
 	}
 
 	building.BuildingID = buildingID
-
-	log.Printf("Building ID: %s, Building Code: %s, Site ID: %s", buildingID, building.BuildingCode, building.SiteID)
 
 	// Validate input
 	if building.SiteID == "" || building.BuildingCode == "" {

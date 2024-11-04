@@ -90,10 +90,6 @@ func (a *App) HandlePutDeviceType(c echo.Context) error {
 		})
 	}
 
-	// log the device type name and id
-	a.handleLogger("Device Type Name: " + deviceTypeDto.EmergencyDeviceTypeName)
-	a.handleLogger("Device Type ID: " + emergencyDeviceTypeIDStr)
-
 	//Validate device type name
 	deviceNameRegex := regexp.MustCompile("^[a-zA-Z0-9_ ]{1,50}$")
 	if !deviceNameRegex.MatchString(deviceTypeDto.EmergencyDeviceTypeName) {

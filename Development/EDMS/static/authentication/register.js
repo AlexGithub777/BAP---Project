@@ -1,8 +1,6 @@
 (function () {
     "use strict";
 
-    console.log("Register JS loaded");
-
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
     var forms = document.querySelectorAll(".needs-validation");
 
@@ -15,7 +13,6 @@
                     event.preventDefault();
                     event.stopPropagation();
                 }
-
                 form.classList.add("was-validated");
             },
             false

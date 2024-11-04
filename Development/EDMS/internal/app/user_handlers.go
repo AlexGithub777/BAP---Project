@@ -2,7 +2,6 @@ package app
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -37,7 +36,6 @@ func (a *App) HandleGetUserByUsername(c echo.Context) error {
 	}
 
 	username := c.Param("username")
-	log.Printf("Username: %s", username)
 	user, err := a.DB.GetUserByUsername(username)
 	if err != nil {
 		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
@@ -68,8 +66,6 @@ func (a *App) HandlePutUser(c echo.Context) error {
 	}
 
 	user.UserID = userID
-
-	log.Printf("currentUserID: %s, userID: %s, username: %s, email: %s, role: %s, default admin: %s", user.CurrentUserID, user.UserID, user.Username, user.Email, user.Role, user.DefaultAdmin)
 
 	// Validate input
 	if user.Username == "" || user.Email == "" || user.Role == "" {

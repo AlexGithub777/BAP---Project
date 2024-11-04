@@ -4,41 +4,36 @@ import {
     updateNotificationsUI,
 } from "/static/main/notifications.js";
 
-export function logout() {
-    window.location.href = "/logout";
-}
-
-export function viewNotifications() {
-    console.log("View notifications");
-    $("#notificationsModal").modal("show");
-    // Add your view notifications logic here
-}
-
-export function clearAllNotificationsHandler() {
-    console.log("Clearing all notifications");
-    clearAllNotifications(); // Calls the function in notifications.js
-}
-
-export function clearNotificationHandler(deviceId) {
-    console.log("Clearing notification for device:", deviceId);
-    clearNotificationById(deviceId); // Calls the function in notifications.js
-}
-
-export async function refreshNotificationsHandler() {
-    console.log("Refreshing notifications");
-    // Clear session storage to force fresh data
-    sessionStorage.removeItem("notifications");
-    // Get fresh notifications and update UI
-    await updateNotificationsUI();
-}
-
-// hot reload
+// hot reload // !!!! REMOVE THIS CODE IN PRODUCTION !!!
 if (window.EventSource) {
     new EventSource("http://localhost:8090/internal/reload").onmessage = () => {
         setTimeout(() => {
             location.reload();
         });
     };
+}
+
+export function logout() {
+    window.location.href = "/logout";
+}
+
+export function viewNotifications() {
+    $("#notificationsModal").modal("show");
+}
+
+export function clearAllNotificationsHandler() {
+    clearAllNotifications(); // Calls the function in notifications.js
+}
+
+export function clearNotificationHandler(deviceId) {
+    clearNotificationById(deviceId); // Calls the function in notifications.js
+}
+
+export async function refreshNotificationsHandler() {
+    // Clear session storage to force fresh data
+    sessionStorage.removeItem("notifications");
+    // Get fresh notifications and update UI
+    await updateNotificationsUI();
 }
 
 function formatEntityType(entityType) {
@@ -120,12 +115,6 @@ export function showDeleteModal(id, entityType, entityName, currentUserId) {
 
         deleteIdInput.value = id;
         currentUserIdInput.value = currentUserId;
-
-        console.log(
-            deleteForm.action,
-            deleteIdInput.value,
-            currentUserIdInput.value
-        );
 
         // Show the modal
         const modal = new bootstrap.Modal(deleteModal);

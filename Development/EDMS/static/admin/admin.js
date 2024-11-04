@@ -1,10 +1,18 @@
 // admin.js
 import { updateNotificationsUI } from "/static/main/notifications.js";
+import {
+    viewDeviceInspections,
+    viewInspectionDetails,
+    addInspection,
+    initializeInspectionForm,
+} from "/static/main/inspections.js";
 
-// Call it when needed
-if (role === "Admin") {
-    updateNotificationsUI();
-}
+initializeInspectionForm();
+
+window.viewDeviceInspections = viewDeviceInspections;
+window.viewInspectionDetails = viewInspectionDetails;
+window.addInspection = addInspection;
+
 
 $(document).ready(function () {
     // Image Preview
@@ -38,11 +46,7 @@ $(document).ready(function () {
         function (event) {
             var fileInput = event.target;
             var file = fileInput.files && fileInput.files[0];
-
-            console.log("File input changed", fileInput, file); // Debugging log
-
             if (!file) {
-                console.log("No file selected"); // Debugging log
                 $("#editSiteModal #imagePreview").attr("src", "");
                 $("#editSiteModal #editSiteImagePreviewContainer").hide();
                 return;
@@ -50,7 +54,6 @@ $(document).ready(function () {
 
             // Check if the file is an image
             if (!file.type.startsWith("image/")) {
-                console.log("Non-image file selected"); // Debugging log
                 fileInput.value = ""; // Clear the file input
                 $("#editSiteModal #imagePreview").attr("src", "");
                 $("#editSiteModal #editSiteImagePreviewContainer").hide();
@@ -68,12 +71,10 @@ $(document).ready(function () {
 
             var reader = new FileReader();
             reader.onload = function (e) {
-                console.log("File read successfully"); // Debugging log
                 $("#editSiteModal #imagePreview").attr("src", e.target.result);
                 $("#editSiteModal #editSiteImagePreviewContainer").show();
             };
             reader.onerror = function (error) {
-                console.log("Error reading file:", error); // Debugging log
                 fileInput.value = ""; // Clear the file input
                 $("#editSiteModal #imagePreview").attr("src", "");
                 $("#editSiteModal #editSiteImagePreviewContainer").hide();
@@ -92,32 +93,12 @@ $(document).ready(function () {
     );
 });
 
-console.log(is_current_user_default_admin);
-
-// whenever is_current_user_default_admin is false, hide the actions buttons from any row with user.default_admin = true
-
 // Fetch users from the server
 fetch("/api/user")
     .then((response) => response.json())
     .then((users) => {
-        console.log("Original users:", users);
-        console.log(
-            "Current user ID:",
-            current_user_id,
-            "Type:",
-            typeof current_user_id
-        );
-
         // Convert current_user_id to a number
         const currentUserIdNumber = parseInt(current_user_id, 10);
-
-        // Log the converted current user ID
-        console.log(
-            "Converted current user ID:",
-            currentUserIdNumber,
-            "Type:",
-            typeof currentUserIdNumber
-        );
 
         // Sort the users array to put the current user first
         users.sort((a, b) => {
@@ -126,11 +107,8 @@ fetch("/api/user")
             return a.username.localeCompare(b.username); // Sort others alphabetically
         });
 
-        console.log("Sorted users:", users);
-
         // Create a table row for each user
         const userRows = users.map((user) => {
-            console.log("Processing user:", user);
             // Convert user.default_admin to a boolean
             var isAdmin = JSON.parse(user.default_admin);
             // Convert is_current_user_default_admin to a boolean
@@ -195,7 +173,6 @@ fetch("/api/user")
         // Add event listeners to the edit and delete buttons
         $(".edit-user-button").click(async (event) => {
             const id = $(event.target).data("id");
-            console.log("Edit button clicked for user with ID:", id);
             // Handle edit
             // Fetch the user data from the nearest row
             const row = $(event.target).closest("tr");
@@ -206,7 +183,6 @@ fetch("/api/user")
             const default_admin = await fetch(`/api/user/${username}`)
                 .then((response) => response.json())
                 .then((user) => {
-                    console.log("User data:", user);
                     return user.default_admin.toString();
                 });
 
@@ -232,9 +208,6 @@ fetch("/api/user")
                 $("#passwordField").hide();
             }
 
-            console.log("Updated user ID:", updatedUserId);
-            console.log("Current user ID:", current_user_id);
-
             // Show the modal
             $("#editUserModal").modal("show");
             // Clear validation classes
@@ -255,7 +228,6 @@ fetch("/api/user")
                     for (const [key, value] of formData.entries()) {
                         jsonData[key] = value;
                     }
-                    console.log("JSON data:", jsonData);
                     fetch(
                         `/api/user/${
                             document.getElementById("editUserID").value
@@ -270,7 +242,6 @@ fetch("/api/user")
                     )
                         .then((response) => response.json())
                         .then((data) => {
-                            console.log("Success:", data);
                             if (data.error) {
                                 window.location.href = data.redirectURL;
                             } else if (data.message) {
@@ -380,7 +351,6 @@ fetch("/api/building")
         // Add event listeners to the edit and delete buttons
         $(".edit-building-button").click((event) => {
             const id = $(event.target).data("id");
-            console.log("Edit button clicked for building with ID:", id);
 
             populateDropdown(
                 ".siteInput",
@@ -431,7 +401,6 @@ fetch("/api/building")
                     for (const [key, value] of formData.entries()) {
                         jsonData[key] = value;
                     }
-                    console.log("JSON data:", jsonData);
                     fetch(
                         `/api/building/${
                             document.getElementById("editBuildingID").value
@@ -446,7 +415,6 @@ fetch("/api/building")
                     )
                         .then((response) => response.json())
                         .then((data) => {
-                            console.log("Success:", data);
                             if (data.error) {
                                 window.location.href = data.redirectURL;
                             } else if (data.message) {
@@ -514,7 +482,6 @@ fetch("/api/room")
         // Event handler for edit button click
         $(".edit-room-button").click((event) => {
             const id = $(event.target).data("id");
-            console.log("Edit button clicked for room with ID:", id);
 
             // Clear custom validation and invalid classes from building select
             const buildingInput = document.getElementById(
@@ -531,8 +498,6 @@ fetch("/api/room")
             fetch(`/api/room/${id}`)
                 .then((response) => response.json())
                 .then((room) => {
-                    console.log("Room data:", room);
-
                     // Populate sites dropdown
                     fetch("/api/site")
                         .then((response) => response.json())
@@ -722,7 +687,6 @@ fetch("/api/room")
                     for (const [key, value] of formData.entries()) {
                         jsonData[key] = value;
                     }
-                    console.log("JSON data:", jsonData);
                     fetch(
                         `/api/room/${
                             document.getElementById("editRoomID").value
@@ -737,7 +701,6 @@ fetch("/api/room")
                     )
                         .then((response) => response.json())
                         .then((data) => {
-                            console.log("Success:", data);
                             if (data.error) {
                                 window.location.href = data.redirectURL;
                             } else if (data.message) {
@@ -802,7 +765,6 @@ fetch("/api/emergency-device-type")
         // Add event listeners to the edit and delete buttons
         $(".edit-device-type-button").click((event) => {
             const id = $(event.target).data("id");
-            console.log("Edit button clicked for device type with ID:", id);
             document.getElementById("editDeviceTypeID").value = id;
 
             //Fetch device type by id and autofill form
@@ -841,7 +803,6 @@ fetch("/api/emergency-device-type")
                     for (const [key, value] of formData.entries()) {
                         jsonData[key] = value;
                     }
-                    console.log("JSON data:", jsonData);
                     fetch(
                         `/api/emergency-device-type/${
                             document.getElementById("editDeviceTypeID").value
@@ -856,7 +817,6 @@ fetch("/api/emergency-device-type")
                     )
                         .then((response) => response.json())
                         .then((data) => {
-                            console.log("Success:", data);
                             if (data.error) {
                                 window.location.href = data.redirectURL;
                             } else if (data.message) {
@@ -1020,8 +980,6 @@ export function AddRoom() {
     buildingInput.disabled = false;
     buildingInput.classList.remove("is-invalid");
 
-    console.log("Add Room");
-
     // Clear the building options
     $(".buildingInput").html(
         `<option value="" disabled selected>Select a Building</option>`
@@ -1048,14 +1006,11 @@ export function AddRoom() {
         );
 
         var siteId = document.getElementById("addRoomSite").value;
-        console.log("Selected site ID:", siteId);
 
         // Fetch the buildings for the selected site
         fetch(`/api/building?siteId=${siteId}`)
             .then((response) => response.json())
             .then((buildings) => {
-                console.log("Buildings for site:", buildings);
-
                 // Check if buildings is null
                 if (buildings === null) {
                     // Add a default disabled option for "No buildings"

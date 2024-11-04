@@ -16,7 +16,6 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
-
 // CustomClaims represents JWT custom claims
 type CustomClaims struct {
 	UserID       string `json:"user_id"`
@@ -62,6 +61,8 @@ func (a *App) HandlePostForgotPassword(c echo.Context) error {
 	}
 
 	emailmessage := fmt.Sprintf("Could not send email but Your new password is: %s", newPassword)
+
+	a.handleLogger(emailmessage)
 
 	// Send the new password to the user's email
 	if err := sendPasswordResetEmail(email, user.Username, newPassword); err != nil {

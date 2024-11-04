@@ -51,6 +51,8 @@
         <link rel="stylesheet" href="/static/main/main.css" />
         <script type="text/javascript">
             $(document).ready(function () {
+                // refresh notifications
+                refreshNotificationsHandler();
                 // Function to get query parameters by name
                 function getQueryParameter(param) {
                     var urlParams = new URLSearchParams(window.location.search);
@@ -126,6 +128,15 @@
             template "edit_building.html". }} {{ template "add_room.html" . }}
             {{ template "edit_room.html" . }}
 
+            <!-- Add Inspection Device Modal -->
+            {{ template "add_inspection.html" . }}
+
+            <!-- View Device Inspections modal -->
+            {{ template "device_inspection.html" . }}
+
+            <!-- View Device Inspection details modal -->
+            {{ template "view_inspection.html" . }}
+
             <!-- Notifications modal -->
             {{ template "notifications.html" . }}
         </div>
@@ -135,12 +146,20 @@
         <!-- Custom JS-->
         <script>
             var role = "{{.role}}";
-            console.log(role);
+
+            if (role === "Admin") {
+                $(document).ready(function () {
+                    // refresh notifications
+                    refreshNotificationsHandler();
+                });
+            }
             var current_user_id = "{{.user_id}}";
+            var user_id = "{{.user_id}}";
             var is_current_user_default_admin = "{{.default_admin}}";
         </script>
         <script type="module" src="/static/main/notifications.js"></script>
         <script type="module" defer src="/static/main/main.js"></script>
+
         <script type="module" defer src="/static/admin/admin.js"></script>
     </body>
 </html>
