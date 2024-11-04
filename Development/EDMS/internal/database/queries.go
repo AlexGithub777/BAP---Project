@@ -352,10 +352,17 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 
 		// Handle dates (same as before)
 		if device.ManufactureDate.Valid {
-			expiryDate := device.ManufactureDate.Time.AddDate(5, 0, 0)
+			expiryDate := device.ManufactureDate.Time.AddDate(5, 0, 0) // Hardcoded 5 years + manuafcture date
 			device.ExpireDate = sql.NullTime{
 				Time:  expiryDate,
 				Valid: true,
+			}
+			// if device type is not "Fire Extinguisher", set expire date to null
+			if device.EmergencyDeviceTypeName != "Fire Extinguisher" {
+				device.ExpireDate = sql.NullTime{
+					Time:  time.Time{},
+					Valid: false,
+				}
 			}
 		} else {
 			device.ManufactureDate = sql.NullTime{
