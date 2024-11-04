@@ -60,7 +60,7 @@ let currentNotifications =
     JSON.parse(sessionStorage.getItem("notifications")) || [];
 
 export async function generateNotifications() {
-    const allDevices = await getAllDevices(); // Store the returned devices
+    const allDevices = await getAllDevices();
 
     const currentDate = new Date();
     const thirtyDaysFromNow = new Date();
@@ -75,22 +75,25 @@ export async function generateNotifications() {
     // Helper function to check if a date is today or in the past
     const isDateDueOrPast = (date) => {
         const targetDate = new Date(date);
-        // Reset time parts to compare just the dates
         targetDate.setHours(0, 0, 0, 0);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         return targetDate <= today;
     };
 
-    // Update device statuses based on dates
+    // Update device statuses first
     for (const device of allDevices) {
         let statusUpdated = false;
+
+        // Skip updating if the status is already "Inspection Failed"
+        if (device.status.String === "Inspection Failed") {
+            continue; // Skip this device as it already has the "Inspection Failed" status
+        }
 
         // Check inspection date
         if (
             device.next_inspection_date.Valid &&
             isDateDueOrPast(device.next_inspection_date.Time) &&
-            device.status.String !== "Inspection Failed" &&
             device.status.String !== "Inspection Due"
         ) {
             const success = await updateDeviceStatus(
@@ -98,10 +101,8 @@ export async function generateNotifications() {
                 "Inspection Due"
             );
             if (success) {
-                device.status.String = "Inspection Due"; // Update local state
+                device.status.String = "Inspection Due";
                 statusUpdated = true;
-                // reload devices
-                await getAllDevices();
             }
         }
 
@@ -112,101 +113,105 @@ export async function generateNotifications() {
             device.status.String !== "Expired" &&
             !statusUpdated
         ) {
-            // Only update if no other status change
-
             const success = await updateDeviceStatus(
                 device.emergency_device_id,
                 "Expired"
             );
             if (success) {
-                device.status.String = "Expired"; // Update local state
-                // reload devices
-                await getAllDevices();
+                device.status.String = "Expired";
             }
         }
     }
 
-    // Create a Map to store unique devices by their ID
+    // Clear all existing notifications for devices that had status changes
+    const clearedDevices = getClearedNotifications();
+
+    // Create notifications map
     const notificationMap = new Map();
 
-    // Helper function to add device to map with reason and days
-    const addDeviceWithReason = (device, reason, days = null) => {
-        if (!notificationMap.has(device.emergency_device_id)) {
-            notificationMap.set(device.emergency_device_id, {
-                ...device,
-                notification_details: [
-                    {
-                        reason: reason,
-                        days: days,
-                    },
-                ],
-            });
-        } else {
-            const existing = notificationMap.get(device.emergency_device_id);
-            if (
-                !existing.notification_details.some(
-                    (detail) => detail.reason === reason
-                )
-            ) {
-                existing.notification_details.push({
+    // Helper function to add or update device notification
+    const updateDeviceNotification = (device, reason, days = null) => {
+        // Always create a fresh notification entry
+        notificationMap.set(device.emergency_device_id, {
+            ...device,
+            notification_details: [
+                {
                     reason: reason,
                     days: days,
-                });
-            }
-        }
+                },
+            ],
+        });
     };
 
-    // Check each device
+    // Process each device for notifications
     allDevices.forEach((device) => {
         // Skip inactive devices
         if (device.status.String === "Inactive") {
             return;
         }
 
-        // Check failed inspection status
-        if (device.status.String === "Inspection Failed") {
-            addDeviceWithReason(device, "Inspection Failed");
+        // Clear any existing notifications for this device
+        if (notificationMap.has(device.emergency_device_id)) {
+            notificationMap.delete(device.emergency_device_id);
         }
 
-        // Check inspection due status
-        if (
+        // Process notifications based on current status
+        // Priority order is maintained by the order of these checks
+        if (device.status.String === "Inspection Failed") {
+            updateDeviceNotification(device, "Inspection Failed");
+        } else if (
+            device.status.String === "Expired" &&
+            device.expire_date.Valid
+        ) {
+            const daysOverdue = calculateDaysOverdue(device.expire_date.Time);
+            updateDeviceNotification(device, "Expired", daysOverdue);
+        } else if (
             device.status.String === "Inspection Due" &&
             device.next_inspection_date.Valid
         ) {
             const daysOverdue = calculateDaysOverdue(
                 device.next_inspection_date.Time
             );
-            addDeviceWithReason(device, "Inspection Due", daysOverdue);
-        }
-
-        // Check expired status
-        if (device.status.String === "Expired" && device.expire_date.Valid) {
-            const daysOverdue = calculateDaysOverdue(device.expire_date.Time);
-            addDeviceWithReason(device, "Expired", daysOverdue);
-        }
-
-        // Check expire date within 30 days
-        if (device.expire_date.Valid) {
-            const expireDate = new Date(device.expire_date.Time);
-            if (expireDate > currentDate && expireDate <= thirtyDaysFromNow) {
-                const daysUntil = Math.ceil(
-                    (expireDate - currentDate) / (1000 * 60 * 60 * 24)
-                );
-                addDeviceWithReason(device, "Expiring Soon", daysUntil);
+            updateDeviceNotification(device, "Inspection Due", daysOverdue);
+        } else {
+            // Check for upcoming issues only if no current issues
+            if (device.expire_date.Valid) {
+                const expireDate = new Date(device.expire_date.Time);
+                if (
+                    expireDate > currentDate &&
+                    expireDate <= thirtyDaysFromNow
+                ) {
+                    const daysUntil = Math.ceil(
+                        (expireDate - currentDate) / (1000 * 60 * 60 * 24)
+                    );
+                    updateDeviceNotification(
+                        device,
+                        "Expiring Soon",
+                        daysUntil
+                    );
+                }
             }
-        }
 
-        // Check next inspection date within 30 days
-        if (device.next_inspection_date.Valid) {
-            const inspectionDate = new Date(device.next_inspection_date.Time);
             if (
-                inspectionDate > currentDate &&
-                inspectionDate <= thirtyDaysFromNow
+                !notificationMap.has(device.emergency_device_id) &&
+                device.next_inspection_date.Valid
             ) {
-                const daysUntil = Math.ceil(
-                    (inspectionDate - currentDate) / (1000 * 60 * 60 * 24)
+                const inspectionDate = new Date(
+                    device.next_inspection_date.Time
                 );
-                addDeviceWithReason(device, "Inspection Due Soon", daysUntil);
+                if (
+                    inspectionDate > currentDate &&
+                    inspectionDate <= thirtyDaysFromNow
+                ) {
+                    const daysUntil = Math.ceil(
+                        (inspectionDate - currentDate) / (1000 * 60 * 60 * 24)
+                    );
+                    updateDeviceNotification(
+                        device,
+                        "Inspection Due Soon",
+                        daysUntil
+                    );
+                }
             }
         }
     });
@@ -224,32 +229,24 @@ export async function generateNotifications() {
     };
 
     notifications.sort((a, b) => {
-        const aPriority = Math.min(
-            ...a.notification_details.map((d) => priorityOrder[d.reason])
-        );
-        const bPriority = Math.min(
-            ...b.notification_details.map((d) => priorityOrder[d.reason])
-        );
+        const aPriority = priorityOrder[a.notification_details[0].reason];
+        const bPriority = priorityOrder[b.notification_details[0].reason];
 
         if (aPriority !== bPriority) {
             return aPriority - bPriority;
         }
 
         // If same priority, sort by days overdue (highest first)
-        const aDetails = a.notification_details.find(
-            (d) => priorityOrder[d.reason] === aPriority
+        return (
+            (b.notification_details[0].days || 0) -
+            (a.notification_details[0].days || 0)
         );
-        const bDetails = b.notification_details.find(
-            (d) => priorityOrder[d.reason] === bPriority
-        );
-        return (bDetails?.days || 0) - (aDetails?.days || 0);
     });
 
     // Update global notifications list
     currentNotifications = notifications;
 
-    // Before returning notifications, filter out cleared ones
-    const clearedDevices = getClearedNotifications();
+    // Filter out manually cleared notifications
     const filteredNotifications = notifications.filter(
         (device) => !clearedDevices.includes(device.emergency_device_id)
     );

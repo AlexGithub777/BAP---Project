@@ -29,12 +29,11 @@ export function clearNotificationHandler(deviceId) {
     clearNotificationById(deviceId); // Calls the function in notifications.js
 }
 
-// Keep your original refreshNotificationsHandler for the button click
 export async function refreshNotificationsHandler() {
+    // Declare refreshButton outside of try to ensure it's accessible in finally
+    const refreshButton = document.getElementById("refreshNotificationsBtn");
+
     try {
-        const refreshButton = document.querySelector(
-            '[onclick="refreshNotificationsHandler()"]'
-        );
         if (refreshButton) {
             refreshButton.disabled = true;
             const icon = refreshButton.querySelector(".fa-sync-alt");
