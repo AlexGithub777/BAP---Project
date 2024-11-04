@@ -85,6 +85,7 @@ export function clearFilters() {
     document.getElementById("roomFilter").selectedIndex = 0;
     document.getElementById("deviceTypeFilter").selectedIndex = 0;
     document.getElementById("statusFilter").selectedIndex = 0;
+    document.getElementById("searchInput").value = ""; // Clear search input
 
     // Reset active filters
     activeFilters = {
@@ -1960,7 +1961,7 @@ export function toggleMap() {
         deviceList.classList.add("col-xxl-12");
     }
 }
-
+/*
 export async function searchDevices() {
     const siteFilter = document.getElementById("siteFilter");
     const searchInput = document.getElementById("searchInput");
@@ -2025,10 +2026,109 @@ export async function searchDevices() {
 
     updateTable(); // Call updateTable after filtering
 }
+*/
 
 document.getElementById("searchInput").addEventListener("input", () => {
     searchDevices();
 });
+
+// Updated search function to use combined filtering approach
+export async function searchDevices() {
+    const searchInput = document.getElementById("searchInput");
+    const searchValue = searchInput.value.toLowerCase();
+
+    // First, reapply base filters to get fresh filtered state
+    // Start with all devices
+    let baseFilteredDevices = [...allDevices];
+
+    // Apply active filters to get our base filtered state
+    if (activeFilters.room && activeFilters.room !== "All Rooms") {
+        baseFilteredDevices = baseFilteredDevices.filter(
+            (device) => device.room_code === activeFilters.room
+        );
+    }
+
+    if (
+        activeFilters.deviceType &&
+        activeFilters.deviceType !== "Device Type" &&
+        activeFilters.deviceType !== "All Device Types"
+    ) {
+        baseFilteredDevices = baseFilteredDevices.filter(
+            (device) =>
+                device.emergency_device_type_name === activeFilters.deviceType
+        );
+    }
+
+    if (
+        activeFilters.status &&
+        activeFilters.status !== "Status" &&
+        activeFilters.status !== "All Statuses"
+    ) {
+        baseFilteredDevices = baseFilteredDevices.filter(
+            (device) => device.status.String === activeFilters.status
+        );
+    }
+
+    // If search is empty, use just the filtered results
+    if (!searchValue) {
+        filteredDevices = baseFilteredDevices;
+    } else {
+        // Apply search filter to the fresh filtered state
+        filteredDevices = baseFilteredDevices.filter((device) => {
+            const baseSearch =
+                device.emergency_device_type_name
+                    .toLowerCase()
+                    .includes(searchValue) ||
+                device.extinguisher_type_name.String.toLowerCase().includes(
+                    searchValue
+                ) ||
+                device.room_code.toLowerCase().includes(searchValue) ||
+                device.serial_number.String.toLowerCase().includes(
+                    searchValue
+                ) ||
+                device.manufacture_date.Time.toLowerCase().includes(
+                    searchValue
+                ) ||
+                device.expire_date.Time.toLowerCase().includes(searchValue) ||
+                device.size.String.toLowerCase().includes(searchValue) ||
+                device.status.String.toLowerCase().includes(searchValue) ||
+                device.description.String.toLowerCase().includes(searchValue);
+
+            // Add admin-only fields if user is admin
+            if (role === "Admin") {
+                const lastInspectionFormatted = new Date(
+                    device.last_inspection_datetime.Time
+                )
+                    .toLocaleDateString("en-NZ", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .toLowerCase();
+
+                const nextInspectionFormatted = new Date(
+                    device.next_inspection_date.Time
+                )
+                    .toLocaleDateString("en-NZ", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                    })
+                    .toLowerCase();
+
+                return (
+                    baseSearch ||
+                    lastInspectionFormatted.includes(searchValue) ||
+                    nextInspectionFormatted.includes(searchValue)
+                );
+            }
+
+            return baseSearch;
+        });
+    }
+
+    updateTable();
+}
 
 // Function to limit the date input to yesterday's date
 $(function () {
