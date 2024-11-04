@@ -653,11 +653,11 @@ if (role === "Admin") {
 function formatDeviceRow(device) {
     if (!device) return "";
     const formatDateMonthYear = (dateString) =>
-        formatDate(dateString, { year: "numeric", month: "long" });
+        formatDate(dateString, { month: "short", year: "numeric" });
     const formatDateFull = (dateString) =>
         formatDate(dateString, {
             year: "numeric",
-            month: "long",
+            month: "short",
             day: "numeric",
             timeZone: "Pacific/Auckland",
         });
@@ -681,6 +681,7 @@ function formatDeviceRow(device) {
             <td data-label="Extinguisher Type">${
                 device.extinguisher_type_name.String
             }</td>
+            <td data-label="Building">${device.building_code}</td>
             <td data-label="Room">${device.room_code}</td>
             <td data-label="Serial Number">${device.serial_number.String}</td>
             <td data-label="Manufacture Date">${formatDateMonthYear(

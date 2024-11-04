@@ -264,6 +264,7 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 		edt.emergencydevicetypename,
 		et.extinguishertypename AS ExtinguisherTypeName,
 		r.roomcode,
+		b.buildingcode,
 		ed.serialnumber,
 		ed.manufacturedate,
 		ed.LastInspectionDateTime AT TIME ZONE 'Pacific/Auckland' AS lastinspectiondatetime_nzdt,
@@ -272,6 +273,7 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 		ed.status 
 	FROM emergency_deviceT ed
 	JOIN roomT r ON ed.roomid = r.roomid
+	JOIN buildingT b ON r.buildingid = b.buildingid
 	LEFT JOIN emergency_device_typeT edt ON ed.emergencydevicetypeid = edt.emergencydevicetypeid
 	LEFT JOIN Extinguisher_TypeT et ON ed.extinguishertypeid = et.extinguishertypeid
 	`
@@ -279,21 +281,18 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 	// Add filtering by site name and building code if provided
 	if siteId != "" && buildingCode != "" {
 		query += `
-		JOIN buildingT b ON r.buildingid = b.buildingid
 		JOIN siteT s ON b.siteid = s.siteid
 		WHERE s.siteid = $1 AND b.buildingcode = $2
 		`
 		args = append(args, siteId, buildingCode)
 	} else if siteId != "" {
 		query += `
-		JOIN buildingT b ON r.buildingid = b.buildingid
 		JOIN siteT s ON b.siteid = s.siteid
 		WHERE s.siteid = $1
 		`
 		args = append(args, siteId)
 	} else if buildingCode != "" {
 		query += `
-		JOIN buildingT b ON r.buildingid = b.buildingid
 		WHERE b.buildingcode = $1
 		`
 		args = append(args, buildingCode)
@@ -317,6 +316,7 @@ func (db *DB) GetAllDevices(siteId string, buildingCode string) ([]models.Emerge
 			&device.EmergencyDeviceTypeName,
 			&device.ExtinguisherTypeName,
 			&device.RoomCode,
+			&device.BuildingCode,
 			&device.SerialNumber,
 			&device.ManufactureDate,
 			&device.LastInspectionDateTime,
