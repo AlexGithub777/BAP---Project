@@ -820,75 +820,152 @@ function clearBuildingAndRoom() {
 }
 
 export function addDevice() {
-    document.getElementById("addDeviceForm").reset();
-    document.getElementById("addDeviceForm").classList.remove("was-validated");
+    console.log("addDevice function called");
+
+    const addDeviceForm = document.getElementById("addDeviceForm");
+    console.log("Form element:", addDeviceForm);
+
+    if (addDeviceForm) {
+        addDeviceForm.reset();
+        addDeviceForm.classList.remove("was-validated");
+    }
 
     // Hide extinguisher-specific fields by default
-    document.querySelector(".ExtinguisherTypeInputDiv").classList.add("d-none");
-    document.getElementById("ExtinguisherTypeInput").value = ""; // Clear selected value
-
-    // Hide expiry date by defualt
-    document.getElementById("ExpireDateDiv").classList.add("d-none");
-    document.getElementById("ExpireDate").value = ""; // Clear selected value
-
-    const emergencyDeviceTypePromise = populateDropdown(
-        ".emergencyDeviceTypeInput",
-        "/api/emergency-device-type",
-        "Select Device Type",
-        "emergency_device_type_id",
-        "emergency_device_type_name"
+    const extinguisherTypeDiv = document.querySelector(
+        ".ExtinguisherTypeInputDiv"
     );
+    const expireDateDiv = document.getElementById("ExpireDateDiv");
 
-    const extinguisherTypePromise = populateDropdown(
-        ".extinguisherTypeInput",
-        "/api/extinguisher-type",
-        "Select Extinguisher Type",
-        "extinguisher_type_id",
-        "extinguisher_type_name"
-    );
+    if (extinguisherTypeDiv) extinguisherTypeDiv.classList.add("d-none");
+    if (expireDateDiv) expireDateDiv.classList.add("d-none");
 
-    const sitePromise = populateDropdown(
-        ".siteInput",
-        "/api/site",
-        "Select a Site",
-        "site_id",
-        "site_name"
-    );
+    // Make expiry date read-only by default
+    document.getElementById("ExpireDate").readOnly = true;
 
-    Promise.all([
-        emergencyDeviceTypePromise,
-        extinguisherTypePromise,
-        sitePromise,
-    ])
+    const promises = [
+        populateDropdown(
+            ".emergencyDeviceTypeInput",
+            "/api/emergency-device-type",
+            "Select Device Type",
+            "emergency_device_type_id",
+            "emergency_device_type_name"
+        ),
+        populateDropdown(
+            ".extinguisherTypeInput",
+            "/api/extinguisher-type",
+            "Select Extinguisher Type",
+            "extinguisher_type_id",
+            "extinguisher_type_name"
+        ),
+        populateDropdown(
+            ".siteInput",
+            "/api/site",
+            "Select a Site",
+            "site_id",
+            "site_name"
+        ),
+    ];
+
+    Promise.all(promises)
         .then(() => {
-            // Event listener for site change
-            document
-                .querySelector(".siteInput")
-                .addEventListener("change", (event) => {
-                    const selectedSiteId = event.target.value;
-                    clearBuildingAndRoom();
+            console.log("All dropdowns populated");
 
-                    if (selectedSiteId) {
-                        fetchAndPopulateBuildings(selectedSiteId);
+            // First, set up the device type change listener
+            const deviceTypeSelect = document.querySelector(
+                ".emergencyDeviceTypeInput"
+            );
+            if (deviceTypeSelect) {
+                deviceTypeSelect.addEventListener("change", function (event) {
+                    const selectedText =
+                        event.target.options[event.target.selectedIndex]
+                            ?.text || "";
+                    console.log("Device type changed to:", selectedText);
+
+                    const isFireExtinguisher = selectedText
+                        .toLowerCase()
+                        .includes("fire extinguisher");
+
+                    if (isFireExtinguisher) {
+                        extinguisherTypeDiv?.classList.remove("d-none");
+                        expireDateDiv?.classList.remove("d-none");
+                    } else {
+                        extinguisherTypeDiv?.classList.add("d-none");
+                        expireDateDiv?.classList.add("d-none");
                     }
                 });
+            }
 
-            // Event listener for building change
-            document
-                .querySelector(".buildingInput")
-                .addEventListener("change", (event) => {
-                    const selectedBuildingId = event.target.value;
+            // Find manufacture date input within the form
+            const manufactureDateInput =
+                document.querySelector('input[type="date"]');
+            console.log("Manufacture date input found:", manufactureDateInput);
 
-                    if (selectedBuildingId) {
-                        fetchAndPopulateRooms(selectedBuildingId);
+            if (manufactureDateInput) {
+                manufactureDateInput.addEventListener(
+                    "change",
+                    function (event) {
+                        console.log(
+                            "Manufacture date changed to:",
+                            event.target.value
+                        );
+
+                        const deviceType = document.querySelector(
+                            ".emergencyDeviceTypeInput"
+                        );
+                        const selectedText =
+                            deviceType?.options[deviceType.selectedIndex]
+                                ?.text || "";
+                        console.log("Current device type:", selectedText);
+
+                        if (
+                            selectedText
+                                .toLowerCase()
+                                .includes("fire extinguisher")
+                        ) {
+                            const expiryDate = new Date(event.target.value);
+                            expiryDate.setFullYear(
+                                expiryDate.getFullYear() + 5
+                            );
+                            const formattedDate = expiryDate
+                                .toISOString()
+                                .split("T")[0];
+
+                            // Find expiry date input - it should be the second date input in the form
+                            const expireDateInput = Array.from(
+                                document.querySelectorAll('input[type="date"]')
+                            )[1];
+
+                            if (expireDateInput) {
+                                expireDateInput.value = formattedDate;
+                                console.log(
+                                    "Set expiry date to:",
+                                    formattedDate
+                                );
+                            } else {
+                                console.log("Could not find expiry date input");
+                            }
+                            document.getElementById(
+                                "ExpireDate"
+                            ).readOnly = true;
+                            document.getElementById(
+                                "ExpireDate"
+                            ).disabled = true;
+                        }
                     }
-                });
+                );
+            } else {
+                console.error("Could not find manufacture date input element");
+            }
 
-            // Show the modal after all dropdowns are populated
-            $("#addDeviceModal").modal("show");
+            const modal = document.getElementById("addDeviceModal");
+            console.log("Modal element:", modal);
+
+            if (modal) {
+                $(modal).modal("show");
+            }
         })
         .catch((error) => {
-            console.error("Error loading dropdown data:", error);
+            console.error("Error in addDevice:", error);
         });
 }
 
@@ -896,7 +973,6 @@ function editDevice(deviceId) {
     // Clear the form before showing the modal
     document.getElementById("editDeviceForm").reset();
     document.getElementById("editDeviceForm").classList.remove("was-validated");
-
     // Function to handle visibility of extinguisher-specific fields
     function updateExtinguisherFields() {
         const selectElement = document.querySelector(
