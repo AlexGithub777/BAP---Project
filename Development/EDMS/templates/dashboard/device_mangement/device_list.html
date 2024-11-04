@@ -14,7 +14,7 @@
             {{ if eq .role "Admin" }}
             <div>
                 <button class="btn btn-success" onclick="addDevice()">
-                    Add Device
+                    Add Device <i class="fa fa-plus"></i>
                 </button>
             </div>
             {{ end }}
@@ -46,131 +46,178 @@
             </div>
             <!-- Filter section -->
             <div
-                class="d-flex align-items-center justify-content-between mb-3 flex-wrap"
+                class="d-flex align-items-start justify-content-between mb-3 flex-wrap"
             >
                 <!-- Site Filter -->
                 <div
                     class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2 ms-lg-0"
                 >
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="siteFilter"
-                        id="siteFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
+                    <label
+                        for="siteFilter"
+                        class="form-label"
+                        style="margin-bottom: 0.25rem"
+                        >Site</label
                     >
-                        <option selected>Site</option>
-                        <!-- Dropdown options for the first dropdown -->
-                    </select>
+                    <div class="position-relative">
+                        <i
+                            class="fa-solid fa-filter position-absolute"
+                            style="
+                                left: 10px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                pointer-events: none;
+                                font-size: 0.85rem;
+                            "
+                        ></i>
+                        <select
+                            title="siteFilter"
+                            id="siteFilter"
+                            class="form-select"
+                            style="padding-left: 2.5rem; width: 100%"
+                        >
+                            <option selected>Site</option>
+                            <!-- Dropdown options for the first dropdown -->
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Building Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="buildingFilter"
-                        id="buildingFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
+                    <label
+                        for="buildingFilter"
+                        class="form-label"
+                        style="margin-bottom: 0.25rem"
+                        >Building</label
                     >
-                        <option selected>All Buildings</option>
-                        <!-- Dropdown options for the third dropdown -->
-                    </select>
+                    <div class="position-relative">
+                        <i
+                            class="fa-solid fa-filter position-absolute"
+                            style="
+                                left: 10px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                pointer-events: none;
+                                font-size: 0.85rem;
+                            "
+                        ></i>
+                        <select
+                            title="buildingFilter"
+                            id="buildingFilter"
+                            class="form-select"
+                            style="padding-left: 2.5rem; width: 100%"
+                        >
+                            <option selected>All Buildings</option>
+                            <!-- Dropdown options for the second dropdown -->
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Room Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="roomFilter"
-                        id="roomFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
+                    <label
+                        for="roomFilter"
+                        class="form-label"
+                        style="margin-bottom: 0.25rem"
+                        >Room</label
                     >
-                        <option selected>All Rooms</option>
-                        <!-- Dropdown options for the third dropdown -->
-                    </select>
+                    <div class="position-relative">
+                        <i
+                            class="fa-solid fa-filter position-absolute"
+                            style="
+                                left: 10px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                pointer-events: none;
+                                font-size: 0.85rem;
+                            "
+                        ></i>
+                        <select
+                            title="roomFilter"
+                            id="roomFilter"
+                            class="form-select"
+                            style="padding-left: 2.5rem; width: 100%"
+                        >
+                            <option selected>All Rooms</option>
+                            <!-- Dropdown options for the third dropdown -->
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Device Type Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="deviceTypeFilter"
-                        id="deviceTypeFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
+                    <label
+                        for="deviceTypeFilter"
+                        class="form-label"
+                        style="margin-bottom: 0.25rem"
+                        >Device Type</label
                     >
-                        <option selected>Device Type</option>
-                        <!-- Dropdown options for the second dropdown -->
-                    </select>
+                    <div class="position-relative">
+                        <i
+                            class="fa-solid fa-filter position-absolute"
+                            style="
+                                left: 10px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                pointer-events: none;
+                                font-size: 0.85rem;
+                            "
+                        ></i>
+                        <select
+                            title="deviceTypeFilter"
+                            id="deviceTypeFilter"
+                            class="form-select"
+                            style="padding-left: 2.5rem; width: 100%"
+                        >
+                            <option selected>Device Type</option>
+                            <!-- Dropdown options for the fourth dropdown -->
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Status Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        class="form-select pl-5"
-                        id="statusFilter"
-                        aria-label="Select status"
-                        style="padding-left: 2.5rem; width: 100%"
+                    <label
+                        for="statusFilter"
+                        class="form-label"
+                        style="margin-bottom: 0.25rem"
+                        >Status</label
                     >
-                        <option selected>Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                        <option value="Expired">Expired</option>
-                        <option value="Inspection Due">Inspection Due</option>
-                        <option value="Inspection Failed">
-                            Inspection Failed
-                        </option>
-                    </select>
+                    <div class="position-relative">
+                        <i
+                            class="fa-solid fa-filter position-absolute"
+                            style="
+                                left: 10px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                pointer-events: none;
+                                font-size: 0.85rem;
+                            "
+                        ></i>
+                        <select
+                            id="statusFilter"
+                            class="form-select"
+                            style="padding-left: 2.5rem; width: 100%"
+                        >
+                            <option selected>Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Expired">Expired</option>
+                            <option value="Inspection Due">
+                                Inspection Due
+                            </option>
+                            <option value="Inspection Failed">
+                                Inspection Failed
+                            </option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Clear Filters Button -->
                 <button
                     type="button"
-                    class="btn btn-secondary mt-2 mt-xl-0 mx-2 ms-lg-0 ms-xl-2 me-lg-0"
+                    class="btn btn-secondary align-self-end mt-2 mt-xl-0 mx-2 ms-lg-0 ms-xl-2 me-lg-0"
                     onclick="clearFilters()"
+                    style="min-height: 38px"
                 >
                     Clear Filters
                 </button>
