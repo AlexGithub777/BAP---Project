@@ -150,20 +150,40 @@ fetch("/api/user")
     <td data-label="Email">${user.email}</td>
     <td data-label="Role">${user.role}</td>
     <td>
-        <div class="btn-group">
+    <div class="btn-group">
+    ${
+        hideActions
+            ? "<span class='text-muted'>No actions available</span>"
+            : `
+            <button class="btn btn-warning p-2 edit-user-button" 
+                    data-id="${user.user_id}" 
+                    title="Edit User">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                    <path d="m15 5 4 4"/>
+                </svg>
+            </button>
             ${
-                hideActions
-                    ? "<span class='text-muted'>No actions available</span>"
-                    : `<button class="btn btn-primary edit-user-button" data-id="${
-                          user.user_id
-                      }">Edit</button>
-                       ${
-                           hideDelete
-                               ? ""
-                               : `<button class="btn btn-danger delete-button" onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}', '${currentUserIdNumber}')" data-id="${user.user_id}">Delete</button>`
-                       }`
+                hideDelete
+                    ? ""
+                    : `<button class="btn btn-danger p-2 delete-button" 
+                            onclick="showDeleteModal(${user.user_id}, 'user', '${user.username}', '${currentUserIdNumber}')" 
+                            data-id="${user.user_id}" 
+                            title="Delete User">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>`
             }
-        </div>
+            `
+    }
+</div>
     </td>
 </tr>
 `;
@@ -277,17 +297,37 @@ fetch("/api/site")
         // Create a table row for each site
         const siteRows = sites.map(
             (site) => `
-        <tr>
-            <td data-label="Site Name">${site.site_name}</td>
-            <td data-label="Site Address">${site.site_address}</td>
-            <td data-label="Actions">
-                <div class="btn-group">
-                    <button class="btn btn-primary edit-button" onclick="editSite(${site.site_id})" data-id="${site.site_id}">Edit</button>
-                    <button class="btn btn-danger delete-button" onclick="showDeleteModal(${site.site_id}, 'site', '${site.site_name}')">Delete</button>
-                </div>
-            </td>
-        </tr>
-        `
+                <tr>
+                    <td data-label="Site Name">${site.site_name}</td>
+                    <td data-label="Site Address">${site.site_address}</td>
+                    <td data-label="Actions">
+                        <div class="btn-group">
+                            <button class="btn btn-warning p-2 edit-button" 
+                                    onclick="editSite(${site.site_id})" 
+                                    data-id="${site.site_id}" 
+                                    title="Edit Site">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                                    <path d="m15 5 4 4"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-danger p-2 delete-button" 
+                                    onclick="showDeleteModal(${site.site_id}, 'site', '${site.site_name}')" 
+                                    title="Delete Site">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"/>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `
         );
 
         // Add the rows to the sites table
@@ -298,20 +338,40 @@ fetch("/api/site")
 fetch("/api/building")
     .then((response) => response.json())
     .then((buildings) => {
-        // Create a table row for each building
         const buildingRows = buildings.map(
             (building) => `
-<tr>
-<td data-label="Building Code">${building.building_code}</td>
-<td data-label="Site Name">${building.site_name}</td>
-<td>
-    <div class="btn-group">
-        <button class="btn btn-primary edit-building-button" data-id="${building.building_id}">Edit</button>
-        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${building.building_id}, 'building', '${building.building_code}')" data-id="${building.building_id}">Delete</button>
-    </div> 
-</td>
-</tr>
-`
+        <tr>
+            <td data-label="Building Code">${building.building_code}</td>
+            <td data-label="Site Name">${building.site_name}</td>
+            <td>
+                <div class="btn-group">
+                    <button class="btn btn-warning p-2 edit-building-button" 
+                            onclick="editBuilding(${building.building_id})" 
+                            data-id="${building.building_id}" 
+                            title="Edit Building">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                            <path d="m15 5 4 4"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-danger p-2 delete-button" 
+                            onclick="showDeleteModal(${building.building_id}, 'building', '${building.building_code}')" 
+                            data-id="${building.building_id}" 
+                            title="Delete Building">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div> 
+            </td>
+        </tr>
+        `
         );
 
         // Add the rows to the buildings table
@@ -413,18 +473,39 @@ fetch("/api/room")
         // Create a table row for each room
         const roomRows = rooms.map(
             (room) => `
-<tr>
-<td data-label="Room Code">${room.room_code}</td>
-<td data-label="Building Code">${room.building_code}</td>
-<td data-label="Site Name">${room.site_name}</td>
-<td>
-    <div class="btn-group">
-        <button class="btn btn-primary edit-room-button" data-id="${room.room_id}">Edit</button>
-        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${room.room_id}, 'room', '${room.room_code}')" data-id="${room.room_id}">Delete</button>
-    </div>
-</td>
-</tr>
-`
+        <tr>
+            <td data-label="Room Code">${room.room_code}</td>
+            <td data-label="Building Code">${room.building_code}</td>
+            <td data-label="Site Name">${room.site_name}</td>
+            <td>
+                <div class="btn-group">
+                    <button class="btn btn-warning p-2 edit-room-button" 
+                            onclick="editRoom(${room.room_id})" 
+                            data-id="${room.room_id}" 
+                            title="Edit Room">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                            <path d="m15 5 4 4"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-danger p-2 delete-button" 
+                            onclick="showDeleteModal(${room.room_id}, 'room', '${room.room_code}')" 
+                            data-id="${room.room_id}" 
+                            title="Delete Room">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        `
         );
 
         // Add the rows to the rooms table
@@ -680,19 +761,39 @@ fetch("/api/room")
 fetch("/api/emergency-device-type")
     .then((response) => response.json())
     .then((deviceTypes) => {
-        // Create a table row for each device type
         const deviceTypeRows = deviceTypes.map(
             (deviceType) => `
-<tr>
-<td data-label="Device Type">${deviceType.emergency_device_type_name}</td>
-<td>
-    <div class="btn-group">
-        <button class="btn btn-primary edit-device-type-button" data-id="${deviceType.emergency_device_type_id}">Edit</button>
-        <button class="btn btn-danger delete-button" onclick="showDeleteModal(${deviceType.emergency_device_type_id}, 'emergency-device-type', '<br>${deviceType.emergency_device_type_name}')" data-id="${deviceType.emergency_device_type_id}">Delete</button>
-    </div>
-</td>
-</tr>
-`
+        <tr>
+            <td data-label="Device Type">${deviceType.emergency_device_type_name}</td>
+            <td>
+                <div class="btn-group">
+                    <button class="btn btn-warning p-2 edit-device-type-button" 
+                            onclick="editDeviceType(${deviceType.emergency_device_type_id})" 
+                            data-id="${deviceType.emergency_device_type_id}" 
+                            title="Edit Device Type">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                            <path d="m15 5 4 4"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-danger p-2 delete-button" 
+                            onclick="showDeleteModal(${deviceType.emergency_device_type_id}, 'emergency-device-type', '<br>${deviceType.emergency_device_type_name}')" 
+                            data-id="${deviceType.emergency_device_type_id}" 
+                            title="Delete Device Type">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        `
         );
 
         // Add the rows to the device types table
