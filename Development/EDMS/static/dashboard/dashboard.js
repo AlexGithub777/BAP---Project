@@ -865,6 +865,7 @@ export function addDevice() {
 
     Promise.all(promises)
         .then(() => {
+            /*
             // First, set up the device type change listener
             const deviceTypeSelect = document.querySelector(
                 ".emergencyDeviceTypeInput"
@@ -888,7 +889,7 @@ export function addDevice() {
                     }
                 });
             }
-
+*/
             // Find manufacture date input within the form
             const manufactureDateInput =
                 document.querySelector('input[type="date"]');
