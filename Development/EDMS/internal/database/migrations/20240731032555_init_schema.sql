@@ -25,10 +25,9 @@ CREATE TABLE BuildingT (
     BuildingCode VARCHAR(100) NOT NULL,
     FOREIGN KEY (SiteID) REFERENCES SiteT(SiteID)
         ON UPDATE CASCADE  -- If a SiteID changes, update it in BuildingT
-        ON DELETE RESTRICT -- Prevent deletion of a Site if it has associated Buildings,
+        ON DELETE RESTRICT, -- Prevent deletion of a Site if it has associated Buildings
     UNIQUE (SiteID, BuildingCode)  -- Ensure unique building names within each site
 );
-
 
 -- Room table to store information about rooms within buildings
 CREATE TABLE RoomT (
@@ -36,11 +35,11 @@ CREATE TABLE RoomT (
     BuildingID INT NOT NULL,
     RoomCode VARCHAR(100) NOT NULL,
     FOREIGN KEY (BuildingID) REFERENCES BuildingT(BuildingID)
-        ON UPDATE CASCADE  -- If a BuildingID changes, update it in RoomT
-        ON DELETE RESTRICT, -- Prevent deletion of a Building if it has associated Rooms
-    UNIQUE (BuildingID, RoomCode)  -- Ensure unique room names within each building
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    UNIQUE (BuildingID, RoomCode),  -- Ensure unique room names within each building
+    UNIQUE (RoomCode, SiteID)  -- Ensure unique room names across the same site
 );
-
 
 -- Emergency Device Type table to categorize different types of emergency devices
 CREATE TABLE Emergency_Device_TypeT (

@@ -693,7 +693,7 @@ func (db *DB) GetAllBuildings(siteId string) ([]models.Building, error) {
 	return buildings, nil
 }
 
-func (db *DB) GetBuildingById(buildingID string) (*models.Building, error) {
+func (db *DB) GetBuildingById(buildingID int) (*models.Building, error) {
 	query := `
 	SELECT buildingid, siteid, buildingcode
 	FROM buildingT
@@ -701,6 +701,27 @@ func (db *DB) GetBuildingById(buildingID string) (*models.Building, error) {
 	`
 	var building models.Building
 	err := db.QueryRow(query, buildingID).Scan(
+		&building.BuildingID,
+		&building.SiteID,
+		&building.BuildingCode,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &building, nil
+}
+
+func (db *DB) GetBuildingByCodeandSite(buildingCode string, siteId int) (*models.Building, error) {
+	query := `
+	SELECT buildingid, siteid, buildingcode
+	FROM buildingT
+	WHERE buildingcode = $1 AND siteid = $2
+	`
+
+	var building models.Building
+	err := db.QueryRow(query, buildingCode, siteId).Scan(
 		&building.BuildingID,
 		&building.SiteID,
 		&building.BuildingCode,
@@ -995,6 +1016,55 @@ func (db *DB) GetRoomByID(roomID int) (*models.Room, error) {
 	}
 
 	return &room, nil
+}
+
+// GetRoomByCodeAndSite retrieves a room by its code across all buildings at the specified site.
+func (db *DB) GetRoomByCodeAndSite(roomCode string, siteId int) (*models.Room, error) {
+	query := `
+    SELECT r.RoomID, r.BuildingID, r.RoomCode
+    FROM RoomT r
+    JOIN BuildingT b ON r.BuildingID = b.BuildingID
+    WHERE r.RoomCode = $1 AND b.SiteID = $2
+    `
+
+	var room models.Room
+	err := db.QueryRow(query, roomCode, siteId).Scan(
+		&room.RoomID,
+		&room.BuildingID,
+		&room.RoomCode,
+	)
+
+	if err != nil {
+		return nil, err // Return nil if the room is not found
+	}
+
+	return &room, nil // Return the found room
+}
+
+// GetRoomByCodeAndBuilding retrieves a room by its code and associated building ID.
+func (db *DB) GetRoomByCodeAndBuilding(roomCode string, buildingId int) (*models.Room, error) {
+	query := `
+    SELECT RoomID, BuildingID, RoomCode
+    FROM RoomT
+    WHERE RoomCode = $1 AND BuildingID = $2
+    `
+
+	var room models.Room
+	err := db.QueryRow(query, roomCode, buildingId).Scan(
+		&room.RoomID,
+		&room.BuildingID,
+		&room.RoomCode,
+	)
+
+	// If no row is found, return nil and a specific error
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // Return nil if the room is not found (no error)
+		}
+		return nil, err // Return the actual error if it occurred
+	}
+
+	return &room, nil // Return the found room
 }
 
 func (db *DB) AddRoom(room *models.Room) error {

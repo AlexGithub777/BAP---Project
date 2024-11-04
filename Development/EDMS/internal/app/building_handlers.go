@@ -33,7 +33,14 @@ func (a *App) HandleGetBuildingByID(c echo.Context) error {
 	}
 
 	buildingId := c.Param("id")
-	building, err := a.DB.GetBuildingById(buildingId)
+
+	// convert the building ID to an integer
+	buildingIdInt, err := strconv.Atoi(buildingId)
+	if err != nil {
+		return a.handleError(c, http.StatusBadRequest, "Invalid building ID", err)
+	}
+
+	building, err := a.DB.GetBuildingById(buildingIdInt)
 	if err != nil {
 		return a.handleError(c, http.StatusInternalServerError, "Error fetching data", err)
 	}
@@ -68,10 +75,15 @@ func (a *App) HandlePostBuilding(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Building code too long, must be less than 100 characters")
 	}
 
-	// Save site information and file path in the database
 	siteIdNum, err := strconv.Atoi(siteId)
 	if err != nil {
 		return a.handleError(c, http.StatusInternalServerError, "Error converting site ID", err)
+	}
+
+	// Check if the building already exists
+	_, err = a.DB.GetBuildingByCodeandSite(buildingCode, siteIdNum)
+	if err == nil {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Building already exists at the site")
 	}
 
 	building := &models.Building{
@@ -136,7 +148,6 @@ func (a *App) HandleEditBuilding(c echo.Context) error {
 		})
 	}
 
-	// Save site information and file path in the database
 	siteIdNum, err := strconv.Atoi(building.SiteID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -150,6 +161,15 @@ func (a *App) HandleEditBuilding(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error":       "Error converting building ID",
 			"redirectURL": "/admin?error=Error converting building ID",
+		})
+	}
+
+	// Check if the building already exists
+	_, err = a.DB.GetBuildingByCodeandSite(building.BuildingCode, siteIdNum)
+	if err == nil {
+		return c.JSON(http.StatusOK, map[string]string{
+			"error":       "Building already exists at the site",
+			"redirectURL": "/admin?error=Building already exists at the site",
 		})
 	}
 
@@ -183,11 +203,20 @@ func (a *App) HandleDeleteBuilding(c echo.Context) error {
 		})
 	}
 
-	// Get the site ID from the URL
+	// Get the building ID from the URL
 	buildingID := c.Param("id")
 
+	// Convert the buildiung ID to an int
+	buildingIDInt, err := strconv.Atoi(buildingID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error":       "Building ID is required",
+			"redirectURL": "/admin?error=Building ID is required",
+		})
+	}
+
 	// Get the building by ID
-	building, err := a.DB.GetBuildingById(buildingID)
+	building, err := a.DB.GetBuildingById(buildingIDInt)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error":       "Error fetching building",
