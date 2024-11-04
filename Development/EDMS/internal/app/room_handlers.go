@@ -96,6 +96,12 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Building does not exist")
 	}
 
+	// check if the room already exists at the site
+	_, err = a.DB.GetRoomByCodeAndSite(roomCode, building.SiteID)
+	if err == nil {
+		return c.Redirect(http.StatusSeeOther, "/admin?error=Room already exists at this site")
+	}
+
 	// Check if the room already exists at the building
 	_, err = a.DB.GetRoomByCodeAndBuilding(roomCode, buildingIdInt)
 	if err == nil {
@@ -195,21 +201,21 @@ func (a *App) HandlePutRoom(c echo.Context) error {
 		})
 	}
 
-	// Check if the room already exists at the building
-	existingRoom, err := a.DB.GetRoomByCodeAndBuilding(roomDto.RoomCode, buildingIdInt)
-	if err == nil && existingRoom != nil {
-		return c.JSON(http.StatusConflict, map[string]string{
-			"error":       "Room already exists at this building",
-			"redirectURL": "/admin?error=Room already exists at this building",
-		})
-	}
-
-	// Check if the room exists at the site using the SiteID from the building
+	// Check if the room already exists at the site
 	existingRoomAtSite, err := a.DB.GetRoomByCodeAndSite(roomDto.RoomCode, building.SiteID)
-	if err == nil && existingRoomAtSite != nil {
+	if err == nil || existingRoomAtSite != nil {
 		return c.JSON(http.StatusConflict, map[string]string{
 			"error":       "Room already exists at this site",
 			"redirectURL": "/admin?error=Room already exists at this site",
+		})
+	}
+
+	// Check if the room already exists at the building
+	existingRoom, err := a.DB.GetRoomByCodeAndBuilding(roomDto.RoomCode, buildingIdInt)
+	if err == nil || existingRoom != nil {
+		return c.JSON(http.StatusConflict, map[string]string{
+			"error":       "Room already exists at this building",
+			"redirectURL": "/admin?error=Room already exists at this building",
 		})
 	}
 

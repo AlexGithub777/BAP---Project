@@ -35,10 +35,9 @@ CREATE TABLE RoomT (
     BuildingID INT NOT NULL,
     RoomCode VARCHAR(100) NOT NULL,
     FOREIGN KEY (BuildingID) REFERENCES BuildingT(BuildingID)
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-    UNIQUE (BuildingID, RoomCode),  -- Ensure unique room names within each building
-    UNIQUE (RoomCode, SiteID)  -- Ensure unique room names across the same site
+        ON UPDATE CASCADE  -- If a BuildingID changes, update it in RoomT
+        ON DELETE RESTRICT, -- Prevent deletion of a Building if it has associated Rooms
+    UNIQUE (BuildingID, RoomCode)  -- Ensure unique room names within each building
 );
 
 -- Emergency Device Type table to categorize different types of emergency devices
