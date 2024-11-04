@@ -820,10 +820,7 @@ function clearBuildingAndRoom() {
 }
 
 export function addDevice() {
-    console.log("addDevice function called");
-
     const addDeviceForm = document.getElementById("addDeviceForm");
-    console.log("Form element:", addDeviceForm);
 
     if (addDeviceForm) {
         addDeviceForm.reset();
@@ -868,8 +865,6 @@ export function addDevice() {
 
     Promise.all(promises)
         .then(() => {
-            console.log("All dropdowns populated");
-
             // First, set up the device type change listener
             const deviceTypeSelect = document.querySelector(
                 ".emergencyDeviceTypeInput"
@@ -879,7 +874,6 @@ export function addDevice() {
                     const selectedText =
                         event.target.options[event.target.selectedIndex]
                             ?.text || "";
-                    console.log("Device type changed to:", selectedText);
 
                     const isFireExtinguisher = selectedText
                         .toLowerCase()
@@ -898,24 +892,16 @@ export function addDevice() {
             // Find manufacture date input within the form
             const manufactureDateInput =
                 document.querySelector('input[type="date"]');
-            console.log("Manufacture date input found:", manufactureDateInput);
-
             if (manufactureDateInput) {
                 manufactureDateInput.addEventListener(
                     "change",
                     function (event) {
-                        console.log(
-                            "Manufacture date changed to:",
-                            event.target.value
-                        );
-
                         const deviceType = document.querySelector(
                             ".emergencyDeviceTypeInput"
                         );
                         const selectedText =
                             deviceType?.options[deviceType.selectedIndex]
                                 ?.text || "";
-                        console.log("Current device type:", selectedText);
 
                         if (
                             selectedText
@@ -937,10 +923,6 @@ export function addDevice() {
 
                             if (expireDateInput) {
                                 expireDateInput.value = formattedDate;
-                                console.log(
-                                    "Set expiry date to:",
-                                    formattedDate
-                                );
                             } else {
                                 console.log("Could not find expiry date input");
                             }
@@ -958,7 +940,6 @@ export function addDevice() {
             }
 
             const modal = document.getElementById("addDeviceModal");
-            console.log("Modal element:", modal);
 
             if (modal) {
                 $(modal).modal("show");
