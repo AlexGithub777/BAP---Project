@@ -865,31 +865,29 @@ export function addDevice() {
 
     Promise.all(promises)
         .then(() => {
-            /*
-            // First, set up the device type change listener
-            const deviceTypeSelect = document.querySelector(
-                ".emergencyDeviceTypeInput"
-            );
-            if (deviceTypeSelect) {
-                deviceTypeSelect.addEventListener("change", function (event) {
-                    const selectedText =
-                        event.target.options[event.target.selectedIndex]
-                            ?.text || "";
+            // Event listener for site change
+            document
+                .querySelector(".siteInput")
+                .addEventListener("change", (event) => {
+                    const selectedSiteId = event.target.value;
+                    clearBuildingAndRoom();
 
-                    const isFireExtinguisher = selectedText
-                        .toLowerCase()
-                        .includes("fire extinguisher");
-
-                    if (isFireExtinguisher) {
-                        extinguisherTypeDiv?.classList.remove("d-none");
-                        expireDateDiv?.classList.remove("d-none");
-                    } else {
-                        extinguisherTypeDiv?.classList.add("d-none");
-                        expireDateDiv?.classList.add("d-none");
+                    if (selectedSiteId) {
+                        fetchAndPopulateBuildings(selectedSiteId);
                     }
                 });
-            }
-*/
+
+            // Event listener for building change
+            document
+                .querySelector(".buildingInput")
+                .addEventListener("change", (event) => {
+                    const selectedBuildingId = event.target.value;
+
+                    if (selectedBuildingId) {
+                        fetchAndPopulateRooms(selectedBuildingId);
+                    }
+                });
+
             // Find manufacture date input within the form
             const manufactureDateInput =
                 document.querySelector('input[type="date"]');
