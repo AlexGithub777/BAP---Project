@@ -248,12 +248,46 @@ export async function generateNotifications() {
     // Update global notifications list
     currentNotifications = notifications;
 
-    return notifications;
+    // Before returning notifications, filter out cleared ones
+    const clearedDevices = getClearedNotifications();
+    const filteredNotifications = notifications.filter(
+        (device) => !clearedDevices.includes(device.emergency_device_id)
+    );
+
+    return filteredNotifications;
 }
 
-// Function to get current notifications
-export function getCurrentNotifications() {
-    return currentNotifications;
+export async function refreshNotificationsPreservingCleared() {
+    try {
+        // Generate fresh notifications (this will already exclude cleared ones)
+        const freshNotifications = await generateNotifications();
+
+        // Update session storage with new notifications
+        saveNotificationsToSession(freshNotifications);
+
+        // Update the UI
+        await updateNotificationsUI(freshNotifications);
+
+        return freshNotifications;
+    } catch (error) {
+        console.error("Failed to refresh notifications:", error);
+        throw error;
+    }
+}
+
+// Add this for form submissions
+export async function refreshAfterChange() {
+    try {
+        const freshNotifications = await generateNotifications();
+        currentNotifications = freshNotifications;
+        sessionStorage.setItem(
+            "notifications",
+            JSON.stringify(freshNotifications)
+        );
+        await updateNotificationsUI(freshNotifications);
+    } catch (error) {
+        console.error("Error refreshing notifications after change:", error);
+    }
 }
 
 export function generateNotificationHTML(notifications) {
@@ -360,13 +394,29 @@ export function generateNotificationHTML(notifications) {
     return html;
 }
 
+function getClearedNotifications() {
+    const cleared = sessionStorage.getItem("clearedNotifications");
+    return cleared ? JSON.parse(cleared) : [];
+}
+
+function addToClearedNotifications(deviceId) {
+    const clearedNotifications = getClearedNotifications();
+    if (!clearedNotifications.includes(deviceId)) {
+        clearedNotifications.push(deviceId);
+        sessionStorage.setItem(
+            "clearedNotifications",
+            JSON.stringify(clearedNotifications)
+        );
+    }
+}
+
 // Function to save notifications to sessionStorage
 function saveNotificationsToSession(notifications) {
     sessionStorage.setItem("notifications", JSON.stringify(notifications));
 }
 
-// Function to clear a single notification
 export function clearNotificationById(deviceId) {
+    addToClearedNotifications(deviceId);
     currentNotifications = currentNotifications.filter(
         (device) => device.emergency_device_id !== deviceId
     );
@@ -414,8 +464,10 @@ export async function updateNotificationsUI(
                 // Check session storage first
                 const storedNotifications =
                     sessionStorage.getItem("notifications");
+                // check if storedNotifications is null
                 if (storedNotifications) {
                     notifications = JSON.parse(storedNotifications);
+                    // if storedNotifications is null then generate new notifications
                 } else {
                     notifications = await generateNotifications();
                     saveNotificationsToSession(notifications);
@@ -482,8 +534,8 @@ export async function updateNotificationsUI(
         }
 
         // Reset refresh button state on error
-        const refreshButton = document.querySelector(
-            '[onclick="refreshNotificationsHandler()"]'
+        const refreshButton = document.getElementById(
+            "refreshNotificationsBtn"
         );
         if (refreshButton) {
             refreshButton.disabled = false;

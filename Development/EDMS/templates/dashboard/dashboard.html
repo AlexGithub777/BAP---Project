@@ -152,13 +152,6 @@
         <script>
             var role = "{{.role}}";
 
-            if (role === "Admin") {
-                $(document).ready(function () {
-                    // refresh notifications
-                    refreshNotificationsHandler();
-                });
-            }
-            
             var user_id = "{{.user_id}}";
         </script>
         <script type="module" src="/static/main/notifications.js"></script>

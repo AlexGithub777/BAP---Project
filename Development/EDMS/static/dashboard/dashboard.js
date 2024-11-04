@@ -2,6 +2,8 @@
 import {
     getAllDevices,
     updateNotificationsUI,
+    refreshNotificationsPreservingCleared,
+    refreshAfterChange,
 } from "/static/main/notifications.js";
 
 // dashboard.js
@@ -633,6 +635,22 @@ document.getElementById("rowsPerPage").addEventListener("change", (e) => {
 // Initial fetch without filtering
 loadDevicesAndUpdateTable();
 
+document.addEventListener("DOMContentLoaded", async function () {
+    if (role === "Admin") {
+        // Check for the refresh flag
+        const shouldRefresh = sessionStorage.getItem(
+            "shouldRefreshNotifications"
+        );
+        if (shouldRefresh === "true") {
+            sessionStorage.removeItem("shouldRefreshNotifications");
+            await refreshAfterChange();
+        } else {
+            // Normal initial load
+            await updateNotificationsUI();
+        }
+    }
+});
+
 function formatDeviceRow(device) {
     if (!device) return "";
     const formatDateMonthYear = (dateString) =>
@@ -1249,7 +1267,12 @@ function handleDeviceTypeChange(event) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+    const pageLoadFlag = sessionStorage.getItem("shouldRefreshNotifications");
+    if (pageLoadFlag === "true") {
+        sessionStorage.removeItem("shouldRefreshNotifications");
+        await refreshNotificationsPreservingCleared();
+    }
     // Add change event listeners to device type inputs
     const deviceTypeInputs = document.querySelectorAll(
         ".emergencyDeviceTypeInput"
@@ -1433,7 +1456,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Add event listener to the add device button
-    addDeviceButton.addEventListener("click", function (event) {
+    addDeviceButton.addEventListener("click", async function (event) {
         // Validate all select elements before form submission
         document
             .querySelectorAll(
@@ -1453,15 +1476,19 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
             event.stopPropagation();
         } else {
-            // If the form is valid, submit it
-            addDeviceForm.submit();
+            try {
+                sessionStorage.setItem("shouldRefreshNotifications", "true");
+                await addDeviceForm.submit(); // Submit form
+            } catch (error) {
+                console.error("Error during form submission:", error);
+            }
         }
 
         addDeviceForm.classList.add("was-validated");
     });
 
     // Add event listener to the edit device button
-    editDeviceButton.addEventListener("click", function (event) {
+    editDeviceButton.addEventListener("click", async function (event) {
         event.preventDefault(); // Prevent default form submission
 
         // Validate all select elements before form submission
@@ -1488,41 +1515,44 @@ document.addEventListener("DOMContentLoaded", function () {
             if (document.getElementById("editStatusInput").disabled) {
                 document.getElementById("editStatusInput").disabled = false; // Temporarily enable
             }
+
             // If the form is valid, prepare to send the PUT request
             const formData = new FormData(editDeviceForm);
-            const jsonData = {};
-            for (const [key, value] of formData.entries()) {
-                jsonData[key] = value;
-            }
-            // Send the PUT request
-            fetch(
-                `/api/emergency-device/${
-                    document.getElementById("editDeviceID").value
-                }`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(jsonData),
-                }
-            )
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.error) {
-                        window.location.href = data.redirectURL;
-                    } else if (data.message) {
-                        window.location.href = data.redirectURL;
-                    } else {
-                        console.error("Unexpected response:", data);
-                        // Handle unexpected responses (e.g., show an error message)
-                        throw new Error("Unexpected response");
+            const jsonData = Object.fromEntries(formData.entries());
+
+            try {
+                // Send the PUT request
+                const response = await fetch(
+                    `/api/emergency-device/${
+                        document.getElementById("editDeviceID").value
+                    }`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(jsonData),
                     }
-                })
-                .catch((error) => {
-                    console.error("Fetch error:", error);
-                    // Optionally display a user-friendly error message
-                });
+                );
+                const data = await response.json();
+
+                if (data.error) {
+                    window.location.href = data.redirectURL;
+                } else if (data.message) {
+                    // Refresh the notifications and then redirect
+                    sessionStorage.setItem(
+                        "shouldRefreshNotifications",
+                        "true"
+                    );
+                    window.location.href = data.redirectURL;
+                } else {
+                    console.error("Unexpected response:", data);
+                    throw new Error("Unexpected response");
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                // Optionally display a user-friendly error message
+            }
         }
     });
 });

@@ -29,11 +29,35 @@ export function clearNotificationHandler(deviceId) {
     clearNotificationById(deviceId); // Calls the function in notifications.js
 }
 
+// Keep your original refreshNotificationsHandler for the button click
 export async function refreshNotificationsHandler() {
-    // Clear session storage to force fresh data
-    sessionStorage.removeItem("notifications");
-    // Get fresh notifications and update UI
-    await updateNotificationsUI();
+    try {
+        const refreshButton = document.querySelector(
+            '[onclick="refreshNotificationsHandler()"]'
+        );
+        if (refreshButton) {
+            refreshButton.disabled = true;
+            const icon = refreshButton.querySelector(".fa-sync-alt");
+            if (icon) {
+                icon.classList.add("fa-spin");
+            }
+        }
+
+        // Clear session storage to force fresh data
+        sessionStorage.removeItem("notifications");
+        // Get fresh notifications and update UI
+        await updateNotificationsUI();
+    } catch (error) {
+        console.error("Error refreshing notifications:", error);
+    } finally {
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            const icon = refreshButton.querySelector(".fa-sync-alt");
+            if (icon) {
+                icon.classList.remove("fa-spin");
+            }
+        }
+    }
 }
 
 function formatEntityType(entityType) {

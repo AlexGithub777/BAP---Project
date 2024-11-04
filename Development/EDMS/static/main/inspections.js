@@ -1,4 +1,4 @@
-import { refreshNotificationsHandler } from "./main.js";
+import { refreshNotificationsPreservingCleared } from "./notifications.js";
 
 function formatDate(dateString, options) {
     if (!dateString || dateString === "0001-01-01T00:00:00Z") {
@@ -110,6 +110,7 @@ export function initializeInspectionForm() {
         }
     });
 
+    // Add event listener to the form submit button
     addInspectionButton.addEventListener("click", async function (event) {
         event.preventDefault();
         if (inspectionDateTimeInput.value) {
@@ -149,7 +150,16 @@ export function initializeInspectionForm() {
                     inspectionDateTimeInput.validationMessage;
             }
         } else {
-            addInspectionForm.submit();
+            try {
+                sessionStorage.setItem("shouldRefreshNotifications", "true");
+                // Submit the form
+                await addInspectionForm.submit();
+            } catch (error) {
+                console.error(
+                    "Error submitting inspection or updating notifications:",
+                    error
+                );
+            }
         }
     });
 }

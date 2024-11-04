@@ -1,5 +1,8 @@
 // admin.js
-import { updateNotificationsUI } from "/static/main/notifications.js";
+import {
+    updateNotificationsUI,
+    refreshAfterChange,
+} from "/static/main/notifications.js";
 import {
     viewDeviceInspections,
     viewInspectionDetails,
@@ -9,10 +12,25 @@ import {
 
 initializeInspectionForm();
 
+document.addEventListener("DOMContentLoaded", async function () {
+    if (role === "Admin") {
+        // Check for the refresh flag
+        const shouldRefresh = sessionStorage.getItem(
+            "shouldRefreshNotifications"
+        );
+        if (shouldRefresh === "true") {
+            sessionStorage.removeItem("shouldRefreshNotifications");
+            await refreshAfterChange();
+        } else {
+            // Normal initial load
+            await updateNotificationsUI();
+        }
+    }
+});
+
 window.viewDeviceInspections = viewDeviceInspections;
 window.viewInspectionDetails = viewInspectionDetails;
 window.addInspection = addInspection;
-
 
 $(document).ready(function () {
     // Image Preview
