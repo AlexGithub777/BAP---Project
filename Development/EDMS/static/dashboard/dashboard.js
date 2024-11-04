@@ -742,21 +742,62 @@ function getBadgeClass(status) {
 }
 
 export function getActionButtons(device) {
-    let buttons = `<button class="btn btn-primary" onclick="deviceNotes('${device.description.String}')">Notes</button>`;
+    let buttons = `
+        <button class="btn btn-primary p-2" 
+                onclick="deviceNotes('${device.description.String}')" 
+                title="View Notes">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 2v4"/>
+                <path d="M12 2v4"/>
+                <path d="M16 2v4"/>
+                <rect width="16" height="18" x="4" y="4" rx="2"/>
+                <path d="M8 10h6"/>
+                <path d="M8 14h8"/>
+                <path d="M8 18h5"/>
+            </svg>
+        </button>`;
 
     if (role === "Admin") {
-        // Only show Inspect button if device is a Fire Extinguisher
         const isFireExtinguisher =
             device.emergency_device_type_name === "Fire Extinguisher";
 
         if (isFireExtinguisher) {
             buttons += `
-                <button class="btn btn-secondary" onclick="viewDeviceInspections(${device.emergency_device_id})">Inspect</button>`;
+                <button class="btn btn-secondary p-2 ml-2" 
+                        onclick="viewDeviceInspections(${device.emergency_device_id})"
+                        title="Inspect Device">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m8 11 2 2 4-4"/>
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                </button>`;
         }
 
         buttons += `
-            <button class="btn btn-warning" onclick="editDevice(${device.emergency_device_id})">Edit</button>
-            <button class="btn btn-danger" onclick="showDeleteModal(${device.emergency_device_id},'emergency-device', '<br>${device.emergency_device_type_name} - Serial Number: ${device.serial_number.String}')">Delete</button>
+            <button class="btn btn-warning p-2 ml-2" 
+                    onclick="editDevice(${device.emergency_device_id})"
+                    title="Edit Device">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                    <path d="m15 5 4 4"/>
+                </svg>
+            </button>
+            <button class="btn btn-danger p-2 ml-2" 
+                    onclick="showDeleteModal(${device.emergency_device_id},'emergency-device', '<br>${device.emergency_device_type_name} - Serial Number: ${device.serial_number.String}')"
+                    title="Delete Device">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/>
+                    <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+            </button>
         `;
     }
     return buttons;
