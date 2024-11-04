@@ -822,6 +822,14 @@ export function addDevice() {
     document.getElementById("addDeviceForm").reset();
     document.getElementById("addDeviceForm").classList.remove("was-validated");
 
+    // Hide extinguisher-specific fields by default
+    document.querySelector(".ExtinguisherTypeInputDiv").classList.add("d-none");
+    document.getElementById("ExtinguisherTypeInput").value = ""; // Clear selected value
+
+    // Hide expiry date by defualt
+    document.getElementById("ExpireDateDiv").classList.add("d-none");
+    document.getElementById("ExpireDate").value = ""; // Clear selected value
+
     const emergencyDeviceTypePromise = populateDropdown(
         ".emergencyDeviceTypeInput",
         "/api/emergency-device-type",
@@ -1181,16 +1189,25 @@ function handleDeviceTypeChange(event) {
         const extinguisherTypeInput = document.querySelector(
             `#${prefix}ExtinguisherTypeInput`
         );
+
         if (extinguisherTypeInput) {
             extinguisherTypeInput.value = "";
             document
                 .querySelector(`.${prefix}ExtinguisherTypeInputDiv`)
+                .classList.add("d-none");
+            document
+                .querySelector(`#${prefix}ExpireDateDiv`)
                 .classList.add("d-none");
         }
     } else {
         // Show fields for Fire Extinguisher
         document
             .querySelector(`.${prefix}ExtinguisherTypeInputDiv`)
+            .classList.remove("d-none");
+
+        // Show expiry date field
+        document
+            .querySelector(`#${prefix}ExpireDateDiv`)
             .classList.remove("d-none");
     }
 }
