@@ -10,7 +10,6 @@ import (
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/app"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
-	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/utils"
 )
 
 func main() {
@@ -20,20 +19,22 @@ func main() {
 	// Initialize the app
 	application := app.NewApp(cfg)
 
-	// Get the local IP that has Internet connectivity
-	ip := utils.GetLocalIP().String()
+	// Get PORT from environment, default to 8080 if not set
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	log.Printf("Starting HTTP service on http://%s:3000", ip)
+	log.Printf("Starting HTTP service on port %s", port)
 
-	// HTTP listener is in a goroutine as its blocking
+	// HTTP listener is in a goroutine as it's blocking
 	go func() {
-		if err := application.Router.Start(ip + ":3000"); err != nil && err != http.ErrServerClosed {
+		if err := application.Router.Start(":" + port); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Error starting the server: %v", err)
 		}
 	}()
 
 	// Setup a ctrl-c trap to ensure a graceful shutdown
-	// This would also allow shutting down other pipes/connections. eg DB
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
@@ -44,11 +45,6 @@ func main() {
 	log.Println("Shutting HTTP service down")
 	if err := application.Router.Shutdown(ctx); err != nil {
 		log.Fatalf("Server Shutdown Failed: %v", err)
-	}
-
-	log.Println("Closing database connections")
-	if err := application.DB.Close(); err != nil {
-		log.Fatalf("Database Close Failed: %v", err)
 	}
 
 	log.Println("Shutdown complete")
