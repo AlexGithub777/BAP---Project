@@ -3,19 +3,13 @@
     <!-- Toggle Map button -->
     <div class="row mx-lg-2">
         <div class="my-4 d-flex justify-content-between">
-            <button
-                class="btn btn-primary me-2 d-none"
-                id="toggleMap"
-                onclick="toggleMap()"
-            >
+            <button class="btn btn-primary me-2 d-none" id="toggleMap" onclick="toggleMap()">
                 Toggle Map
             </button>
             <!-- Add Device button -->
             {{ if eq .role "Admin" }}
             <div>
-                <button class="btn btn-success" onclick="addDevice()">
-                    Add Device
-                </button>
+                <button class="btn btn-success" onclick="addDevice()">Add Device</button>
             </div>
             {{ end }}
         </div>
@@ -28,172 +22,80 @@
             <div>
                 <!-- Search and filter section -->
                 <div class="input-group mb-3">
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="searchInput"
-                        placeholder="Search for devices.."
-                    />
-                    <button
-                        class="btn btn-secondary"
-                        type="button"
-                        id="search-button"
-                        onclick=""
-                    >
-                        Search
-                    </button>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search for devices..">
+                    <button class="btn btn-secondary" type="button" id="search-button" onclick="">Search</button>
                 </div>
             </div>
             <!-- Filter section -->
-            <div
-                class="d-flex align-items-center justify-content-between mb-3 flex-wrap"
-            >
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap">
                 <!-- Site Filter -->
-                <div
-                    class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2 ms-lg-0"
-                >
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="siteFilter"
-                        id="siteFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
-                    >
+                <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2 ms-lg-0">
+                    <i class="fa-solid fa-filter position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    <select title="siteFilter" id="siteFilter" class="form-select pl-5" style="padding-left: 2.5rem; width: 100%">
                         <option selected>Site</option>
-                        <!-- Dropdown options for the first dropdown -->
                     </select>
                 </div>
 
                 <!-- Building Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="buildingFilter"
-                        id="buildingFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
-                    >
+                    <i class="fa-solid fa-filter position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    <select title="buildingFilter" id="buildingFilter" class="form-select pl-5" style="padding-left: 2.5rem; width: 100%">
                         <option selected>All Buildings</option>
-                        <!-- Dropdown options for the third dropdown -->
                     </select>
                 </div>
 
                 <!-- Room Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="roomFilter"
-                        id="roomFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
-                    >
+                    <i class="fa-solid fa-filter position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    <select title="roomFilter" id="roomFilter" class="form-select pl-5" style="padding-left: 2.5rem; width: 100%">
                         <option selected>All Rooms</option>
-                        <!-- Dropdown options for the third dropdown -->
                     </select>
                 </div>
 
                 <!-- Device Type Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        title="deviceTypeFilter"
-                        id="deviceTypeFilter"
-                        class="form-select pl-5"
-                        style="padding-left: 2.5rem; width: 100%"
-                    >
+                    <i class="fa-solid fa-filter position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    <select title="deviceTypeFilter" id="deviceTypeFilter" class="form-select pl-5" style="padding-left: 2.5rem; width: 100%">
                         <option selected>Device Type</option>
-                        <!-- Dropdown options for the second dropdown -->
                     </select>
                 </div>
 
                 <!-- Status Filter -->
                 <div class="position-relative flex-grow-1 mt-2 mt-xl-0 mx-2">
-                    <i
-                        class="fa-solid fa-filter position-absolute"
-                        style="
-                            left: 10px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            pointer-events: none;
-                        "
-                    ></i>
-                    <select
-                        class="form-select pl-5"
-                        id="statusFilter"
-                        aria-label="Select status"
-                        style="padding-left: 2.5rem; width: 100%"
-                    >
+                    <i class="fa-solid fa-filter position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    <select class="form-select pl-5" id="statusFilter" aria-label="Select status" style="padding-left: 2.5rem; width: 100%">
                         <option selected>Status</option>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                         <option value="Expired">Expired</option>
                         <option value="Inspection Due">Inspection Due</option>
-                        <option value="Inspection Failed">
-                            Inspection Failed
-                        </option>
+                        <option value="Inspection Failed">Inspection Failed</option>
                     </select>
                 </div>
 
                 <!-- Clear Filters Button -->
-                <button
-                    type="button"
-                    class="btn btn-secondary mt-2 mt-xl-0 mx-2 ms-lg-0 ms-xl-2 me-lg-0"
-                    onclick="clearFilters()"
-                >
+                <button type="button" class="btn btn-secondary mt-2 mt-xl-0 mx-2 ms-lg-0 ms-xl-2 me-lg-0" onclick="clearFilters()">
                     Clear Filters
                 </button>
             </div>
 
             <!-- Bootstrap Table -->
-
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead class="table-secondary" id="tableHeader">
                         <tr>
-                            <th>Device Type ▲</th>
-                            <th>Extinguisher Type ▲</th>
-                            <th>Room ▲</th>
-                            <th>Serial Number ▲</th>
-                            <th>Manufacture Date ▲</th>
-                            <th>Expire Date ▲</th>
+                            <th onclick="toggleSort(this, 'deviceType')">Device Type <span class="sort-icon">▲</span></th>
+                            <th onclick="toggleSort(this, 'extinguisherType')">Extinguisher Type <span class="sort-icon">▲</span></th>
+                            <th onclick="toggleSort(this, 'room')">Room <span class="sort-icon">▲</span></th>
+                            <th onclick="toggleSort(this, 'serialNumber')">Serial Number <span class="sort-icon">▲</span></th>
+                            <th onclick="toggleSort(this, 'manufactureDate')">Manufacture Date <span class="sort-icon">▲</span></th>
+                            <th onclick="toggleSort(this, 'expireDate')">Expire Date <span class="sort-icon">▲</span></th>
                             {{ if eq .role "Admin" }}
-                            <th>Last Inspection Date ▲</th>
-                            <th>Next Inspection Date ▲</th>
+                            <th onclick="toggleSort(this, 'lastInspectionDate')">Last Inspection Date <span class="sort-icon">▲</span></th>
+                            <th onclick="toggleSort(this, 'nextInspectionDate')">Next Inspection Date <span class="sort-icon">▲</span></th>
                             {{ end }}
-                            <th>Size ▲</th>
-                            <th>Status ▲</th>
+                            <th onclick="toggleSort(this, 'size')">Size <span class="sort-icon">▲</span></th>
+                            <th onclick="toggleSort(this, 'status')">Status <span class="sort-icon">▲</span></th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -202,9 +104,7 @@
                         <!-- from dashboard.js - GetAllDevices() -->
                     </tbody>
                 </table>
-                <div
-                    class="d-flex justify-content-between align-items-center mx-lg-0 mx-2"
-                >
+                <div class="d-flex justify-content-between align-items-center mx-lg-0 mx-2">
                     <div class="dropdown mb-3">
                         <label for="rowsPerPage" class="">Rows per page:</label>
                         <select class="form-select" id="rowsPerPage">
@@ -226,3 +126,44 @@
         </div>
     </div>
 </div>
+
+<script>
+    let sortDirection = {}; // Object to store sort direction of each column
+
+    function toggleSort(element, column) {
+        // Toggle direction for this column; default is ascending (true)
+        sortDirection[column] = !sortDirection[column] ?? true;
+
+        // Update sort icon based on direction
+        element.querySelector(".sort-icon").innerText = sortDirection[column] ? '▲' : '▼';
+        
+        // Sort the table
+        sortTable(column, sortDirection[column]);
+    }
+
+    function sortTable(column, ascending) {
+        const tableBody = document.getElementById("emergency-device-body");
+        const rows = Array.from(tableBody.querySelectorAll("tr"));
+
+        rows.sort((a, b) => {
+            const cellA = a.querySelector(`[data-column="${column}"]`).innerText.trim();
+            const cellB = b.querySelector(`[data-column="${column}"]`).innerText.trim();
+
+            // Handle numeric sorting for columns with numbers
+            const isNumeric = !isNaN(cellA) && !isNaN(cellB);
+            if (isNumeric) {
+                return ascending ? cellA - cellB : cellB - cellA;
+            }
+
+            // Otherwise, use localeCompare for text-based sorting
+            return ascending
+                ? cellA.localeCompare(cellB, undefined, { numeric: true })
+                : cellB.localeCompare(cellA, undefined, { numeric: true });
+        });
+
+        // Re-attach sorted rows to the table body
+        rows.forEach(row => tableBody.appendChild(row));
+    }
+</script>
+
+
