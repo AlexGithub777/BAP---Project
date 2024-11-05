@@ -332,7 +332,7 @@ func sendPasswordResetEmail(email, username, newPassword string) error {
 		<p>Your new password is: <strong>`+newPassword+`</strong></p>
 	</body></html>`)
 
-	d := gomail.NewDialer("smtp.mailersend.net", 587, "MS_kAX6BH@trial-jpzkmgqev0vg059v.mlsender.net", "4GGgYHaff4fjn0Yg")
+	d := gomail.NewDialer("smtp.gmail.com", 587, "edms4758@gmail.com", "dksz kwoc zjiv cqub")
 
 	fmt.Println("Sending email to", email)
 	fmt.Println("Username:", username)
