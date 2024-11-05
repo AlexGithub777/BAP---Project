@@ -890,7 +890,7 @@ export function addDevice() {
 
             // Find manufacture date input within the form
             const manufactureDateInput =
-                document.querySelector('input[type="date"]');
+                document.getElementById("manufactureDate");
             if (manufactureDateInput) {
                 manufactureDateInput.addEventListener(
                     "change",
@@ -902,6 +902,40 @@ export function addDevice() {
                             deviceType?.options[deviceType.selectedIndex]
                                 ?.text || "";
 
+                        // Clear custom validity if manufacture date is valid
+                        const statusInput = document.getElementById("status"); // Adjust ID if needed
+                        const statusFeedback =
+                            document.getElementById("statusFeedback");
+                        const manufactureDateFeedback = document.getElementById(
+                            "addManufactureDateFeedback"
+                        );
+
+                        if (event.target.value) {
+                            // If a valid date is entered, clear any previous custom validity messages
+                            statusInput.setCustomValidity("");
+                            statusFeedback.textContent = "";
+                            manufactureDateInput.setCustomValidity("");
+                            manufactureDateFeedback.textContent = "";
+                        }
+
+                        // Additional validation if the status is set to "Expired"
+                        if (
+                            statusInput.value === "Expired" &&
+                            !event.target.value
+                        ) {
+                            statusInput.setCustomValidity(
+                                "Please enter a manufacture date before setting status to 'Expired'"
+                            );
+                            statusFeedback.textContent =
+                                "Please enter a manufacture date before setting status to 'Expired'";
+                            manufactureDateInput.setCustomValidity(
+                                "Please enter a manufacture date before setting status to 'Expired'"
+                            );
+                            manufactureDateFeedback.textContent =
+                                "Please enter a manufacture date before setting status to 'Expired'";
+                        }
+
+                        // Calculate and set expiry date for fire extinguishers
                         if (
                             selectedText
                                 .toLowerCase()
@@ -915,22 +949,16 @@ export function addDevice() {
                                 .toISOString()
                                 .split("T")[0];
 
-                            // Find expiry date input - it should be the second date input in the form
-                            const expireDateInput = Array.from(
-                                document.querySelectorAll('input[type="date"]')
-                            )[1];
+                            const expireDateInput =
+                                document.getElementById("ExpireDate");
 
                             if (expireDateInput) {
                                 expireDateInput.value = formattedDate;
+                                expireDateInput.readOnly = true;
+                                expireDateInput.disabled = true;
                             } else {
                                 console.log("Could not find expiry date input");
                             }
-                            document.getElementById(
-                                "ExpireDate"
-                            ).readOnly = true;
-                            document.getElementById(
-                                "ExpireDate"
-                            ).disabled = true;
                         }
                     }
                 );
@@ -949,11 +977,29 @@ export function addDevice() {
         });
 }
 
+function calculateAndSetExpiryDate() {
+    const manufactureDateInput = document.getElementById(
+        "editManufactureDateInput"
+    );
+    const expiryDateInput = document.getElementById("editExpireDate");
+
+    if (manufactureDateInput.value) {
+        const expiryDate = new Date(manufactureDateInput.value);
+        expiryDate.setFullYear(expiryDate.getFullYear() + 5);
+        const formattedDate = expiryDate.toISOString().split("T")[0];
+
+        expiryDateInput.value = formattedDate;
+        expiryDateInput.readOnly = true; // Make it read-only
+        expiryDateInput.disabled = true; // Disable the input
+    } else {
+        expiryDateInput.value = ""; // Clear the expiry date if no manufacture date is set
+    }
+}
+
 function editDevice(deviceId) {
     // Clear the form before showing the modal
     document.getElementById("editDeviceForm").reset();
     document.getElementById("editDeviceForm").classList.remove("was-validated");
-    // Function to handle visibility of extinguisher-specific fields
     function updateExtinguisherFields() {
         const selectElement = document.querySelector(
             "#editEmergencyDeviceTypeInput"
@@ -961,6 +1007,9 @@ function editDevice(deviceId) {
         const selectedOption =
             selectElement.options[selectElement.selectedIndex];
         const selectedDeviceType = selectedOption.textContent;
+        const manufactureDateInput = document.getElementById(
+            "editManufactureDateInput"
+        );
 
         if (selectedDeviceType !== "Fire Extinguisher") {
             // Hide and clear extinguisher-specific fields if not a Fire Extinguisher
@@ -968,11 +1017,21 @@ function editDevice(deviceId) {
                 .querySelector(".editExtinguisherTypeInputDiv")
                 .classList.add("d-none");
             document.querySelector("#editExtinguisherTypeInput").value = ""; // Clear selected value
+            document
+                .querySelector("#editExpireDateDiv")
+                .classList.add("d-none");
+            document.getElementById("editExpireDate").value = ""; // Clear expiry date
         } else {
-            // Show extinguisher-specific fields and set default
+            // Show extinguisher-specific fields
             document
                 .querySelector(".editExtinguisherTypeInputDiv")
                 .classList.remove("d-none");
+            document
+                .querySelector("#editExpireDateDiv")
+                .classList.remove("d-none");
+
+            // Calculate and set expiry date whenever device type is "Fire Extinguisher"
+            calculateAndSetExpiryDate();
         }
     }
 
@@ -1152,6 +1211,10 @@ function editDevice(deviceId) {
     document
         .querySelector("#editEmergencyDeviceTypeInput")
         .addEventListener("change", updateExtinguisherFields);
+
+    document
+        .querySelector("#editManufactureDateInput")
+        .addEventListener("change", calculateAndSetExpiryDate);
 }
 
 function fetchAndPopulateBuildings(siteId) {
@@ -1325,48 +1388,65 @@ document.addEventListener("DOMContentLoaded", async function () {
             "editManufactureDateInput"
         );
 
-        // Get the current date and set time to midnight for accurate comparison
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
 
+        const deviceType = document.getElementById(
+            "editEmergencyDeviceTypeInput"
+        );
+        const selectedText =
+            deviceType?.options[deviceType.selectedIndex]?.text || "";
+
         if (statusInput.value === "Expired") {
-            if (manufactureDateInput.value === "") {
-                statusInput.setCustomValidity(
-                    "Please enter a manufacture date before setting status to 'Expired'"
-                );
-                statusFeedback.textContent =
-                    "Please enter a manufacture date before setting status to 'Expired'";
-                manufactureDateInput.setCustomValidity(
-                    "Please enter a manufacture date before setting status to 'Expired'"
-                );
-                document.getElementById(
-                    "editManufactureDateFeedback"
-                ).textContent =
-                    "Please enter a manufacture date before setting status to 'Expired'";
-                return false;
-            }
+            const manufactureDateValue = manufactureDateInput.value;
+            const invalidDate = "0001-01-01"; // Adjust to match "01/01/0001" if needed
 
-            const manufactureDate = new Date(manufactureDateInput.value);
-            const expireDate = new Date(manufactureDate);
-            expireDate.setFullYear(expireDate.getFullYear() + 5);
+            // Only if device type is Fire Extinguisher
+            if (selectedText.toLowerCase().includes("fire extinguisher")) {
+                if (
+                    manufactureDateValue === "" ||
+                    manufactureDateValue.startsWith(invalidDate)
+                ) {
+                    statusInput.setCustomValidity(
+                        "Please enter a valid manufacture date before setting status to 'Expired'"
+                    );
+                    statusFeedback.textContent =
+                        "Please enter a valid manufacture date before setting status to 'Expired'";
+                    manufactureDateInput.setCustomValidity(
+                        "Please enter a valid manufacture date before setting status to 'Expired'"
+                    );
+                    document.getElementById(
+                        "editManufactureDateFeedback"
+                    ).textContent =
+                        "Please enter a valid manufacture date before setting status to 'Expired'";
+                    return false;
+                }
 
-            if (expireDate > currentDate) {
-                statusInput.setCustomValidity(
-                    "Device status is 'Expired' but the expire date is in the future."
-                );
-                statusFeedback.textContent =
-                    "Device status is 'Expired' but the expire date is in the future.";
-                manufactureDateInput.setCustomValidity(
-                    "Manufacture date cannot be within the past 5 years if status is 'Expired'"
-                );
-                document.getElementById(
-                    "editManufactureDateFeedback"
-                ).textContent =
-                    "Manufacture date cannot be within the past 5 years if status is 'Expired'";
-                return false;
+                const manufactureDate = new Date(manufactureDateValue);
+                const expireDate = new Date(manufactureDate);
+                expireDate.setFullYear(expireDate.getFullYear() + 5);
+
+                if (expireDate > currentDate) {
+                    statusInput.setCustomValidity(
+                        "Device status is 'Expired' but the expire date is in the future."
+                    );
+                    statusFeedback.textContent =
+                        "Device status is 'Expired' but the expire date is in the future.";
+                    manufactureDateInput.setCustomValidity(
+                        "Manufacture date cannot be within the past 5 years if status is 'Expired'"
+                    );
+                    document.getElementById(
+                        "editManufactureDateFeedback"
+                    ).textContent =
+                        "Manufacture date cannot be within the past 5 years if status is 'Expired'";
+                    return false;
+                }
             }
         } else if (statusInput.value === "Active") {
-            if (manufactureDateInput.value !== "") {
+            if (
+                selectedText.toLowerCase().includes("fire extinguisher") &&
+                manufactureDateInput.value !== ""
+            ) {
                 const manufactureDate = new Date(manufactureDateInput.value);
                 const expireDate = new Date(manufactureDate);
                 expireDate.setFullYear(expireDate.getFullYear() + 5);
@@ -1394,52 +1474,62 @@ document.addEventListener("DOMContentLoaded", async function () {
         const statusFeedback = document.getElementById("statusFeedback");
         const manufactureDateInput = document.getElementById("manufactureDate");
 
-        // Get the current date and set time to midnight for accurate comparison
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
 
+        const deviceType = document.getElementById("EmergencyDeviceTypeInput");
+        const selectedText =
+            deviceType?.options[deviceType.selectedIndex]?.text || "";
+
         if (statusInput.value === "Expired") {
-            // Check if manufacture date is empty, return false if so
-            if (manufactureDateInput.value === "") {
-                statusInput.setCustomValidity(
-                    "Please enter a manufacture date before setting status to 'Expired'"
-                );
-                statusFeedback.textContent =
-                    "Please enter a manufacture date before setting status to 'Expired'";
-                manufactureDateInput.setCustomValidity(
-                    "Please enter a manufacture date before setting status to 'Expired'"
-                );
-                document.getElementById(
-                    "addManufactureDateFeedback"
-                ).textContent =
-                    "Please enter a manufacture date before setting status to 'Expired'";
-                return false;
-            }
+            const manufactureDateValue = manufactureDateInput.value;
+            const invalidDate = "0001-01-01";
 
-            // Calculate the expire date (manufacture date + 5 years)
-            const manufactureDate = new Date(manufactureDateInput.value);
-            const expireDate = new Date(manufactureDate);
-            expireDate.setFullYear(expireDate.getFullYear() + 5);
+            if (selectedText.toLowerCase().includes("fire extinguisher")) {
+                if (
+                    manufactureDateValue === "" ||
+                    manufactureDateValue.startsWith(invalidDate)
+                ) {
+                    statusInput.setCustomValidity(
+                        "Please enter a valid manufacture date before setting status to 'Expired'"
+                    );
+                    statusFeedback.textContent =
+                        "Please enter a valid manufacture date before setting status to 'Expired'";
+                    manufactureDateInput.setCustomValidity(
+                        "Please enter a valid manufacture date before setting status to 'Expired'"
+                    );
+                    document.getElementById(
+                        "addManufactureDateFeedback"
+                    ).textContent =
+                        "Please enter a valid manufacture date before setting status to 'Expired'";
+                    return false;
+                }
 
-            // If expireDate is in the future, set custom validity error
-            if (expireDate > currentDate) {
-                statusInput.setCustomValidity(
-                    "Device status is 'Expired' but the expire date is in the future."
-                );
-                statusFeedback.textContent =
-                    "Device status is 'Expired' but the expire date is in the future.";
-                manufactureDateInput.setCustomValidity(
-                    "Manufacture date cannot be within the past 5 years if status is 'Expired'"
-                );
-                document.getElementById(
-                    "addManufactureDateFeedback"
-                ).textContent =
-                    "Manufacture date cannot be within the past 5 years if status is 'Expired'";
-                return false;
+                const manufactureDate = new Date(manufactureDateValue);
+                const expireDate = new Date(manufactureDate);
+                expireDate.setFullYear(expireDate.getFullYear() + 5);
+
+                if (expireDate > currentDate) {
+                    statusInput.setCustomValidity(
+                        "Device status is 'Expired' but the expire date is in the future."
+                    );
+                    statusFeedback.textContent =
+                        "Device status is 'Expired' but the expire date is in the future.";
+                    manufactureDateInput.setCustomValidity(
+                        "Manufacture date cannot be within the past 5 years if status is 'Expired'"
+                    );
+                    document.getElementById(
+                        "addManufactureDateFeedback"
+                    ).textContent =
+                        "Manufacture date cannot be within the past 5 years if status is 'Expired'";
+                    return false;
+                }
             }
         } else if (statusInput.value === "Active") {
-            // Prevent "Active" status if the device has expired
-            if (manufactureDateInput.value !== "") {
+            if (
+                selectedText.toLowerCase().includes("fire extinguisher") &&
+                manufactureDateInput.value !== ""
+            ) {
                 const manufactureDate = new Date(manufactureDateInput.value);
                 const expireDate = new Date(manufactureDate);
                 expireDate.setFullYear(expireDate.getFullYear() + 5);
@@ -1455,7 +1545,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
 
-        // Clear validity if everything is fine
         statusInput.setCustomValidity("");
         statusFeedback.textContent = "";
         manufactureDateInput.setCustomValidity("");
