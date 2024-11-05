@@ -99,7 +99,7 @@ CREATE TABLE Emergency_Device_InspectionT (
     Notes VARCHAR(255) NULL,
     FOREIGN KEY (EmergencyDeviceID) REFERENCES Emergency_DeviceT(EmergencyDeviceID)
         ON UPDATE CASCADE  -- If an EmergencyDeviceID changes, update it in Emergency_Device_InspectionT
-        ON DELETE DELETE, -- Delete associated Inspection records if an Emergency Device is deleted
+        ON DELETE CASCADE, -- Delete associated Inspection records if an Emergency Device is deleted
     FOREIGN KEY (UserID) REFERENCES UserT(UserID)
         ON UPDATE CASCADE  -- If a UserID changes, update it in Emergency_Device_InspectionT
         ON DELETE RESTRICT -- Prevent deletion of a User if they have associated Inspection records
