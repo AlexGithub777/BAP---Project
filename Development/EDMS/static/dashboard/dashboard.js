@@ -396,7 +396,7 @@ async function loadDevicesAndUpdateTable(buildingCode = "", siteId = "") {
     if (devices.length === 0) {
         const tbody = document.getElementById("emergency-device-body");
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="12" class="text-center">No devices found.</td></tr>`;
         }
     }
 }
@@ -414,7 +414,7 @@ function updateTable() {
 
     // Clear table if no devices
     if (!Array.isArray(pageDevices) || pageDevices.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="text-center">No devices found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center">No devices found.</td></tr>`;
     } else {
         tbody.innerHTML = pageDevices.map(formatDeviceRow).join("");
     }
