@@ -22,11 +22,6 @@ FROM gcr.io/distroless/base
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/edms.exe /app/edms.exe
 
-# Copy the .env file into the container
-COPY --from=builder /app/.env /app/.env
-
-COPY .env /.env
-
 COPY templates /templates
 COPY static /static
 COPY internal /internal

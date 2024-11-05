@@ -26,7 +26,7 @@ func LoadConfig() Config {
 	log.Printf("Current working directory: %s", cwd)
 
 	// Load the .env file
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
