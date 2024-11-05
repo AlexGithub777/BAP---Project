@@ -1325,8 +1325,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             "editManufactureDateInput"
         );
 
+        // Get the current date and set time to midnight for accurate comparison
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
         if (statusInput.value === "Expired") {
-            // Check if manufacture date is empty return false
             if (manufactureDateInput.value === "") {
                 statusInput.setCustomValidity(
                     "Please enter a manufacture date before setting status to 'Expired'"
@@ -1342,45 +1345,43 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "Please enter a manufacture date before setting status to 'Expired'";
                 return false;
             }
-            // Get manufacture date and calculate expire date (manufacture date + 5 years)
-            const manufactureDate = document.getElementById(
-                "editManufactureDateInput"
-            ).value;
+
+            const manufactureDate = new Date(manufactureDateInput.value);
             const expireDate = new Date(manufactureDate);
             expireDate.setFullYear(expireDate.getFullYear() + 5);
 
-            // Get the current date and set its time to midnight for accurate comparison
-            const currentDate = new Date();
-            currentDate.setHours(0, 0, 0, 0);
-
-            // If expireDate is in the future, set custom validity error
             if (expireDate > currentDate) {
                 statusInput.setCustomValidity(
-                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future."
+                    "Device status is 'Expired' but the expire date is in the future."
                 );
                 statusFeedback.textContent =
-                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future.";
+                    "Device status is 'Expired' but the expire date is in the future.";
                 manufactureDateInput.setCustomValidity(
                     "Manufacture date cannot be within the past 5 years if status is 'Expired'"
                 );
-
                 document.getElementById(
                     "editManufactureDateFeedback"
                 ).textContent =
                     "Manufacture date cannot be within the past 5 years if status is 'Expired'";
                 return false;
             }
+        } else if (statusInput.value === "Active") {
+            if (manufactureDateInput.value !== "") {
+                const manufactureDate = new Date(manufactureDateInput.value);
+                const expireDate = new Date(manufactureDate);
+                expireDate.setFullYear(expireDate.getFullYear() + 5);
 
-            // Clear any previous custom validity message if status is correctly "Expired"
-            statusInput.setCustomValidity("");
-            statusFeedback.textContent = "";
-            manufactureDateInput.setCustomValidity("");
-            document.getElementById("editManufactureDateFeedback").textContent =
-                "";
-            return true;
+                if (expireDate <= currentDate) {
+                    statusInput.setCustomValidity(
+                        "Device status cannot be set to 'Active' if it has expired."
+                    );
+                    statusFeedback.textContent =
+                        "Device status cannot be set to 'Active' if it has expired.";
+                    return false;
+                }
+            }
         }
 
-        // Clear any previous custom validity message if status is not "Expired"
         statusInput.setCustomValidity("");
         statusFeedback.textContent = "";
         manufactureDateInput.setCustomValidity("");
@@ -1393,8 +1394,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         const statusFeedback = document.getElementById("statusFeedback");
         const manufactureDateInput = document.getElementById("manufactureDate");
 
+        // Get the current date and set time to midnight for accurate comparison
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
         if (statusInput.value === "Expired") {
-            // Check if manufacture date is empty return false
+            // Check if manufacture date is empty, return false if so
             if (manufactureDateInput.value === "") {
                 statusInput.setCustomValidity(
                     "Please enter a manufacture date before setting status to 'Expired'"
@@ -1410,23 +1415,19 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "Please enter a manufacture date before setting status to 'Expired'";
                 return false;
             }
-            // Get manufacture date and calculate expire date (manufacture date + 5 years)
-            const manufactureDate =
-                document.getElementById("manufactureDate").value;
+
+            // Calculate the expire date (manufacture date + 5 years)
+            const manufactureDate = new Date(manufactureDateInput.value);
             const expireDate = new Date(manufactureDate);
             expireDate.setFullYear(expireDate.getFullYear() + 5);
-
-            // Get the current date and set its time to midnight for accurate comparison
-            const currentDate = new Date();
-            currentDate.setHours(0, 0, 0, 0);
 
             // If expireDate is in the future, set custom validity error
             if (expireDate > currentDate) {
                 statusInput.setCustomValidity(
-                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future."
+                    "Device status is 'Expired' but the expire date is in the future."
                 );
                 statusFeedback.textContent =
-                    "Device status is 'Expired' but the expire date (manufacture date + 5 years) is in the future.";
+                    "Device status is 'Expired' but the expire date is in the future.";
                 manufactureDateInput.setCustomValidity(
                     "Manufacture date cannot be within the past 5 years if status is 'Expired'"
                 );
@@ -1434,20 +1435,27 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "addManufactureDateFeedback"
                 ).textContent =
                     "Manufacture date cannot be within the past 5 years if status is 'Expired'";
-
                 return false;
             }
+        } else if (statusInput.value === "Active") {
+            // Prevent "Active" status if the device has expired
+            if (manufactureDateInput.value !== "") {
+                const manufactureDate = new Date(manufactureDateInput.value);
+                const expireDate = new Date(manufactureDate);
+                expireDate.setFullYear(expireDate.getFullYear() + 5);
 
-            // Clear any previous custom validity message if status is correctly "Expired"
-            statusInput.setCustomValidity("");
-            statusFeedback.textContent = "";
-            manufactureDateInput.setCustomValidity("");
-            document.getElementById("addManufactureDateFeedback").textContent =
-                "";
-            return true;
+                if (expireDate <= currentDate) {
+                    statusInput.setCustomValidity(
+                        "Device status cannot be set to 'Active' if it has expired."
+                    );
+                    statusFeedback.textContent =
+                        "Device status cannot be set to 'Active' if it has expired.";
+                    return false;
+                }
+            }
         }
 
-        // Clear any previous custom validity message if status is not "Expired"
+        // Clear validity if everything is fine
         statusInput.setCustomValidity("");
         statusFeedback.textContent = "";
         manufactureDateInput.setCustomValidity("");
