@@ -28,7 +28,6 @@ func (a *App) handleLogger(message string) {
 	a.Logger.Printf("\033[34m%s\033[0m", message)
 }
 
-
 // NewApp creates a new instance of App
 func NewApp(cfg config.Config) *App {
 	// Initialize Echo
@@ -51,7 +50,7 @@ func NewApp(cfg config.Config) *App {
 	router.Use(middleware.CORS())    // Enable CORS
 
 	// Initialize Database
-	db, err := database.NewDB(cfg)
+	db, err := database.NewDB()
 	if err != nil {
 		panic(err)
 	}

@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+    db:
+        image: postgres:16
+        restart: always
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        ports:
+            - "5432:5432"
+        networks:
+            - app-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "8080:8080"
+        environment:
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_NAME: ${DB_NAME}
+            DB_HOST: db # Changed to match service name
+            DB_PORT: 5432
+            ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+            JWT_SECRET: ${JWT_SECRET}
+        depends_on:
+            db:
+                condition: service_healthy # Wait for db to be healthy before starting
+        networks:
+            - app-network
+        restart: unless-stopped
+
+networks:
+    app-network:
+        driver: bridge

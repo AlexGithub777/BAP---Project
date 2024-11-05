@@ -29,6 +29,7 @@ COPY .env /.env
 
 COPY templates /templates
 COPY static /static
+COPY internal /internal
 
 # Command to run the executable
 CMD ["/app/edms.exe"]
