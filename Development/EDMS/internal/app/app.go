@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/database"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -28,7 +29,7 @@ func (a *App) handleLogger(message string) {
 }
 
 // NewApp creates a new instance of App
-func NewApp() *App {
+func NewApp(cfg config.Config) *App {
 	// Initialize Echo
 	router := echo.New()
 
@@ -49,7 +50,7 @@ func NewApp() *App {
 	router.Use(middleware.CORS())    // Enable CORS
 
 	// Initialize Database
-	db, err := database.NewDB()
+	db, err := database.NewDB(cfg)
 	if err != nil {
 		panic(err)
 	}

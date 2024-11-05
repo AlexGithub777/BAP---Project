@@ -1,0 +1,14 @@
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud.
+
+# Ignore everything from .gitignore except specific files we want to include
+#!include:.gitignore
+
+# Now explicitly include the files we want to keep
+!.env
+!static/site_maps/EIT_Hastings.png
+
+# Standard ignores
+.gcloudignore
+.git
+.gitignore

@@ -9,12 +9,15 @@ import (
 	"time"
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/app"
+	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 )
 
 func main() {
+	// Load the configuration
+	cfg := config.LoadConfig()
 
 	// Initialize the app
-	application := app.NewApp()
+	application := app.NewApp(cfg)
 
 	// Get PORT from environment, default to 8080 if not set
 	port := os.Getenv("PORT")
