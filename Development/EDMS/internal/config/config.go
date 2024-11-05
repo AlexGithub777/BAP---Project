@@ -19,9 +19,15 @@ type Config struct {
 }
 
 func LoadConfig() Config {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Error getting current working directory: %v", err)
+	}
+	log.Printf("Current working directory: %s", cwd)
+
 	// Load the .env file
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 
 	// Get the DB_PORT environment variable
