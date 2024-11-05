@@ -39,22 +39,27 @@ func createTriggerAndFunctionIfNotExists(db *sql.DB) error {
 		RETURNS TRIGGER AS $$
 		DECLARE
 			current_last_inspection_timestamp TIMESTAMP;
+			calculated_expire_date TIMESTAMP;
 		BEGIN
-			-- Retrieve the current last inspection timestamp for the device
-			SELECT LastInspectionDateTime INTO current_last_inspection_timestamp
+			-- Retrieve the current last inspection timestamp and manufacture date for the device
+			SELECT LastInspectionDateTime, ManufactureDate INTO current_last_inspection_timestamp, calculated_expire_date
 			FROM Emergency_DeviceT
 			WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
+			
+			-- Calculate the expiration date as ManufactureDate + 5 years
+			calculated_expire_date := calculated_expire_date + INTERVAL '5 years';
 
 			-- Check if the new inspection timestamp is more recent than the current last inspection timestamp
 			IF current_last_inspection_timestamp IS NULL OR NEW.InspectionDateTime > current_last_inspection_timestamp THEN
-				-- Update LastInspectionDateTime with the new inspection timestamp
+				-- Determine the status based on inspection and expiration conditions
 				UPDATE Emergency_DeviceT
 				SET LastInspectionDateTime = NEW.InspectionDateTime,
-				Status = CASE 
+					Status = CASE 
 								WHEN NEW.InspectionStatus = 'Failed' THEN 'Inspection Failed'
+								WHEN calculated_expire_date <= NOW() THEN 'Expired'
 								WHEN NEW.InspectionStatus = 'Passed' THEN 'Active'
 								ELSE Status
-							 END
+							END
 				WHERE EmergencyDeviceID = NEW.EmergencyDeviceID;
 			END IF;
 
