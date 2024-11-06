@@ -65,6 +65,11 @@ func (a *App) HandlePutUser(c echo.Context) error {
 		})
 	}
 
+	// log the user model
+	a.handleLogger(user.CurrentUserID)
+	a.handleLogger(user.DefaultAdmin)
+	a.handleLogger(user.Role)
+
 	user.UserID = userID
 
 	// Validate input
@@ -148,7 +153,8 @@ func (a *App) HandlePutUser(c echo.Context) error {
 		// Check if the user is trying to change their role
 		if user.DefaultAdmin == "true" && user.Role != "Admin" {
 			return c.JSON(http.StatusOK, map[string]string{
-				"error": "Cannot change role of default admin",
+				"error":       "Cannot change role of default admin",
+				"redirectURL": "/admin?error=Cannot change role of the default admin account",
 			})
 		}
 
