@@ -1213,4 +1213,3 @@ window.editRoom = editRoom;
 window.editSite = editSite;
 window.AddBuilding = AddBuilding;
 window.AddRoom = AddRoom;
-window.editSite = editSite;
