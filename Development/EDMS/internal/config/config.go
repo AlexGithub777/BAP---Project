@@ -19,27 +19,43 @@ type Config struct {
 }
 
 func LoadConfig() Config {
-	cwd, err := os.Getwd()
-
-	if err != nil {
-		log.Fatalf("Error getting current working directory: %v", err)
-	}
-	log.Printf("Current working directory: %s", cwd)
-
-	// Load the .env file
+	// Try to load .env file, but don't fail if it doesn't exist
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Println("No .env file found, will use environment variables")
 	}
 
-	// Get the DB_PORT environment variable
-	dbPortStr := os.Getenv("DB_PORT")
+	// List of required environment variables
+	requiredEnvVars := map[string]string{
+		"DB_USER":        "",
+		"DB_PASSWORD":    "",
+		"DB_NAME":        "",
+		"DB_HOST":        "",
+		"DB_PORT":        "",
+		"ADMIN_PASSWORD": "",
+		"JWT_SECRET":     "",
+	}
 
-	// Convert the string to an integer and handle any potential errors
+	// Check for missing environment variables
+	var missingVars []string
+	for env := range requiredEnvVars {
+		if value := os.Getenv(env); value == "" {
+			missingVars = append(missingVars, env)
+		}
+	}
+
+	// If any required variables are missing, log them and exit
+	if len(missingVars) > 0 {
+		log.Fatalf("Missing required environment variables: %v", missingVars)
+	}
+
+	// Get and validate DB_PORT
+	dbPortStr := os.Getenv("DB_PORT")
 	dbPort, err := strconv.Atoi(dbPortStr)
 	if err != nil {
 		log.Fatalf("Invalid DB_PORT value: %v", err)
 	}
 
+	// Create and return the config
 	return Config{
 		DBUser:        os.Getenv("DB_USER"),
 		DBPassword:    os.Getenv("DB_PASSWORD"),
