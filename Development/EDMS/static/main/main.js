@@ -4,15 +4,6 @@ import {
     updateNotificationsUI,
 } from "/static/main/notifications.js";
 
-// hot reload // !!!! REMOVE THIS CODE IN PRODUCTION !!!
-if (window.EventSource) {
-    new EventSource("http://localhost:8090/internal/reload").onmessage = () => {
-        setTimeout(() => {
-            location.reload();
-        });
-    };
-}
-
 export function logout() {
     window.location.href = "/logout";
 }
