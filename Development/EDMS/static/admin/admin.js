@@ -151,8 +151,9 @@ fetch("/api/user")
         hideActions
             ? "<span class='text-muted'>No actions available</span>"
             : `
-            <button class="btn btn-warning p-2 edit-user-button" 
-                    data-id="${user.user_id}" 
+            <button class="btn btn-warning p-2 edit-user-button" onclick="editUser(${
+                user.user_id
+            })"
                     title="Edit User">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -187,97 +188,92 @@ fetch("/api/user")
 
         // Add the rows to the users table
         $("#users-table tbody").html(userRows.join(""));
-
-        // Add event listeners to the edit and delete buttons
-        $(".edit-user-button").click(async (event) => {
-            const id = $(event.target).data("id");
-            // Handle edit
-            // Fetch the user data from the nearest row
-            const row = $(event.target).closest("tr");
-            const username = row.find("td[data-label=Username]").text();
-            const email = row.find("td[data-label=Email]").text();
-            const role = row.find("td[data-label=Role]").text();
-
-            const default_admin = await fetch(`/api/user/${username}`)
-                .then((response) => response.json())
-                .then((user) => {
-                    return user.default_admin.toString();
-                });
-
-            // Fill in the form with the user data
-            $("#editUserForm")[0].reset();
-            $("#editUserForm input[name=current_user_id]").val(current_user_id);
-            $("#editUserForm input[name=user_id]").val(id);
-            $("#editUserForm input[name=username]").val(username);
-            $("#editUserForm input[name=email]").val(email);
-            $("#editUserForm select[name=role]").val(role);
-            $("#editUserForm input[name=default_admin]").val(default_admin);
-
-            // Set the form action to the update endpoint for this user
-            $("#editUserForm").attr("action", `/api/user/${id}`);
-
-            // Get the user ID of the user being updated
-            const updatedUserId = $("#editUserForm input[name=user_id]").val();
-
-            // If the current user ID is equal to the user being updated, display the password field
-            if (current_user_id === updatedUserId) {
-                $("#passwordField").show();
-            } else {
-                $("#passwordField").hide();
-            }
-
-            // Show the modal
-            $("#editUserModal").modal("show");
-            // Clear validation classes
-            $("#editUserForm").removeClass("was-validated");
-
-            var editUserForm = document.getElementById("editUserForm");
-
-            // Add event listener to the submit button
-            $("#editUserBtn").click(function (event) {
-                // Check if the form is valid
-                if (!editUserForm.checkValidity()) {
-                    event.stopPropagation();
-                    editUserForm.classList.add("was-validated");
-                } else {
-                    // If the form is valid, prepare to send the PUT request
-                    const formData = new FormData(editUserForm);
-                    const jsonData = {};
-                    for (const [key, value] of formData.entries()) {
-                        jsonData[key] = value;
-                    }
-                    fetch(
-                        `/api/user/${
-                            document.getElementById("editUserID").value
-                        }`,
-                        {
-                            method: "PUT",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(jsonData),
-                        }
-                    )
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data.error) {
-                                window.location.href = data.redirectURL;
-                            } else if (data.message) {
-                                window.location.href = data.redirectURL;
-                            } else {
-                                console.error("Unexpected response:", data);
-                                // Handle unexpected responses (e.g., show an error message)
-                                throw new Error("Unexpected response");
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Fetch error:", error);
-                            // Optionally display a user-friendly error message
-                        });
-                }
-            });
-        });
     });
+
+export async function editUser(userId) {
+    const id = userId;
+    console.log("Edit user ID:", id);
+    // Handle edit
+    // Fetch the user data from the nearest row
+    const row = $(event.target).closest("tr");
+    const username = row.find("td[data-label=Username]").text();
+    const email = row.find("td[data-label=Email]").text();
+    const role = row.find("td[data-label=Role]").text();
+
+    const default_admin = await fetch(`/api/user/${username}`)
+        .then((response) => response.json())
+        .then((user) => {
+            return user.default_admin.toString();
+        });
+
+    // Fill in the form with the user data
+    $("#editUserForm")[0].reset();
+    $("#editUserForm input[name=current_user_id]").val(current_user_id);
+    $("#editUserForm input[name=user_id]").val(id);
+    $("#editUserForm input[name=username]").val(username);
+    $("#editUserForm input[name=email]").val(email);
+    $("#editUserForm select[name=role]").val(role);
+    $("#editUserForm input[name=default_admin]").val(default_admin);
+
+    // Set the form action to the update endpoint for this user
+    $("#editUserForm").attr("action", `/api/user/${id}`);
+
+    // Get the user ID of the user being updated
+    const updatedUserId = $("#editUserForm input[name=user_id]").val();
+
+    // If the current user ID is equal to the user being updated, display the password field
+    if (current_user_id === updatedUserId) {
+        $("#passwordField").show();
+    } else {
+        $("#passwordField").hide();
+    }
+
+    // Show the modal
+    $("#editUserModal").modal("show");
+    // Clear validation classes
+    $("#editUserForm").removeClass("was-validated");
+
+    var editUserForm = document.getElementById("editUserForm");
+
+    // Add event listener to the submit button
+    $("#editUserBtn").click(function (event) {
+        // Check if the form is valid
+        if (!editUserForm.checkValidity()) {
+            event.stopPropagation();
+            editUserForm.classList.add("was-validated");
+        } else {
+            // If the form is valid, prepare to send the PUT request
+            const formData = new FormData(editUserForm);
+            const jsonData = {};
+            for (const [key, value] of formData.entries()) {
+                jsonData[key] = value;
+            }
+            fetch(`/api/user/${document.getElementById("editUserID").value}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(jsonData),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.error) {
+                        window.location.href = data.redirectURL;
+                    } else if (data.message) {
+                        window.location.href = data.redirectURL;
+                    } else {
+                        console.error("Unexpected response:", data);
+                        // Handle unexpected responses (e.g., show an error message)
+                        throw new Error("Unexpected response");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    // Optionally display a user-friendly error message
+                });
+        }
+    });
+}
 
 // Fetch site data from the server
 fetch("/api/site")
@@ -716,8 +712,7 @@ fetch("/api/emergency-device-type")
             <td data-label="Device Type">${deviceType.emergency_device_type_name}</td>
             <td>
                 <div class="btn-group">
-                    <button class="btn btn-warning p-2 edit-device-type-button"
-                            data-id="${deviceType.emergency_device_type_id}" 
+                    <button class="btn btn-warning p-2 edit-device-type-button" onclick="editDeviceType(${deviceType.emergency_device_type_id})"
                             title="Edit Device Type">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -746,86 +741,84 @@ fetch("/api/emergency-device-type")
 
         // Add the rows to the device types table
         $("#device-types-table tbody").html(deviceTypeRows.join(""));
+    });
 
-        // Add event listeners to the edit and delete buttons
-        $(".edit-device-type-button").click((event) => {
-            const id = $(event.target).data("id");
-            document.getElementById("editDeviceTypeID").value = id;
+export function editDeviceType(deviceTypeId) {
+    const id = deviceTypeId;
+    document.getElementById("editDeviceTypeID").value = id;
 
-            //Fetch device type by id and autofill form
-            fetch(`/api/emergency-device-type/${id}`)
+    //Fetch device type by id and autofill form
+    fetch(`/api/emergency-device-type/${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+            //Populate the form with the data
+            document.getElementById("editDeviceTypeName").value =
+                data.emergency_device_type_name;
+        })
+        .catch((error) => {
+            console.error("Fetch error: ", error);
+        });
+
+    // Handle edit
+    $("#editDeviceTypeModal").modal("show");
+
+    // Clear validation classes
+    $("#editDeviceTypeForm").removeClass("was-validated");
+
+    var editDeviceTypeForm = document.getElementById("editDeviceTypeForm");
+
+    // Function to handle form submission
+    function handleSubmit(event) {
+        event.preventDefault(); // Prevent actual form submission
+
+        // Check if the form is valid
+        if (!editDeviceTypeForm.checkValidity()) {
+            event.stopPropagation();
+            editDeviceTypeForm.classList.add("was-validated");
+        } else {
+            // If the form is valid, prepare to send the PUT request
+            const formData = new FormData(editDeviceTypeForm);
+            const jsonData = {};
+            for (const [key, value] of formData.entries()) {
+                jsonData[key] = value;
+            }
+            fetch(
+                `/api/emergency-device-type/${
+                    document.getElementById("editDeviceTypeID").value
+                }`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(jsonData),
+                }
+            )
                 .then((response) => response.json())
                 .then((data) => {
-                    //Populate the form with the data
-                    document.getElementById("editDeviceTypeName").value =
-                        data.emergency_device_type_name;
+                    if (data.error) {
+                        window.location.href = data.redirectURL;
+                    } else if (data.message) {
+                        window.location.href = data.redirectURL;
+                    } else {
+                        console.error("Unexpected response:", data);
+                        // Handle unexpected responses (e.g., show an error message)
+                        throw new Error("Unexpected response");
+                    }
                 })
                 .catch((error) => {
-                    console.error("Fetch error: ", error);
+                    console.error("Fetch error:", error);
+                    // Optionally display a user-friendly error message
                 });
+        }
+    }
 
-            // Handle edit
-            $("#editDeviceTypeModal").modal("show");
+    // Add event listener to the form for submit event (triggered by Enter key)
+    $(editDeviceTypeForm).off("submit").on("submit", handleSubmit);
 
-            // Clear validation classes
-            $("#editDeviceTypeForm").removeClass("was-validated");
-
-            var editDeviceTypeForm =
-                document.getElementById("editDeviceTypeForm");
-
-            // Function to handle form submission
-            function handleSubmit(event) {
-                event.preventDefault(); // Prevent actual form submission
-
-                // Check if the form is valid
-                if (!editDeviceTypeForm.checkValidity()) {
-                    event.stopPropagation();
-                    editDeviceTypeForm.classList.add("was-validated");
-                } else {
-                    // If the form is valid, prepare to send the PUT request
-                    const formData = new FormData(editDeviceTypeForm);
-                    const jsonData = {};
-                    for (const [key, value] of formData.entries()) {
-                        jsonData[key] = value;
-                    }
-                    fetch(
-                        `/api/emergency-device-type/${
-                            document.getElementById("editDeviceTypeID").value
-                        }`,
-                        {
-                            method: "PUT",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(jsonData),
-                        }
-                    )
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data.error) {
-                                window.location.href = data.redirectURL;
-                            } else if (data.message) {
-                                window.location.href = data.redirectURL;
-                            } else {
-                                console.error("Unexpected response:", data);
-                                // Handle unexpected responses (e.g., show an error message)
-                                throw new Error("Unexpected response");
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Fetch error:", error);
-                            // Optionally display a user-friendly error message
-                        });
-                }
-            }
-
-            // Add event listener to the form for submit event (triggered by Enter key)
-            $(editDeviceTypeForm).off("submit").on("submit", handleSubmit);
-
-            // Add event listener to the submit button
-            $("#editDeviceTypeBtn").off("click").on("click", handleSubmit);
-        });
-    });
+    // Add event listener to the submit button
+    $("#editDeviceTypeBtn").off("click").on("click", handleSubmit);
+}
 
 // Function to edit a site in the database
 export function editSite(siteId) {
@@ -878,12 +871,6 @@ export function editSite(siteId) {
     // Show the modal
 
     $("#editSiteModal").modal("show");
-}
-
-export function addSite() {
-    // Clear the form before showing it
-    document.getElementById("addSiteForm").reset();
-    document.getElementById("addSiteForm").classList.remove("was-validated");
 }
 
 (function () {
@@ -1219,6 +1206,8 @@ export function AddRoom() {
 })();
 
 // Make functions available globally
+window.editDeviceType = editDeviceType;
+window.editUser = editUser;
 window.editBuilding = editBuilding;
 window.editRoom = editRoom;
 window.editSite = editSite;
