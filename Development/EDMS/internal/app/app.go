@@ -55,14 +55,10 @@ func NewApp(cfg config.Config) *App {
 		panic(err)
 	}
 
-	tempFilePath := "internal/seed_complete"
-	// Check data import status
-	_, err = os.Stat(tempFilePath)
-	if os.IsNotExist(err) {
-		log.Println("Data not imported")
-		database.SeedData(db.DB) // Seed data
-	} else {
-		log.Println("Data already imported")
+	// Seed database
+	// Initialize database and seed data if needed
+	if err := database.SeedDatabase(db.DB); err != nil {
+		panic(err)
 	}
 
 	// Initialize Logger

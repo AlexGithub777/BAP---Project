@@ -5,13 +5,92 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
+
+	"github.com/joho/godotenv"
 
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/config"
 	"github.com/AlexGithub777/BAP---Project/Development/EDMS/internal/models"
 	_ "github.com/lib/pq" // Import the PostgreSQL driver
 	"golang.org/x/crypto/bcrypt"
 )
+
+// SeedStatus tracks the seeding state
+type SeedStatus struct {
+	TempFilePath string
+	EnvVarName   string
+}
+
+// NewSeedStatus creates a new SeedStatus instance
+func NewSeedStatus() *SeedStatus {
+	return &SeedStatus{
+		TempFilePath: filepath.Join("internal", "seed_complete"),
+		EnvVarName:   "DATA_SEEDED",
+	}
+}
+
+// IsDataSeeded checks if data has been seeded using both temp file and env var
+func (s *SeedStatus) IsDataSeeded() bool {
+
+	_, err := os.Stat(s.TempFilePath)
+	fileExists := !os.IsNotExist(err)
+
+	// Check environment variable
+	envVal := os.Getenv(s.EnvVarName)
+	envExists := envVal == "true"
+
+	// Load from .env file if environment variable is not set
+	if !envExists {
+		if err := godotenv.Load(); err == nil {
+			envVal = os.Getenv(s.EnvVarName)
+			envExists = envVal == "true"
+		}
+	}
+
+	// Return true if either check passes
+	return fileExists || envExists
+}
+
+// MarkDataAsSeeded marks the data as seeded
+func (s *SeedStatus) MarkDataAsSeeded() error {
+	// Create temp file
+	err := os.MkdirAll(filepath.Dir(s.TempFilePath), 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create directory: %v", err)
+	}
+
+	tempFile, err := os.Create(s.TempFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %v", err)
+	}
+	tempFile.Close()
+
+	// Set environment variable
+	err = os.Setenv(s.EnvVarName, "true")
+	if err != nil {
+		return fmt.Errorf("failed to set environment variable: %v", err)
+	}
+
+	return nil
+}
+
+func SeedDatabase(db *sql.DB) error {
+	seedStatus := NewSeedStatus()
+
+	if !seedStatus.IsDataSeeded() {
+		log.Println("Seeding database...")
+		SeedData(db) // Corrected here to remove error handling
+		if err := seedStatus.MarkDataAsSeeded(); err != nil {
+			return fmt.Errorf("failed to mark data as seeded: %v", err)
+		}
+		log.Println("Database seeding completed successfully")
+	} else {
+		log.Println("Database already seeded")
+	}
+
+	return nil
+}
 
 func createTriggerAndFunctionIfNotExists(db *sql.DB) error {
 	triggerName := "trg_update_device_status"                   // Trigger name
@@ -409,10 +488,14 @@ func SeedData(db *sql.DB) {
 	}
 	tempFile.Close()
 
+	// Set environment variable to indicate that data has been seeded
+	os.Setenv("DATA_SEEDED", "true")
+
 	// Create trigger and function if they don't exist
 	err = createTriggerAndFunctionIfNotExists(db)
 	if err != nil {
 		log.Fatalf("Failed to create trigger or function: %v", err)
+		return
 	}
 
 	log.Println("Seeding complete.")
