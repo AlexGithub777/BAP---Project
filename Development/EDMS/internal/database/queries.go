@@ -1059,7 +1059,7 @@ func (db *DB) GetRoomByCodeAndBuilding(roomCode string, buildingId int) (*models
 	// If no row is found, return nil and a specific error
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // Return nil if the room is not found (no error)
+			return nil, err // Return nil if the room is not found (no error)
 		}
 		return nil, err // Return the actual error if it occurred
 	}

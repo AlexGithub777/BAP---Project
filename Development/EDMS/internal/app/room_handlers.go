@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -96,7 +97,6 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Building does not exist")
 	}
 
-	// check if the room already exists at the site
 	_, err = a.DB.GetRoomByCodeAndSite(roomCode, building.SiteID)
 	if err == nil {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Room already exists at this site")
@@ -106,12 +106,6 @@ func (a *App) HandlePostRoom(c echo.Context) error {
 	_, err = a.DB.GetRoomByCodeAndBuilding(roomCode, buildingIdInt)
 	if err == nil {
 		return c.Redirect(http.StatusSeeOther, "/admin?error=Room already exists at this building")
-	}
-
-	// Check if the room already exists at the site
-	_, err = a.DB.GetRoomByCodeAndSite(roomCode, building.SiteID)
-	if err == nil {
-		return c.Redirect(http.StatusSeeOther, "/admin?error=Room already exists at this site")
 	}
 
 	var room = models.Room{
