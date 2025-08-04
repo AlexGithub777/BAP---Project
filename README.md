@@ -1,8 +1,8 @@
 
-# ITPR7.508 Business Application Programming
+# EDMS
 
 
-#### Group members: Alex Scott, Aidan Willis, James Sadler, Joe Yin, Liam Palmers,
+#### Developers: Alex Scott, Aidan Willis, James Sadler, Joe Yin, Liam Palmers,
 
 
 
